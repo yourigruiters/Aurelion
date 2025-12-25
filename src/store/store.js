@@ -8,6 +8,7 @@ import {
   PERSIST,
   PURGE,
   REGISTER,
+  createMigrate,
 } from "redux-persist";
 import storage from "redux-persist/lib/storage"; // defaults to localStorage for web
 
@@ -21,7 +22,12 @@ const rootReducer = combineReducers({
 
 const persistConfig = {
   key: "root",
+  version: 1,
   storage,
+  migrate: (state) => {
+    // Simple migration: if version changed (or undefined), just return undefined to reset
+    return Promise.resolve(undefined);
+  },
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

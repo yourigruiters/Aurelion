@@ -2,7 +2,6 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   population: 10,
-  happiness: 100,
   resources: {
     food: 100,
     wood: 100,
@@ -10,9 +9,11 @@ const initialState = {
     iron: 0,
     gold: 50,
   },
+  daysPassed: 0,
   rates: {
-    food: 0,
-    wood: 0,
+    population: 0,
+    food: 10,
+    wood: 5,
     stone: 0,
     iron: 0,
     gold: 0,
@@ -36,6 +37,13 @@ export const resourcesSlice = createSlice({
           state.resources[key] += state.rates[key];
         }
       });
+      // Population growth if rate exists
+      if (state.rates.population) {
+        state.population += state.rates.population;
+      }
+    },
+    advanceDay: (state) => {
+      state.daysPassed += 1;
     },
     setRate: (state, action) => {
       const { resource, rate } = action.payload;
@@ -46,7 +54,7 @@ export const resourcesSlice = createSlice({
   },
 });
 
-export const { updateResource, tickResources, setRate } =
+export const { updateResource, tickResources, advanceDay, setRate } =
   resourcesSlice.actions;
 
 export default resourcesSlice.reducer;

@@ -14,7 +14,7 @@ import {
 const SidebarItem = ({ id, icon: Icon, label, isActive, onClick }) => (
   <button
     onClick={() => onClick(id)}
-    className={`w-full flex items-center space-x-3 px-4 py-3 text-sm font-medium transition-colors ${
+    className={`w-full flex items-center space-x-3 px-4 py-3 text-sm font-medium transition-colors cursor-pointer ${
       isActive
         ? "bg-zinc-700 text-yellow-500 border-r-2 border-yellow-500"
         : "text-zinc-400 hover:bg-zinc-700/50 hover:text-zinc-200"
