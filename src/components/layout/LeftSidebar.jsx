@@ -1,41 +1,38 @@
 import React from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { setActiveTab } from "../../store/uiSlice";
+import { NavLink } from "react-router-dom";
 import {
   Users,
   Hammer,
   ShoppingCart,
   Map,
-  Flag,
   Home,
   ShieldAlert,
 } from "lucide-react";
 
-const SidebarItem = ({ id, icon: Icon, label, isActive, onClick }) => (
-  <button
-    onClick={() => onClick(id)}
-    className={`w-full flex items-center space-x-3 px-4 py-3 text-sm font-medium transition-colors cursor-pointer ${
-      isActive
-        ? "bg-zinc-700 text-yellow-500 border-r-2 border-yellow-500"
-        : "text-zinc-400 hover:bg-zinc-700/50 hover:text-zinc-200"
-    }`}
+const SidebarItem = ({ to, icon: Icon, label }) => (
+  <NavLink
+    to={to}
+    className={({ isActive }) =>
+      `w-full flex items-center space-x-3 px-4 py-3 text-sm font-medium transition-colors cursor-pointer ${
+        isActive
+          ? "bg-zinc-700 text-yellow-500 border-r-2 border-yellow-500"
+          : "text-zinc-400 hover:bg-zinc-700/50 hover:text-zinc-200"
+      }`
+    }
   >
     <Icon size={18} />
     <span>{label}</span>
-  </button>
+  </NavLink>
 );
 
 const LeftSidebar = () => {
-  const dispatch = useDispatch();
-  const activeTab = useSelector((state) => state.ui.activeTab);
-
   const menuItems = [
-    { id: "overview", icon: Home, label: "Overview" },
-    { id: "people", icon: Users, label: "Population" },
-    { id: "buildings", icon: Hammer, label: "Buildings" },
-    { id: "market", icon: ShoppingCart, label: "Market Hall" },
-    { id: "military", icon: ShieldAlert, label: "Military" },
-    { id: "map", icon: Map, label: "Region Map" },
+    { to: "/overview", icon: Home, label: "Overview" },
+    { to: "/people", icon: Users, label: "Population" },
+    { to: "/buildings", icon: Hammer, label: "Buildings" },
+    { to: "/market", icon: ShoppingCart, label: "Market Hall" },
+    { to: "/military", icon: ShieldAlert, label: "Military" },
+    { to: "/map", icon: Map, label: "Region Map" },
   ];
 
   return (
@@ -48,12 +45,10 @@ const LeftSidebar = () => {
       <nav className="flex-1 overflow-y-auto py-2">
         {menuItems.map((item) => (
           <SidebarItem
-            key={item.id}
-            id={item.id}
+            key={item.to}
+            to={item.to}
             icon={item.icon}
             label={item.label}
-            isActive={activeTab === item.id}
-            onClick={(id) => dispatch(setActiveTab(id))}
           />
         ))}
       </nav>

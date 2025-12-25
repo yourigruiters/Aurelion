@@ -1,9 +1,10 @@
 import React from "react";
+import { Outlet } from "react-router-dom";
 import TopBar from "./TopBar";
 import LeftSidebar from "./LeftSidebar";
 import RightSidebar from "./RightSidebar";
-import GameView from "./GameView";
 import Footer from "./Footer";
+import DayProgressBar from "./DayProgressBar";
 
 const MainLayout = () => {
   return (
@@ -11,6 +12,10 @@ const MainLayout = () => {
       {/* Top Navigation - Fixed height */}
       <div className="h-16 flex-none z-50 shadow-md">
         <TopBar />
+      </div>
+
+      <div className="flex-none">
+        <DayProgressBar />
       </div>
 
       {/* Middle Section - Flex row, takes remaining height */}
@@ -21,8 +26,8 @@ const MainLayout = () => {
         </aside>
 
         {/* Central Map Area - Flexible */}
-        <main className="flex-1 bg-zinc-900 relative overflow-hidden z-10">
-          <GameView />
+        <main className="flex-1 bg-zinc-900 relative overflow-hidden z-10 flex">
+          <Outlet />
         </main>
 
         {/* Right Sidebar - Fixed width */}

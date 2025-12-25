@@ -10,6 +10,7 @@ const initialState = {
     gold: 50,
   },
   daysPassed: 0,
+  gameStartTime: Date.now(),
   rates: {
     population: 0,
     food: 10,
