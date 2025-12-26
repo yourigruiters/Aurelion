@@ -8,9 +8,8 @@ import {
   PERSIST,
   PURGE,
   REGISTER,
-  createMigrate,
 } from "redux-persist";
-import storage from "redux-persist/lib/storage"; // defaults to localStorage for web
+import storage from "redux-persist/lib/storage";
 
 import resourcesReducer from "./resourcesSlice";
 import uiReducer from "./uiSlice";
@@ -26,7 +25,7 @@ const persistConfig = {
   key: "root",
   version: 1,
   storage,
-  migrate: (state) => {
+  migrate: (_state: any) => {
     // Simple migration: if version changed (or undefined), just return undefined to reset
     return Promise.resolve(undefined);
   },
@@ -45,3 +44,7 @@ export const store = configureStore({
 });
 
 export const persistor = persistStore(store);
+
+// Infer the `RootState` and `AppDispatch` types from the store itself
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;

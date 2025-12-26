@@ -8,9 +8,16 @@ import {
   Home,
   ShieldAlert,
   Activity,
+  LucideIcon,
 } from "lucide-react";
 
-const SidebarItem = ({ to, icon: Icon, label }) => (
+interface SidebarItemProps {
+  to: string;
+  icon: LucideIcon;
+  label: string;
+}
+
+const SidebarItem: React.FC<SidebarItemProps> = ({ to, icon: Icon, label }) => (
   <NavLink
     to={to}
     className={({ isActive }) =>
@@ -26,7 +33,7 @@ const SidebarItem = ({ to, icon: Icon, label }) => (
   </NavLink>
 );
 
-const LeftSidebar = () => {
+const LeftSidebar: React.FC = () => {
   const menuItems = [
     { to: "/overview", icon: Home, label: "Overview" },
     { to: "/people", icon: Users, label: "Population" },

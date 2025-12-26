@@ -1,6 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { UIState } from "../types";
 
-const initialState = {
+const initialState: UIState = {
   isSettingsOpen: false,
 };
 

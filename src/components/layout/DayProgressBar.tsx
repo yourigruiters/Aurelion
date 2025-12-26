@@ -1,12 +1,21 @@
 import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
+import { RootState } from "../../store/store";
 
 const DAY_DURATION_MS = 30 * 60 * 1000; // 30 minutes
 const SEGMENT_DURATION_MS = 10 * 60 * 1000; // 10 minutes
 
-const Zone = ({
+interface ZoneProps {
+  startMs: number;
+  endMs: number;
+  currentProgressMs: number;
+  colorClass: string;
+  tooltipText: string;
+}
+
+const Zone: React.FC<ZoneProps> = ({
   startMs,
-  endMs,
+  // endMs,
   currentProgressMs,
   colorClass,
   tooltipText,
@@ -39,14 +48,17 @@ const Zone = ({
   );
 };
 
-const DayProgressBar = () => {
-  const gameStartTime = useSelector((state) => state.resources.gameStartTime);
+const DayProgressBar: React.FC = () => {
+  const gameStartTime = useSelector(
+    (state: RootState) => state.resources.gameStartTime
+  );
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
     const updateProgress = () => {
       const now = Date.now();
-      const elapsed = (now - gameStartTime) % DAY_DURATION_MS;
+      const start = gameStartTime || now; // Handle null start time
+      const elapsed = (now - start) % DAY_DURATION_MS;
       setProgress(elapsed);
     };
 

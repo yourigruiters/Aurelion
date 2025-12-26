@@ -3,9 +3,10 @@ import { useSelector } from "react-redux";
 import { Search } from "lucide-react";
 import worldMap from "../assets/region/worldmap.png";
 import Input from "../components/ui/Input";
+import { RootState } from "../store/store";
 
-const RegionMap = () => {
-  const { cityName } = useSelector((state) => state.game);
+const RegionMap: React.FC = () => {
+  const { cityName } = useSelector((state: RootState) => state.game);
   const [searchTerm, setSearchTerm] = useState("");
 
   const allCities = [

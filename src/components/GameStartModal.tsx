@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, ChangeEvent, FormEvent } from "react";
 import { useDispatch } from "react-redux";
 import { startGame } from "../store/gameSlice";
 import { initializeResources } from "../store/resourcesSlice";
@@ -20,18 +20,33 @@ import Input from "./ui/Input";
 import Select from "./ui/Select";
 import ResourceItem from "./ui/ResourceItem";
 
-const GameStartModal = () => {
+interface FormData {
+  cityName: string;
+  region: string;
+  bonus: string;
+}
+
+interface PreviewData {
+  population: number;
+  food: number;
+  wood: number;
+  stone: number;
+  iron: number;
+  gold: number;
+  bonuses: string[];
+}
+
+const GameStartModal: React.FC = () => {
   const dispatch = useDispatch();
-  const [formData, setFormData] = useState({
-    cityName: "",
-    region: "",
-    bonus: "",
+  const [formData, setFormData] = useState<FormData>({
     cityName: "",
     region: "",
     bonus: "",
   });
 
-  const handleChange = (e) => {
+  const handleChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -39,7 +54,7 @@ const GameStartModal = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (!formData.cityName.trim()) {
       alert("Please enter a city name");
@@ -48,11 +63,18 @@ const GameStartModal = () => {
 
     // Dispatch actions to start game
     // Defaulting mode/speed since they are removed from UI
-    dispatch(startGame({ ...formData, mode: "Friendly", speed: "Regular" }));
-    dispatch(initializeResources(formData));
+    dispatch(
+      startGame({
+        ...formData,
+        mode: "Friendly",
+        speed: "Regular",
+        gameStarted: true,
+      })
+    );
+    dispatch(initializeResources({ ...formData }));
   };
 
-  const getOptionDescription = (type, value) => {
+  const getOptionDescription = (type: string, value: string) => {
     switch (type) {
       case "region":
         if (value === "Forest Realm") return "25% wood production";
@@ -64,15 +86,13 @@ const GameStartModal = () => {
         if (value === "Gathering") return "Start with higher population";
         if (value === "Fighting") return "Start with better gear";
         break;
-        if (value === "Fighting") return "Start with better gear";
-        break;
       default:
         return "";
     }
     return "";
   };
 
-  const getPreviewResources = () => {
+  const getPreviewResources = (): PreviewData => {
     // If nothing selected, return 0s
     if (!formData.region && !formData.bonus) {
       return {
@@ -86,12 +106,7 @@ const GameStartModal = () => {
       };
     }
 
-    // Base values (only if we have some configuration started, or maybe base is always there?)
-    // User said "Start at 0", assuming literal 0 until configured.
-    // But if they select one thing, should we show base + that thing?
-    // "So the contents will always start at 0" implies empty state = 0.
-
-    let preview = {
+    let preview: PreviewData = {
       population: 10,
       food: 100,
       wood: 100,

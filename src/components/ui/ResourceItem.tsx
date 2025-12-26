@@ -1,7 +1,16 @@
 import React from "react";
-import { ChevronUp, ChevronDown } from "lucide-react";
+import { ChevronUp, ChevronDown, LucideIcon } from "lucide-react";
 
-const ResourceItem = ({
+interface ResourceItemProps {
+  icon: LucideIcon;
+  value: number;
+  rate?: number;
+  color?: string;
+  tooltipLabel?: string;
+  className?: string;
+}
+
+const ResourceItem: React.FC<ResourceItemProps> = ({
   icon: Icon,
   value,
   rate,
@@ -10,7 +19,7 @@ const ResourceItem = ({
   className = "",
 }) => {
   // Determine arrow
-  let ArrowIcon = null;
+  let ArrowIcon: LucideIcon | null = null;
   let arrowColor = "";
 
   if (rate !== undefined) {

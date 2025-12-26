@@ -1,6 +1,11 @@
-import React from "react";
+import React, { SelectHTMLAttributes } from "react";
 
-const Select = ({
+interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
+  label?: string;
+  helperText?: string;
+}
+
+const Select: React.FC<SelectProps> = ({
   label,
   id,
   children,

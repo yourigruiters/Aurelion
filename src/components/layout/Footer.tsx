@@ -4,7 +4,7 @@ import { useDispatch } from "react-redux";
 import { resetGame } from "../../store/gameSlice";
 import { resetResources } from "../../store/resourcesSlice";
 
-const Footer = () => {
+const Footer: React.FC = () => {
   const dispatch = useDispatch();
 
   const handleReset = () => {

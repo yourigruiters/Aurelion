@@ -1,6 +1,7 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { GameState } from "../types";
 
-const initialState = {
+const initialState: GameState = {
   gameStarted: false,
   cityName: "",
   region: "", // "Forest Realm", "Riverlands", "Highland pass"
@@ -13,7 +14,7 @@ export const gameSlice = createSlice({
   name: "game",
   initialState,
   reducers: {
-    startGame: (state, action) => {
+    startGame: (state, action: PayloadAction<GameState>) => {
       const { cityName, region, bonus, mode, speed } = action.payload;
       state.gameStarted = true;
       state.cityName = cityName;
@@ -22,7 +23,7 @@ export const gameSlice = createSlice({
       state.mode = mode;
       state.speed = speed;
     },
-    resetGame: (state) => {
+    resetGame: () => {
       return initialState;
     },
   },

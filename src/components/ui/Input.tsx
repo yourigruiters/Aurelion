@@ -1,6 +1,15 @@
-import React from "react";
+import React, { InputHTMLAttributes } from "react";
 
-const Input = ({ label, id, className = "", ...props }) => {
+interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
+  label?: string;
+}
+
+const Input: React.FC<InputProps> = ({
+  label,
+  id,
+  className = "",
+  ...props
+}) => {
   return (
     <div className="w-full">
       {label && (

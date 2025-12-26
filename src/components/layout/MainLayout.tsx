@@ -8,9 +8,10 @@ import DayProgressBar from "./DayProgressBar";
 
 import { useSelector } from "react-redux";
 import GameStartModal from "../GameStartModal";
+import { RootState } from "../../store/store";
 
-const MainLayout = () => {
-  const { gameStarted } = useSelector((state) => state.game);
+const MainLayout: React.FC = () => {
+  const { gameStarted } = useSelector((state: RootState) => state.game);
   const [isRightSidebarOpen, setIsRightSidebarOpen] = React.useState(true);
 
   const toggleRightSidebar = () => {

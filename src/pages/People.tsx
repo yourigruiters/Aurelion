@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { setAssignments } from "../store/resourcesSlice";
+import { RootState } from "../store/store";
 import {
   Wheat,
   Fish,
@@ -17,11 +18,28 @@ import {
   Apple,
   Mountain,
   Gem,
+  LucideIcon,
 } from "lucide-react";
 import Button from "../components/ui/Button";
 
+interface Impact {
+  resource: string; // keyof Resources but flexible for now
+  val: number;
+  icon: LucideIcon;
+}
+
+interface RoleDefinition {
+  id: string; // Role type
+  name: string;
+  description: string;
+  icon: LucideIcon;
+  color: string;
+  locked: boolean;
+  impacts: Impact[];
+}
+
 // Role Logic Definitions
-const ROLE_DEFINITIONS = [
+const ROLE_DEFINITIONS: RoleDefinition[] = [
   {
     id: "Farmer",
     name: "Farmer",
@@ -29,7 +47,7 @@ const ROLE_DEFINITIONS = [
     icon: Wheat,
     color: "text-succes",
     locked: false,
-    impacts: [{ resource: "food", val: 12, icon: Apple }], // Integer Value
+    impacts: [{ resource: "food", val: 12, icon: Apple }],
   },
   {
     id: "Fisher",
@@ -99,16 +117,17 @@ const ROLE_DEFINITIONS = [
   },
 ];
 
-const People = () => {
+const People: React.FC = () => {
   const dispatch = useDispatch();
   const {
     population,
     assignments = {},
     rates: currentRates,
-  } = useSelector((state) => state.resources);
+  } = useSelector((state: RootState) => state.resources);
 
   // Local state for editing assignments
-  const [localAssignments, setLocalAssignments] = useState(assignments);
+  const [localAssignments, setLocalAssignments] =
+    useState<Record<string, number>>(assignments);
   const [idlePop, setIdlePop] = useState(0);
 
   // Sync local state when redux state changes (e.g. init)
@@ -125,7 +144,7 @@ const People = () => {
     setIdlePop(population - totalAssigned);
   }, [localAssignments, population]);
 
-  const handleAdjust = (roleId, delta) => {
+  const handleAdjust = (roleId: string, delta: number) => {
     const current = localAssignments[roleId] || 0;
     const newCount = current + delta;
 
@@ -140,14 +159,16 @@ const People = () => {
   };
 
   // Calculate PROJECTED TOTAL Daily Income
-  // Instead of just delta, we want (Current Rate + Delta)
   const calculateProjectedRates = () => {
-    // Start with current rates from Redux (which are based on SAVED assignments)
-    // Wait, if we use currentRates, they are based on saved assignments.
-    // We need to calculate the *difference* caused by local changes, and add it to currentRates.
+    // Step 1: Calculate Delta based on local vs saved assignments
+    let diffs: Record<string, number> = {
+      food: 0,
+      wood: 0,
+      stone: 0,
+      iron: 0,
+      gold: 0,
+    };
 
-    // Step 1: Calculate Delta
-    let diffs = { food: 0, wood: 0, stone: 0, iron: 0, gold: 0 };
     ROLE_DEFINITIONS.forEach((role) => {
       if (!role.locked && role.impacts.length > 0) {
         const currentCount = assignments[role.id] || 0;
@@ -162,9 +183,10 @@ const People = () => {
     });
 
     // Step 2: Add Delta to Current Rates
-    let projected = { ...currentRates };
-    // Ensure keys exist in projected (might be missing if 0 initially?)
-    // currentRates usually has all keys initialized to 0.
+    // We need to clone currentRates or create a new object
+    // currentRates is Rates type which has population too.
+    let projected: Record<string, number> = { ...currentRates };
+
     Object.keys(diffs).forEach((key) => {
       projected[key] = (projected[key] || 0) + diffs[key];
     });
@@ -252,6 +274,7 @@ const People = () => {
           <div className="w-48 flex-none h-full flex items-center justify-center p-4">
             <Button
               onClick={onSave}
+              // @ts-ignore
               variant="primary"
               icon={Save}
               disabled={idlePop < 0}

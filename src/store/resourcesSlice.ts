@@ -1,6 +1,7 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { ResourcesState, Resources } from "../types";
 
-const initialState = {
+const initialState: ResourcesState = {
   population: 0,
   resources: {
     food: 0,
@@ -42,7 +43,10 @@ export const resourcesSlice = createSlice({
   name: "resources",
   initialState,
   reducers: {
-    updateResource: (state, action) => {
+    updateResource: (
+      state,
+      action: PayloadAction<{ resource: keyof Resources; amount: number }>
+    ) => {
       const { resource, amount } = action.payload;
       if (state.resources[resource] !== undefined) {
         state.resources[resource] += amount;
@@ -50,18 +54,24 @@ export const resourcesSlice = createSlice({
     },
     tickResources: (state) => {
       // Simulate resource generation based on rates and modifiers
-      Object.keys(state.resources).forEach((key) => {
-        if (state.rates[key]) {
-          const modifier = state.modifiers[key] || 1;
-          state.resources[key] += state.rates[key] * modifier;
+      (Object.keys(state.resources) as Array<keyof Resources>).forEach(
+        (key) => {
+          if (state.rates[key]) {
+            // @ts-ignore - Index signature for modifiers might be needed or strict keys
+            const modifier = state.modifiers[key] || 1;
+            state.resources[key] += state.rates[key] * modifier;
+          }
         }
-      });
+      );
       // Population growth if rate exists
       if (state.rates.population) {
         state.population += state.rates.population;
       }
     },
-    initializeResources: (state, action) => {
+    initializeResources: (
+      state,
+      action: PayloadAction<{ region: string; bonus: string }>
+    ) => {
       const { region, bonus } = action.payload;
 
       // Set initial base values
@@ -108,41 +118,38 @@ export const resourcesSlice = createSlice({
     advanceDay: (state) => {
       state.daysPassed += 1;
     },
-    setRate: (state, action) => {
+    setRate: (
+      state,
+      action: PayloadAction<{ resource: keyof Resources; rate: number }>
+    ) => {
       const { resource, rate } = action.payload;
       if (state.rates[resource] !== undefined) {
         state.rates[resource] = rate;
       }
     },
     resetResources: () => initialState,
-    setAssignments: (state, action) => {
+    setAssignments: (state, action: PayloadAction<Record<string, number>>) => {
       const newAssignments = action.payload; // { farmer: 5, miner: 2, ... }
       state.assignments = newAssignments;
 
       // Recalculate Rates based on assignments
-      // Base rates per role (can be moved to constants later)
-      const ROLE_RATES = {
-        Farmer: { resource: "food", amount: 1.2 }, // +1.2 Food/tick
-        Fisher: { resource: "food", amount: 0.8 }, // +0.8 Food/tick (example)
-        Woodcutter: { resource: "wood", amount: 1.0 },
+      // Base rates per role
+      const ROLE_RATES: Record<string, any> = {
+        Farmer: { resource: "food", amount: 12 }, // +12 Food/day
+        Fisher: { resource: "food", amount: 8 }, // +8 Food/day
+        Woodcutter: { resource: "wood", amount: 10 },
         Miner: {
           resource: "stone",
-          amount: 0.5,
+          amount: 5,
           resource2: "iron",
-          amount2: 0.1,
-        }, // Miner yields stone and some iron
-        // Builder: Special case (increases construction speed? for now ignoring or just placeholders)
-        // Blacksmith: Tools?
-        // Merchant: Gold
-        Merchant: { resource: "gold", amount: 0.5 },
+          amount2: 1,
+        },
+        // Builder: Construction Speed
+        // Blacksmith: Tools
+        Merchant: { resource: "gold", amount: 5 },
       };
 
-      // Reset rates to base (or 0) before applying role rates
-      // Assuming base rates (natural generation) are 0 for now, or we preserve them?
-      // For simplicity, let's assume rates are purely driven by population for now,
-      // EXCEPT maybe base town center production.
-      // To play safe, we'll zero them out and re-add.
-
+      // Reset rates to base
       let newRates = {
         population: 0,
         food: 0,
@@ -152,17 +159,15 @@ export const resourcesSlice = createSlice({
         gold: 0,
       };
 
-      // Add base generation (Town Center)?
-      // Let's assume some base values if needed, but per user request, it's about roles.
-      // We will iterate assignments and sum up.
-
       Object.entries(newAssignments).forEach(([role, count]) => {
         const rateConfig = ROLE_RATES[role];
         if (rateConfig) {
           if (rateConfig.resource) {
+            // @ts-ignore
             newRates[rateConfig.resource] += rateConfig.amount * count;
           }
           if (rateConfig.resource2) {
+            // @ts-ignore
             newRates[rateConfig.resource2] += rateConfig.amount2 * count;
           }
         }

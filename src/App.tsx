@@ -1,13 +1,12 @@
-import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
-import MainLayout from "./components/layout/MainLayout";
+import Buildings from "./pages/Buildings";
 import Overview from "./pages/Overview";
 import People from "./pages/People";
-import Buildings from "./pages/Buildings";
 import Market from "./pages/Market";
 import Military from "./pages/Military";
-import RegionMap from "./pages/RegionMap";
 import Activities from "./pages/Activities";
+import RegionMap from "./pages/RegionMap";
+import MainLayout from "./components/layout/MainLayout";
 
 function App() {
   return (

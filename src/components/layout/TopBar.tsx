@@ -1,8 +1,6 @@
 import React from "react";
 import { useSelector } from "react-redux";
 import {
-  Settings,
-  Bell,
   BookOpen,
   Crown,
   Gem,
@@ -11,13 +9,12 @@ import {
   Apple,
   Mountain,
   Users,
-  ChevronUp,
-  ChevronDown,
 } from "lucide-react";
 import ResourceItem from "../ui/ResourceItem";
+import { RootState } from "../../store/store";
 
 // Helper to format date from daysPassed (Start: 1650-01-01)
-const formatDate = (daysPassed) => {
+const formatDate = (daysPassed: number) => {
   const startDate = new Date("1650-01-01");
   startDate.setDate(startDate.getDate() + daysPassed);
   return startDate.toLocaleDateString("en-GB", {
@@ -27,14 +24,24 @@ const formatDate = (daysPassed) => {
   });
 };
 
-const TopBar = ({ isRightSidebarOpen, onToggleRightSidebar }) => {
+interface TopBarProps {
+  isRightSidebarOpen: boolean;
+  onToggleRightSidebar: () => void;
+}
+
+const TopBar: React.FC<TopBarProps> = ({
+  isRightSidebarOpen,
+  onToggleRightSidebar,
+}) => {
   const {
     population,
     resources,
     daysPassed = 0,
     rates,
-  } = useSelector((state) => state.resources);
-  const { gameStarted, cityName, region } = useSelector((state) => state.game);
+  } = useSelector((state: RootState) => state.resources);
+  const { gameStarted, cityName, region } = useSelector(
+    (state: RootState) => state.game
+  );
 
   return (
     <header className="h-full w-full bg-bg-main border-b border-border-main flex items-center justify-between px-4">
