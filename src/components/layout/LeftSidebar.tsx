@@ -63,7 +63,10 @@ const LeftSidebar: React.FC = () => {
       </nav>
 
       {/* City Status Summary */}
-      <div className="p-4 border-t border-border-main bg-bg-panel/50">
+      <NavLink
+        to="/people"
+        className="p-4 border-t border-border-main bg-bg-panel cursor-pointer transition-colors hover:bg-bg-main/20"
+      >
         <div className="space-y-2">
           <div className="flex justify-between items-center text-xs">
             <span className="text-text-muted">Idle Villagers</span>
@@ -73,7 +76,7 @@ const LeftSidebar: React.FC = () => {
             <div className="bg-danger h-full w-1/5" />
           </div>
         </div>
-      </div>
+      </NavLink>
     </div>
   );
 };

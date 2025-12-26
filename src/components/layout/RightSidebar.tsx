@@ -1,20 +1,5 @@
 import React from "react";
 
-// interface ActionButtonProps {
-//   icon: LucideIcon;
-//   label: string;
-//   colorClass: string;
-// }
-
-// const ActionButton: React.FC<ActionButtonProps> = ({ icon: Icon, label, colorClass }) => (
-//   <button className="flex items-center space-x-2 w-full p-2 rounded bg-bg-main hover:bg-bg-panel transition-colors border border-transparent hover:border-border-light">
-//     <div className={`p-1.5 rounded bg-bg-panel ${colorClass}`}>
-//       <Icon size={16} />
-//     </div>
-//     <span className="text-sm text-text-secondary">{label}</span>
-//   </button>
-// );
-
 interface NotificationProps {
   title: string;
   time: string;
@@ -61,9 +46,7 @@ const RightSidebar: React.FC = () => {
           </h2>
         </div>
         <div className="px-4 pb-4 space-y-2">
-          <Notification title="Villager arrived" time="2m ago" />
-          <Notification title="Storage full: Wood" time="5m ago" />
-          <Notification title="Game saved" time="10m ago" />
+          <Notification title="Daily report generated" time="2m ago" />
         </div>
       </div>
     </div>

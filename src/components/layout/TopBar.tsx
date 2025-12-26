@@ -14,14 +14,31 @@ import ResourceItem from "../ui/ResourceItem";
 import { RootState } from "../../store/store";
 
 // Helper to format date from daysPassed (Start: 1650-01-01)
+// Helper to get ordinal suffix
+const getOrdinalSuffix = (day: number) => {
+  if (day > 3 && day < 21) return "th";
+  switch (day % 10) {
+    case 1:
+      return "st";
+    case 2:
+      return "nd";
+    case 3:
+      return "rd";
+    default:
+      return "th";
+  }
+};
+
+// Helper to format date from daysPassed (Start: 1650-01-01)
 const formatDate = (daysPassed: number) => {
   const startDate = new Date("1650-01-01");
   startDate.setDate(startDate.getDate() + daysPassed);
-  return startDate.toLocaleDateString("en-GB", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
+
+  const day = startDate.getDate();
+  const month = startDate.toLocaleDateString("en-GB", { month: "long" });
+  const year = startDate.getFullYear();
+
+  return `${day}${getOrdinalSuffix(day)} of ${month}, ${year}`;
 };
 
 interface TopBarProps {

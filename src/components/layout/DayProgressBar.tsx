@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 
-const DAY_DURATION_MS = 30 * 60 * 1000; // 30 minutes
-const SEGMENT_DURATION_MS = 10 * 60 * 1000; // 10 minutes
+const DAY_DURATION_MS = 15 * 60 * 1000; // 15 minutes
+const SEGMENT_DURATION_MS = 5 * 60 * 1000; // 5 minutes
 
 interface ZoneProps {
   startMs: number;
@@ -70,25 +70,25 @@ const DayProgressBar: React.FC = () => {
 
   return (
     <div className="w-full h-[10px] bg-zinc-800 flex relative overflow-visible border-b border-zinc-700">
-      {/* Zone 1: 0-10m (Green) */}
+      {/* Zone 1: 0-5m (Green) */}
       <Zone
         startMs={0}
         endMs={SEGMENT_DURATION_MS}
         currentProgressMs={progress}
         colorClass="bg-gradient-to-r from-green-600 to-green-400"
-        tooltipText="You still have time to setup your population for today"
+        tooltipText="You can setup your population and run activities for today"
       />
 
-      {/* Zone 2: 10-20m (Yellow) */}
+      {/* Zone 2: 5-10m (Yellow) */}
       <Zone
         startMs={SEGMENT_DURATION_MS}
         endMs={SEGMENT_DURATION_MS * 2}
         currentProgressMs={progress}
         colorClass="bg-gradient-to-r from-yellow-600 to-yellow-400"
-        tooltipText="Activities can still be executed"
+        tooltipText="You can run activities for today"
       />
 
-      {/* Zone 3: 20-30m (Red) */}
+      {/* Zone 3: 10-15m (Red) */}
       <Zone
         startMs={SEGMENT_DURATION_MS * 2}
         endMs={DAY_DURATION_MS}

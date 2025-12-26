@@ -260,7 +260,7 @@ const GameStartModal: React.FC = () => {
         {/* Right Column: Form */}
         <div className="p-8 flex flex-col justify-center bg-bg-main">
           <h2 className="text-3xl font-bold mb-8 text-center text-text-main">
-            Configure Realm
+            Configure City
           </h2>
 
           <form onSubmit={handleSubmit} className="space-y-6">

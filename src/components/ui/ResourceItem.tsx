@@ -42,21 +42,15 @@ const ResourceItem: React.FC<ResourceItemProps> = ({
 
       {/* Tooltip */}
       {tooltipLabel && (
-        <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 w-48 bg-bg-main border border-border-main shadow-xl rounded p-2 text-xs z-50 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+        <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 w-32 bg-bg-main border border-border-main shadow-xl rounded p-2 text-xs z-50 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
           <div className="font-bold mb-1 text-text-secondary">
             {tooltipLabel}
           </div>
-          {rate !== undefined && (
-            <>
-              <div className="flex justify-between text-success">
-                <span>Income:</span>
-                <span>+{rate > 0 ? rate : 0} / day</span>
-              </div>
-              <div className="flex justify-between text-danger-light">
-                <span>Use:</span>
-                <span>{rate < 0 ? rate : 0} / day</span>
-              </div>
-            </>
+          {rate !== undefined && rate > 0 && (
+            <div className="flex justify-between text-success">
+              <span>Income:</span>
+              <span>+{rate > 0 ? rate : 0} / day</span>
+            </div>
           )}
         </div>
       )}
