@@ -2,56 +2,47 @@ import React from "react";
 import { Pickaxe, ScrollText, ArrowUpCircle } from "lucide-react";
 
 const ActionButton = ({ icon: Icon, label, colorClass }) => (
-  <button className="flex items-center space-x-2 w-full p-2 rounded bg-zinc-700/40 hover:bg-zinc-700 transition-colors border border-transparent hover:border-zinc-600">
-    <div className={`p-1.5 rounded bg-zinc-800 ${colorClass}`}>
+  <button className="flex items-center space-x-2 w-full p-2 rounded bg-bg-main hover:bg-bg-panel transition-colors border border-transparent hover:border-border-light">
+    <div className={`p-1.5 rounded bg-bg-panel ${colorClass}`}>
       <Icon size={16} />
     </div>
-    <span className="text-sm text-zinc-300">{label}</span>
+    <span className="text-sm text-text-secondary">{label}</span>
   </button>
 );
 
 const Notification = ({ title, time, type }) => (
-  <div className="p-3 bg-zinc-700/30 rounded border-l-2 border-zinc-600 hover:bg-zinc-700/50 transition-colors cursor-pointer">
-    <h4 className="text-sm font-medium text-zinc-200">{title}</h4>
-    <span className="text-xs text-zinc-500">{time}</span>
+  <div className="p-3 bg-bg-main rounded border-l-2 border-border-light hover:bg-bg-panel transition-colors cursor-pointer">
+    <h4 className="text-sm font-medium text-text-main">{title}</h4>
+    <span className="text-xs text-text-muted">{time}</span>
   </div>
 );
 
 const RightSidebar = () => {
   return (
-    <div className="flex flex-col h-full">
-      <div className="p-4 border-b border-zinc-700">
-        <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">
-          Quick Actions
+    <div className="flex flex-col h-full bg-bg-panel border-l border-border-main">
+      {/* Running Activities */}
+      <div className="p-4 border-b border-border-main">
+        <h2 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-3">
+          Running Activities
         </h2>
+        <div className="text-sm text-text-dim italic py-2">No active tasks</div>
       </div>
 
-      <div className="p-4 space-y-2">
-        <ActionButton
-          icon={Pickaxe}
-          label="Collect All"
-          colorClass="text-green-400"
-        />
-        <ActionButton
-          icon={ArrowUpCircle}
-          label="Upgrade Town Center"
-          colorClass="text-blue-400"
-        />
-      </div>
-
-      <div className="p-4 border-t border-zinc-700 border-b">
-        <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3">
+      {/* Construction Queue */}
+      <div className="p-4 border-b border-border-main">
+        <h2 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-3">
           Construction Queue
         </h2>
-        <div className="text-sm text-zinc-400 italic text-center py-2">
+        <div className="text-sm text-text-dim italic py-2">
           No active construction
         </div>
       </div>
 
+      {/* Notifications */}
       <div className="flex-1 overflow-y-auto">
-        <div className="sticky top-0 bg-zinc-800 p-4 pb-2 z-10">
-          <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">
-            Log & Alerts
+        <div className="sticky top-0 bg-bg-panel p-4 pb-2 z-10">
+          <h2 className="text-xs font-semibold text-text-muted uppercase tracking-wider">
+            Notifications
           </h2>
         </div>
         <div className="px-4 pb-4 space-y-2">

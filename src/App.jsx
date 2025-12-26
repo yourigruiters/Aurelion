@@ -7,6 +7,7 @@ import Buildings from "./pages/Buildings";
 import Market from "./pages/Market";
 import Military from "./pages/Military";
 import RegionMap from "./pages/RegionMap";
+import Activities from "./pages/Activities";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <Route path="buildings" element={<Buildings />} />
         <Route path="market" element={<Market />} />
         <Route path="military" element={<Military />} />
+        <Route path="activities" element={<Activities />} />
         <Route path="map" element={<RegionMap />} />
       </Route>
     </Routes>

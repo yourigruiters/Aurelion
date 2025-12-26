@@ -7,6 +7,7 @@ import {
   Map,
   Home,
   ShieldAlert,
+  Activity,
 } from "lucide-react";
 
 const SidebarItem = ({ to, icon: Icon, label }) => (
@@ -15,8 +16,8 @@ const SidebarItem = ({ to, icon: Icon, label }) => (
     className={({ isActive }) =>
       `w-full flex items-center space-x-3 px-4 py-3 text-sm font-medium transition-colors cursor-pointer ${
         isActive
-          ? "bg-zinc-700 text-yellow-500 border-r-2 border-yellow-500"
-          : "text-zinc-400 hover:bg-zinc-700/50 hover:text-zinc-200"
+          ? "bg-bg-main text-accent border-r-2 border-accent"
+          : "text-text-secondary hover:bg-bg-main/50 hover:text-text-main"
       }`
     }
   >
@@ -29,6 +30,7 @@ const LeftSidebar = () => {
   const menuItems = [
     { to: "/overview", icon: Home, label: "Overview" },
     { to: "/people", icon: Users, label: "Population" },
+    { to: "/activities", icon: Activity, label: "Activities" },
     { to: "/buildings", icon: Hammer, label: "Buildings" },
     { to: "/market", icon: ShoppingCart, label: "Market Hall" },
     { to: "/military", icon: ShieldAlert, label: "Military" },
@@ -37,8 +39,8 @@ const LeftSidebar = () => {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="p-4 border-b border-zinc-700">
-        <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">
+      <div className="p-4 border-b border-border-main">
+        <h2 className="text-xs font-semibold text-text-muted uppercase tracking-wider">
           City Management
         </h2>
       </div>
@@ -54,14 +56,14 @@ const LeftSidebar = () => {
       </nav>
 
       {/* City Status Summary */}
-      <div className="p-4 border-t border-zinc-700 bg-zinc-800/50">
+      <div className="p-4 border-t border-border-main bg-bg-panel/50">
         <div className="space-y-2">
           <div className="flex justify-between items-center text-xs">
-            <span className="text-zinc-400">Idle Villagers</span>
-            <span className="text-orange-400 font-bold">2</span>
+            <span className="text-text-muted">Idle Villagers</span>
+            <span className="text-danger font-bold">2</span>
           </div>
-          <div className="w-full bg-zinc-700 h-1.5 rounded-full overflow-hidden">
-            <div className="bg-orange-500 h-full w-1/5" />
+          <div className="w-full bg-border-main h-1.5 rounded-full overflow-hidden">
+            <div className="bg-danger h-full w-1/5" />
           </div>
         </div>
       </div>

@@ -27,7 +27,7 @@ const formatDate = (daysPassed) => {
   });
 };
 
-const TopBar = () => {
+const TopBar = ({ isRightSidebarOpen, onToggleRightSidebar }) => {
   const {
     population,
     resources,
@@ -125,15 +125,18 @@ const TopBar = () => {
 
       {/* Right Area: Actions */}
       <div className="flex items-center space-x-3 min-w-[300px] justify-end">
-        <button className="p-2 hover:bg-bg-panel rounded-full transition-colors text-text-muted hover:text-white">
+        <button
+          onClick={onToggleRightSidebar}
+          className={`p-2 rounded-full transition-colors relative cursor-pointer ${
+            isRightSidebarOpen
+              ? "bg-bg-panel text-white"
+              : "text-text-muted hover:bg-bg-panel hover:text-white"
+          }`}
+          title="Toggle Logbook"
+        >
           <BookOpen size={20} />
-        </button>
-        <button className="p-2 hover:bg-bg-panel rounded-full transition-colors text-text-muted hover:text-white relative">
-          <Bell size={20} />
-          <span className="absolute top-1 right-1 w-2 h-2 bg-danger rounded-full"></span>
-        </button>
-        <button className="p-2 hover:bg-bg-panel rounded-full transition-colors text-text-muted hover:text-white">
-          <Settings size={20} />
+          {/* Notification Badge */}
+          <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-danger rounded-full border border-bg-main"></span>
         </button>
       </div>
     </header>

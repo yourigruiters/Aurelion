@@ -11,13 +11,21 @@ import GameStartModal from "../GameStartModal";
 
 const MainLayout = () => {
   const { gameStarted } = useSelector((state) => state.game);
+  const [isRightSidebarOpen, setIsRightSidebarOpen] = React.useState(true);
+
+  const toggleRightSidebar = () => {
+    setIsRightSidebarOpen((prev) => !prev);
+  };
 
   return (
     <div className="flex flex-col h-screen w-screen overflow-hidden bg-bg-main text-text-main font-sans">
       {!gameStarted && <GameStartModal />}
       {/* Top Navigation - Fixed height */}
       <div className="h-16 flex-none z-50 shadow-md">
-        <TopBar />
+        <TopBar
+          isRightSidebarOpen={isRightSidebarOpen}
+          onToggleRightSidebar={toggleRightSidebar}
+        />
       </div>
 
       <div className="flex-none">
@@ -36,10 +44,12 @@ const MainLayout = () => {
           <Outlet />
         </main>
 
-        {/* Right Sidebar - Fixed width */}
-        <aside className="w-72 flex-none border-l border-border-main bg-bg-panel z-40 shadow-lg">
-          <RightSidebar />
-        </aside>
+        {/* Right Sidebar - Flexible width based on toggle */}
+        {isRightSidebarOpen && (
+          <aside className="w-72 flex-none border-l border-border-main bg-bg-panel z-40 shadow-lg transition-all duration-300">
+            <RightSidebar />
+          </aside>
+        )}
       </div>
 
       {/* Bottom Footer - Fixed height (optional/minimal) */}
