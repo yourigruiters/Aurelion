@@ -3,19 +3,32 @@ import { useDispatch } from "react-redux";
 import { startGame } from "../store/gameSlice";
 import { initializeResources } from "../store/resourcesSlice";
 import regionsImage from "../assets/region/regions.png";
-import { Crown } from "lucide-react";
+import region1 from "../assets/region/region1.png";
+import region2 from "../assets/region/region2.png";
+import region3 from "../assets/region/region3.png";
+import {
+  Crown,
+  Users,
+  Apple,
+  Wheat,
+  Mountain,
+  Hammer,
+  Gem,
+} from "lucide-react";
 import Button from "./ui/Button";
 import Input from "./ui/Input";
 import Select from "./ui/Select";
+import ResourceItem from "./ui/ResourceItem";
 
 const GameStartModal = () => {
   const dispatch = useDispatch();
   const [formData, setFormData] = useState({
-    cityName: "[Aurelion placeholder]",
-    region: "Forest Realm",
-    bonus: "Building",
-    mode: "Friendly",
-    speed: "Regular",
+    cityName: "",
+    region: "",
+    bonus: "",
+    cityName: "",
+    region: "",
+    bonus: "",
   });
 
   const handleChange = (e) => {
@@ -34,7 +47,8 @@ const GameStartModal = () => {
     }
 
     // Dispatch actions to start game
-    dispatch(startGame(formData));
+    // Defaulting mode/speed since they are removed from UI
+    dispatch(startGame({ ...formData, mode: "Friendly", speed: "Regular" }));
     dispatch(initializeResources(formData));
   };
 
@@ -50,14 +64,7 @@ const GameStartModal = () => {
         if (value === "Gathering") return "Start with higher population";
         if (value === "Fighting") return "Start with better gear";
         break;
-      case "mode":
-        if (value === "Friendly") return "Building, trading, expanding";
-        if (value === "Aggressive") return "Also includes fighting";
-        break;
-      case "speed":
-        if (value === "Active") return "Have some hours to play now";
-        if (value === "Regular") return "Playing multiple times a day";
-        if (value === "Idle") return "Playing daily";
+        if (value === "Fighting") return "Start with better gear";
         break;
       default:
         return "";
@@ -65,36 +72,193 @@ const GameStartModal = () => {
     return "";
   };
 
+  const getPreviewResources = () => {
+    // If nothing selected, return 0s
+    if (!formData.region && !formData.bonus) {
+      return {
+        population: 0,
+        food: 0,
+        wood: 0,
+        stone: 0,
+        iron: 0,
+        gold: 0,
+        bonuses: [],
+      };
+    }
+
+    // Base values (only if we have some configuration started, or maybe base is always there?)
+    // User said "Start at 0", assuming literal 0 until configured.
+    // But if they select one thing, should we show base + that thing?
+    // "So the contents will always start at 0" implies empty state = 0.
+
+    let preview = {
+      population: 10,
+      food: 100,
+      wood: 100,
+      stone: 50,
+      iron: 0,
+      gold: 50,
+      bonuses: [],
+    };
+
+    // Apply Base Bonus from selection
+    if (formData.bonus === "Building") {
+      preview.food += 100;
+      preview.wood += 100;
+      preview.stone += 100;
+      preview.bonuses.push("Start with extra resources");
+    } else if (formData.bonus === "Gathering") {
+      preview.population += 15;
+      preview.bonuses.push("Start with +15 Population");
+    } else if (formData.bonus === "Fighting") {
+      preview.iron += 50;
+      preview.gold += 50;
+      preview.bonuses.push("Start with Iron & Gold");
+    }
+
+    // Determine modifiers for display textual
+    if (formData.region === "Forest Realm")
+      preview.bonuses.push("+25% Wood Production");
+    if (formData.region === "Riverlands")
+      preview.bonuses.push("+25% Food from Fishing");
+    if (formData.region === "Highland pass")
+      preview.bonuses.push("+15% Stone & Iron Production");
+
+    return preview;
+  };
+
+  const getImage = () => {
+    if (formData.region === "Forest Realm") return region1;
+    if (formData.region === "Riverlands") return region2;
+    if (formData.region === "Highland pass") return region3;
+    return regionsImage;
+  };
+
+  const preview = getPreviewResources();
+  const currentImage = getImage();
+
   return (
-    <div className="fixed inset-0 bg-black/70 bg-opacity-70 flex items-center justify-center z-[100]">
-      <div className="bg-bg-main border border-border-main p-8 rounded-lg shadow-2xl max-w-2xl w-full text-white max-h-[90vh] overflow-y-auto">
-        <div className="flex flex-col items-center justify-center mb-6 space-y-2">
-          <Crown size={32} className="text-accent" />
-          <h2 className="text-3xl font-bold text-center text-accent">
-            Start Your Journey
+    <div className="fixed inset-0 bg-black/70 bg-opacity-70 flex items-center justify-center z-[100] p-4">
+      <div className="bg-bg-main border border-border-main rounded-lg shadow-2xl max-w-5xl w-full text-white max-h-[95vh] overflow-y-auto grid grid-cols-1 lg:grid-cols-2">
+        {/* Left Column: Visuals & Preview */}
+        <div className="relative bg-bg-panel p-8 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-border-main">
+          {/* Header */}
+          <div className="flex flex-col items-center justify-center mb-8 space-y-2">
+            <Crown size={48} className="text-accent" />
+            <h2 className="text-4xl font-bold text-center text-accent">
+              Aurelion
+            </h2>
+          </div>
+
+          {/* Mini TopBar Preview */}
+          <div className="mb-0 p-4 bg-bg-main rounded border border-border-main">
+            <h3 className="text-sm font-semibold text-text-muted mb-4 uppercase tracking-wider text-center">
+              Starting Status
+            </h3>
+
+            <div className="space-y-4">
+              {/* Core Resources */}
+              <div>
+                <h4 className="text-xs text-text-dim mb-2 font-medium">Core</h4>
+                <div className="flex gap-3">
+                  <ResourceItem
+                    icon={Users}
+                    value={preview.population}
+                    color="text-info"
+                    tooltipLabel="Population"
+                    className="bg-bg-panel flex-1"
+                  />
+                  <ResourceItem
+                    icon={Apple}
+                    value={preview.food}
+                    color="text-danger-light"
+                    tooltipLabel="Food"
+                    className="bg-bg-panel flex-1"
+                  />
+                </div>
+              </div>
+
+              {/* Secondary Resources */}
+              <div>
+                <h4 className="text-xs text-text-dim mb-2 font-medium">
+                  Secondary
+                </h4>
+                <div className="flex gap-3">
+                  <ResourceItem
+                    icon={Wheat}
+                    value={preview.wood}
+                    color="text-brand"
+                    tooltipLabel="Wood"
+                    className="bg-bg-panel flex-1"
+                  />
+                  <ResourceItem
+                    icon={Mountain}
+                    value={preview.stone}
+                    color="text-text-muted"
+                    tooltipLabel="Stone"
+                    className="bg-bg-panel flex-1"
+                  />
+                  <ResourceItem
+                    icon={Hammer}
+                    value={preview.iron}
+                    color="text-text-secondary"
+                    tooltipLabel="Iron"
+                    className="bg-bg-panel flex-1"
+                  />
+                  <ResourceItem
+                    icon={Gem}
+                    value={preview.gold}
+                    color="text-accent"
+                    tooltipLabel="Gold"
+                    className="bg-bg-panel flex-1"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Valid Bonuses Text */}
+            {preview.bonuses.length > 0 && (
+              <div className="mt-4 pt-4 border-t border-border-main">
+                <h4 className="text-xs text-text-dim mb-2 font-medium">
+                  Active Bonuses
+                </h4>
+                <ul className="text-xs text-success space-y-1">
+                  {preview.bonuses.map((bonus, idx) => (
+                    <li key={idx} className="flex items-center">
+                      <span className="mr-2">•</span> {bonus}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+
+          <div className="flex-1 flex items-center justify-center py-4">
+            <img
+              src={currentImage}
+              alt="Region Preview"
+              className="rounded-lg border border-border-light shadow-lg w-full object-cover h-48 lg:h-56 transition-all duration-300"
+            />
+          </div>
+        </div>
+
+        {/* Right Column: Form */}
+        <div className="p-8 flex flex-col justify-center bg-bg-main">
+          <h2 className="text-3xl font-bold mb-8 text-center text-text-main">
+            Configure Realm
           </h2>
-        </div>
 
-        <div className="mb-6 flex justify-center">
-          <img
-            src={regionsImage}
-            alt="Regions"
-            className="rounded border border-border-light max-h-48 object-cover"
-          />
-        </div>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* City Name */}
+            <Input
+              label="City Name"
+              name="cityName"
+              value={formData.cityName}
+              onChange={handleChange}
+              placeholder="Enter your city's name..."
+              required
+            />
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* City Name */}
-          <Input
-            label="City Name"
-            name="cityName"
-            value={formData.cityName}
-            onChange={handleChange}
-            placeholder="Enter your city's name..."
-            required
-          />
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Region */}
             <Select
               label="Region"
@@ -102,7 +266,11 @@ const GameStartModal = () => {
               value={formData.region}
               onChange={handleChange}
               helperText={getOptionDescription("region", formData.region)}
+              required
             >
+              <option value="" disabled>
+                Select a Region...
+              </option>
               <option value="Forest Realm">Forest Realm</option>
               <option value="Riverlands">Riverlands</option>
               <option value="Highland pass">Highland pass</option>
@@ -115,42 +283,21 @@ const GameStartModal = () => {
               value={formData.bonus}
               onChange={handleChange}
               helperText={getOptionDescription("bonus", formData.bonus)}
+              required
             >
+              <option value="" disabled>
+                Select a Bonus...
+              </option>
               <option value="Building">Building</option>
               <option value="Gathering">Gathering</option>
               <option value="Fighting">Fighting</option>
             </Select>
 
-            {/* Gameplay Mode */}
-            <Select
-              label="Gameplay Mode"
-              name="mode"
-              value={formData.mode}
-              onChange={handleChange}
-              helperText={getOptionDescription("mode", formData.mode)}
-            >
-              <option value="Friendly">Friendly</option>
-              <option value="Aggressive">Aggressive</option>
-            </Select>
-
-            {/* Gameplay Speed */}
-            <Select
-              label="Gameplay Speed"
-              name="speed"
-              value={formData.speed}
-              onChange={handleChange}
-              helperText={getOptionDescription("speed", formData.speed)}
-            >
-              <option value="Active">Active</option>
-              <option value="Regular">Regular</option>
-              <option value="Idle">Idle</option>
-            </Select>
-          </div>
-
-          <Button type="submit" className="mt-8">
-            Start Game
-          </Button>
-        </form>
+            <Button type="submit" className="mt-8">
+              Start Journey
+            </Button>
+          </form>
+        </div>
       </div>
     </div>
   );
