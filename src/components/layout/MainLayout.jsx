@@ -6,9 +6,15 @@ import RightSidebar from "./RightSidebar";
 import Footer from "./Footer";
 import DayProgressBar from "./DayProgressBar";
 
+import { useSelector } from "react-redux";
+import GameStartModal from "../GameStartModal";
+
 const MainLayout = () => {
+  const { gameStarted } = useSelector((state) => state.game);
+
   return (
     <div className="flex flex-col h-screen w-screen overflow-hidden bg-zinc-900 text-zinc-100 font-sans">
+      {!gameStarted && <GameStartModal />}
       {/* Top Navigation - Fixed height */}
       <div className="h-16 flex-none z-50 shadow-md">
         <TopBar />

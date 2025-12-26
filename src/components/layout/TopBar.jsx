@@ -68,6 +68,7 @@ const TopBar = () => {
     daysPassed = 0,
     rates,
   } = useSelector((state) => state.resources);
+  const { gameStarted, cityName, region } = useSelector((state) => state.game);
 
   return (
     <header className="h-full w-full bg-zinc-900 border-b border-zinc-700 flex items-center justify-between px-4">
@@ -81,9 +82,11 @@ const TopBar = () => {
         </div>
         <div className="h-6 w-px bg-zinc-700 mx-2" />
         <div className="flex flex-col">
-          <span className="text-sm font-semibold">City name</span>
+          <span className="text-sm font-semibold">
+            {gameStarted ? cityName : "Uncharted Territory"}
+          </span>
           <span className="text-xs text-zinc-400 uppercase tracking-wider">
-            Region: Highlands
+            {gameStarted ? `Region: ${region}` : "Region: Unknown"}
           </span>
         </div>
       </div>

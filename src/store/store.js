@@ -14,10 +14,12 @@ import storage from "redux-persist/lib/storage"; // defaults to localStorage for
 
 import resourcesReducer from "./resourcesSlice";
 import uiReducer from "./uiSlice";
+import gameReducer from "./gameSlice";
 
 const rootReducer = combineReducers({
   resources: resourcesReducer,
   ui: uiReducer,
+  game: gameReducer,
 });
 
 const persistConfig = {
