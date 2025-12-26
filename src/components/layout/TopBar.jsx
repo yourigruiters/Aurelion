@@ -32,27 +32,27 @@ const ResourceItem = ({ icon: Icon, value, rate = 0, color, tooltipLabel }) => {
   let arrowColor = "";
   if (rate > 0) {
     ArrowIcon = ChevronUp;
-    arrowColor = "text-green-500";
+    arrowColor = "text-success";
   } else if (rate < 0) {
     ArrowIcon = ChevronDown;
-    arrowColor = "text-red-500";
+    arrowColor = "text-danger";
   }
 
   return (
-    <div className="group relative flex items-center space-x-1.5 bg-zinc-800/50 px-2 py-1 rounded cursor-default border border-transparent hover:border-zinc-600 transition-colors">
+    <div className="group relative flex items-center space-x-1.5 bg-bg-panel/50 px-2 py-1 rounded cursor-default border border-transparent hover:border-border-light transition-colors">
       <Icon size={16} className={color} />
       <span className="text-sm font-medium">{Math.floor(value)}</span>
       {ArrowIcon && <ArrowIcon size={12} className={arrowColor} />}
 
       {/* Tooltip */}
-      <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 w-48 bg-zinc-900 border border-zinc-700 shadow-xl rounded p-2 text-xs z-50 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-        <div className="font-bold mb-1 text-zinc-300">{tooltipLabel}</div>
-        <div className="flex justify-between text-green-400">
+      <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 w-48 bg-bg-main border border-border-main shadow-xl rounded p-2 text-xs z-50 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+        <div className="font-bold mb-1 text-text-secondary">{tooltipLabel}</div>
+        <div className="flex justify-between text-success">
           <span>Income:</span>
           <span>+{rate > 0 ? rate : 0} / day</span>
         </div>
         {/* TODO: Add 'Use' when consumption logic exists */}
-        <div className="flex justify-between text-red-400">
+        <div className="flex justify-between text-danger-light">
           <span>Use:</span>
           <span>{rate < 0 ? rate : 0} / day</span>
         </div>
@@ -71,21 +71,21 @@ const TopBar = () => {
   const { gameStarted, cityName, region } = useSelector((state) => state.game);
 
   return (
-    <header className="h-full w-full bg-zinc-900 border-b border-zinc-700 flex items-center justify-between px-4">
+    <header className="h-full w-full bg-bg-main border-b border-border-main flex items-center justify-between px-4">
       {/* Left Area: Logo & Region */}
       <div className="flex items-center space-x-4 min-w-[300px]">
         <div className="flex items-center space-x-2">
-          <Crown size={24} className="text-yellow-500" />
-          <h1 className="text-xl font-bold bg-gradient-to-r from-yellow-400 to-yellow-600 text-transparent bg-clip-text">
+          <Crown size={24} className="text-accent" />
+          <h1 className="text-xl font-bold bg-gradient-to-r from-accent to-brand text-transparent bg-clip-text">
             Aurelion
           </h1>
         </div>
-        <div className="h-6 w-px bg-zinc-700 mx-2" />
+        <div className="h-6 w-px bg-border-main mx-2" />
         <div className="flex flex-col">
           <span className="text-sm font-semibold">
             {gameStarted ? cityName : "Uncharted Territory"}
           </span>
-          <span className="text-xs text-zinc-400 uppercase tracking-wider">
+          <span className="text-xs text-text-muted uppercase tracking-wider">
             {gameStarted ? `Region: ${region}` : "Region: Unknown"}
           </span>
         </div>
@@ -102,7 +102,7 @@ const TopBar = () => {
           </div>
         </div>
 
-        <div className="h-6 w-px bg-zinc-700" />
+        <div className="h-6 w-px bg-border-main" />
 
         {/* Population & Food Group */}
         <div className="flex items-center space-x-3">
@@ -110,19 +110,19 @@ const TopBar = () => {
             icon={Users}
             value={population}
             rate={rates.population}
-            color="text-blue-300"
+            color="text-info"
             tooltipLabel="Population"
           />
           <ResourceItem
             icon={Apple}
             value={resources.food}
             rate={rates.food}
-            color="text-red-400"
+            color="text-danger-light"
             tooltipLabel="Food"
           />
         </div>
 
-        <div className="h-6 w-px bg-zinc-700" />
+        <div className="h-6 w-px bg-border-main" />
 
         {/* Other Resources */}
         <div className="flex items-center space-x-2">
@@ -130,28 +130,28 @@ const TopBar = () => {
             icon={Wheat}
             value={resources.wood}
             rate={rates.wood}
-            color="text-amber-600"
+            color="text-brand"
             tooltipLabel="Wood"
           />
           <ResourceItem
             icon={Mountain}
             value={resources.stone}
             rate={rates.stone}
-            color="text-stone-400"
+            color="text-text-muted"
             tooltipLabel="Stone"
           />
           <ResourceItem
             icon={Hammer}
             value={resources.iron}
             rate={rates.iron}
-            color="text-slate-300"
+            color="text-text-secondary"
             tooltipLabel="Iron"
           />
           <ResourceItem
             icon={Gem}
             value={resources.gold}
             rate={rates.gold}
-            color="text-yellow-400"
+            color="text-accent"
             tooltipLabel="Gold"
           />
         </div>
@@ -159,14 +159,14 @@ const TopBar = () => {
 
       {/* Right Area: Actions */}
       <div className="flex items-center space-x-3 min-w-[300px] justify-end">
-        <button className="p-2 hover:bg-zinc-800 rounded-full transition-colors text-zinc-400 hover:text-white">
+        <button className="p-2 hover:bg-bg-panel rounded-full transition-colors text-text-muted hover:text-white">
           <BookOpen size={20} />
         </button>
-        <button className="p-2 hover:bg-zinc-800 rounded-full transition-colors text-zinc-400 hover:text-white relative">
+        <button className="p-2 hover:bg-bg-panel rounded-full transition-colors text-text-muted hover:text-white relative">
           <Bell size={20} />
-          <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+          <span className="absolute top-1 right-1 w-2 h-2 bg-danger rounded-full"></span>
         </button>
-        <button className="p-2 hover:bg-zinc-800 rounded-full transition-colors text-zinc-400 hover:text-white">
+        <button className="p-2 hover:bg-bg-panel rounded-full transition-colors text-text-muted hover:text-white">
           <Settings size={20} />
         </button>
       </div>

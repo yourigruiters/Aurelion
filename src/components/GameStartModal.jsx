@@ -3,6 +3,10 @@ import { useDispatch } from "react-redux";
 import { startGame } from "../store/gameSlice";
 import { initializeResources } from "../store/resourcesSlice";
 import regionsImage from "../assets/region/regions.png";
+import { Crown } from "lucide-react";
+import Button from "./ui/Button";
+import Input from "./ui/Input";
+import Select from "./ui/Select";
 
 const GameStartModal = () => {
   const dispatch = useDispatch();
@@ -62,124 +66,90 @@ const GameStartModal = () => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[100]">
-      <div className="bg-zinc-900 border border-zinc-700 p-8 rounded-lg shadow-2xl max-w-2xl w-full text-white max-h-[90vh] overflow-y-auto">
-        <h2 className="text-3xl font-bold mb-6 text-center text-amber-500">
-          Start Your Journey
-        </h2>
+    <div className="fixed inset-0 bg-black/70 bg-opacity-70 flex items-center justify-center z-[100]">
+      <div className="bg-bg-main border border-border-main p-8 rounded-lg shadow-2xl max-w-2xl w-full text-white max-h-[90vh] overflow-y-auto">
+        <div className="flex flex-col items-center justify-center mb-6 space-y-2">
+          <Crown size={32} className="text-accent" />
+          <h2 className="text-3xl font-bold text-center text-accent">
+            Start Your Journey
+          </h2>
+        </div>
 
         <div className="mb-6 flex justify-center">
           <img
             src={regionsImage}
             alt="Regions"
-            className="rounded border border-zinc-600 max-h-48 object-cover"
+            className="rounded border border-border-light max-h-48 object-cover"
           />
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* City Name */}
-          <div>
-            <label className="block text-zinc-300 mb-2 font-medium">
-              City Name
-            </label>
-            <input
-              type="text"
-              name="cityName"
-              value={formData.cityName}
-              onChange={handleChange}
-              className="w-full bg-zinc-800 border border-zinc-600 rounded p-3 text-white focus:border-amber-500 focus:outline-none transition-colors"
-              placeholder="Enter your city's name..."
-              required
-            />
-          </div>
+          <Input
+            label="City Name"
+            name="cityName"
+            value={formData.cityName}
+            onChange={handleChange}
+            placeholder="Enter your city's name..."
+            required
+          />
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Region */}
-            <div>
-              <label className="block text-zinc-300 mb-2 font-medium">
-                Region
-              </label>
-              <select
-                name="region"
-                value={formData.region}
-                onChange={handleChange}
-                className="w-full bg-zinc-800 border border-zinc-600 rounded p-3 text-white focus:border-amber-500 focus:outline-none"
-              >
-                <option value="Forest Realm">Forest Realm</option>
-                <option value="Riverlands">Riverlands</option>
-                <option value="Highland pass">Highland pass</option>
-              </select>
-              <p className="text-xs text-zinc-400 mt-1">
-                {getOptionDescription("region", formData.region)}
-              </p>
-            </div>
+            <Select
+              label="Region"
+              name="region"
+              value={formData.region}
+              onChange={handleChange}
+              helperText={getOptionDescription("region", formData.region)}
+            >
+              <option value="Forest Realm">Forest Realm</option>
+              <option value="Riverlands">Riverlands</option>
+              <option value="Highland pass">Highland pass</option>
+            </Select>
 
             {/* Bonus */}
-            <div>
-              <label className="block text-zinc-300 mb-2 font-medium">
-                Starting Bonus
-              </label>
-              <select
-                name="bonus"
-                value={formData.bonus}
-                onChange={handleChange}
-                className="w-full bg-zinc-800 border border-zinc-600 rounded p-3 text-white focus:border-amber-500 focus:outline-none"
-              >
-                <option value="Building">Building</option>
-                <option value="Gathering">Gathering</option>
-                <option value="Fighting">Fighting</option>
-              </select>
-              <p className="text-xs text-zinc-400 mt-1">
-                {getOptionDescription("bonus", formData.bonus)}
-              </p>
-            </div>
+            <Select
+              label="Starting Bonus"
+              name="bonus"
+              value={formData.bonus}
+              onChange={handleChange}
+              helperText={getOptionDescription("bonus", formData.bonus)}
+            >
+              <option value="Building">Building</option>
+              <option value="Gathering">Gathering</option>
+              <option value="Fighting">Fighting</option>
+            </Select>
 
             {/* Gameplay Mode */}
-            <div>
-              <label className="block text-zinc-300 mb-2 font-medium">
-                Gameplay Mode
-              </label>
-              <select
-                name="mode"
-                value={formData.mode}
-                onChange={handleChange}
-                className="w-full bg-zinc-800 border border-zinc-600 rounded p-3 text-white focus:border-amber-500 focus:outline-none"
-              >
-                <option value="Friendly">Friendly</option>
-                <option value="Aggressive">Aggressive</option>
-              </select>
-              <p className="text-xs text-zinc-400 mt-1">
-                {getOptionDescription("mode", formData.mode)}
-              </p>
-            </div>
+            <Select
+              label="Gameplay Mode"
+              name="mode"
+              value={formData.mode}
+              onChange={handleChange}
+              helperText={getOptionDescription("mode", formData.mode)}
+            >
+              <option value="Friendly">Friendly</option>
+              <option value="Aggressive">Aggressive</option>
+            </Select>
 
             {/* Gameplay Speed */}
-            <div>
-              <label className="block text-zinc-300 mb-2 font-medium">
-                Gameplay Speed
-              </label>
-              <select
-                name="speed"
-                value={formData.speed}
-                onChange={handleChange}
-                className="w-full bg-zinc-800 border border-zinc-600 rounded p-3 text-white focus:border-amber-500 focus:outline-none"
-              >
-                <option value="Active">Active</option>
-                <option value="Regular">Regular</option>
-                <option value="Idle">Idle</option>
-              </select>
-              <p className="text-xs text-zinc-400 mt-1">
-                {getOptionDescription("speed", formData.speed)}
-              </p>
-            </div>
+            <Select
+              label="Gameplay Speed"
+              name="speed"
+              value={formData.speed}
+              onChange={handleChange}
+              helperText={getOptionDescription("speed", formData.speed)}
+            >
+              <option value="Active">Active</option>
+              <option value="Regular">Regular</option>
+              <option value="Idle">Idle</option>
+            </Select>
           </div>
 
-          <button
-            type="submit"
-            className="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 px-4 rounded transition-colors mt-8 shadow-lg transform cursor-pointer hover:scale-[1.02]"
-          >
+          <Button type="submit" className="mt-8">
             Start Game
-          </button>
+          </Button>
         </form>
       </div>
     </div>

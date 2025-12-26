@@ -13,7 +13,7 @@ const MainLayout = () => {
   const { gameStarted } = useSelector((state) => state.game);
 
   return (
-    <div className="flex flex-col h-screen w-screen overflow-hidden bg-zinc-900 text-zinc-100 font-sans">
+    <div className="flex flex-col h-screen w-screen overflow-hidden bg-bg-main text-text-main font-sans">
       {!gameStarted && <GameStartModal />}
       {/* Top Navigation - Fixed height */}
       <div className="h-16 flex-none z-50 shadow-md">
@@ -27,23 +27,23 @@ const MainLayout = () => {
       {/* Middle Section - Flex row, takes remaining height */}
       <div className="flex flex-1 overflow-hidden relative">
         {/* Left Sidebar - Fixed width */}
-        <aside className="w-64 flex-none border-r border-zinc-700 bg-zinc-800 z-40 shadow-lg">
+        <aside className="w-64 flex-none border-r border-border-main bg-bg-panel z-40 shadow-lg">
           <LeftSidebar />
         </aside>
 
         {/* Central Map Area - Flexible */}
-        <main className="flex-1 bg-zinc-900 relative overflow-hidden z-10 flex">
+        <main className="flex-1 bg-bg-main relative overflow-hidden z-10 flex">
           <Outlet />
         </main>
 
         {/* Right Sidebar - Fixed width */}
-        <aside className="w-72 flex-none border-l border-zinc-700 bg-zinc-800 z-40 shadow-lg">
+        <aside className="w-72 flex-none border-l border-border-main bg-bg-panel z-40 shadow-lg">
           <RightSidebar />
         </aside>
       </div>
 
       {/* Bottom Footer - Fixed height (optional/minimal) */}
-      <footer className="h-8 flex-none border-t border-zinc-700 bg-zinc-950 text-xs flex items-center px-4 z-50">
+      <footer className="h-8 flex-none border-t border-border-main bg-bg-dark text-xs flex items-center px-4 z-50">
         <Footer />
       </footer>
     </div>
