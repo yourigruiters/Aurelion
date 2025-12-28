@@ -15,12 +15,14 @@ import resourcesReducer from "./resourcesSlice";
 import uiReducer from "./uiSlice";
 import gameReducer from "./gameSlice";
 import buildingsReducer from "./buildingsSlice";
+import activitiesReducer from "./activitiesSlice";
 
 const rootReducer = combineReducers({
   resources: resourcesReducer,
   ui: uiReducer,
   game: gameReducer,
   buildings: buildingsReducer,
+  activities: activitiesReducer,
 });
 
 const persistConfig = {

@@ -2,6 +2,7 @@ import React, { useState, ChangeEvent, FormEvent } from "react";
 import { useDispatch } from "react-redux";
 import { startGame } from "../store/gameSlice";
 import { initializeResources } from "../store/resourcesSlice";
+import { generateDailyActivities } from "../store/activitiesSlice";
 import regionsImage from "../assets/region/regions.png";
 import region1 from "../assets/region/region1.png";
 import region2 from "../assets/region/region2.png";
@@ -72,6 +73,7 @@ const GameStartModal: React.FC = () => {
       })
     );
     dispatch(initializeResources({ ...formData }));
+    dispatch(generateDailyActivities({ day: 1 }));
   };
 
   const getOptionDescription = (type: string, value: string) => {
