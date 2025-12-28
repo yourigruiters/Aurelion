@@ -175,6 +175,47 @@ export const resourcesSlice = createSlice({
 
       state.rates = newRates;
     },
+    tradeResource: (
+      state,
+      action: PayloadAction<{
+        type: "buy" | "sell";
+        resource: keyof Resources | "population";
+        amount: number;
+        cost: number;
+      }>
+    ) => {
+      const { type, resource, amount, cost } = action.payload;
+
+      if (type === "buy") {
+        if (state.resources.gold >= cost) {
+          state.resources.gold -= cost;
+          if (resource === "population") {
+            state.population += amount;
+          } else {
+            // @ts-ignore
+            state.resources[resource] += amount;
+          }
+        }
+      } else if (type === "sell") {
+        let currentAmount = 0;
+        if (resource === "population") {
+          currentAmount = state.population;
+        } else {
+          // @ts-ignore
+          currentAmount = state.resources[resource];
+        }
+
+        if (currentAmount >= amount) {
+          if (resource === "population") {
+            state.population -= amount;
+          } else {
+            // @ts-ignore
+            state.resources[resource] -= amount;
+          }
+          state.resources.gold += cost;
+        }
+      }
+    },
   },
 });
 
@@ -186,6 +227,7 @@ export const {
   initializeResources,
   resetResources,
   setAssignments,
+  tradeResource,
 } = resourcesSlice.actions;
 
 export default resourcesSlice.reducer;
