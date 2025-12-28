@@ -14,11 +14,13 @@ import storage from "redux-persist/lib/storage";
 import resourcesReducer from "./resourcesSlice";
 import uiReducer from "./uiSlice";
 import gameReducer from "./gameSlice";
+import buildingsReducer from "./buildingsSlice";
 
 const rootReducer = combineReducers({
   resources: resourcesReducer,
   ui: uiReducer,
   game: gameReducer,
+  buildings: buildingsReducer,
 });
 
 const persistConfig = {

@@ -177,6 +177,7 @@ const Market: React.FC = () => {
                       <Button
                         onClick={() => handleTrade("sell", item, 1)}
                         disabled={!HasResource(item.id, 1)}
+                        variant="secondary"
                         className="px-4 py-1 text-sm bg-bg-main border border-border-main hover:bg-bg-dark"
                       >
                         Sell 1
@@ -184,7 +185,7 @@ const Market: React.FC = () => {
                       <Button
                         onClick={() => handleTrade("sell", item, 10)}
                         disabled={!HasResource(item.id, 10)}
-                        variant="primary" // Using primary for the bigger action
+                        variant="outline" // Less screamy than primary
                         className="px-4 py-1 text-sm bg-bg-main border border-border-main hover:bg-bg-dark"
                       >
                         Sell 10
@@ -248,6 +249,7 @@ const Market: React.FC = () => {
                       <Button
                         onClick={() => handleTrade("buy", item, 1)}
                         disabled={!CanAfford(item.basePrice)}
+                        variant="secondary"
                         className="px-4 py-1 text-sm bg-bg-main border border-border-main hover:bg-bg-dark"
                       >
                         Buy 1
@@ -255,6 +257,7 @@ const Market: React.FC = () => {
                       <Button
                         onClick={() => handleTrade("buy", item, 10)}
                         disabled={!CanAfford(item.basePrice * 10)}
+                        variant="outline"
                         className="px-4 py-1 text-sm bg-bg-main border border-border-main hover:bg-bg-dark"
                       >
                         Buy 10

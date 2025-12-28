@@ -216,6 +216,15 @@ export const resourcesSlice = createSlice({
         }
       }
     },
+    deductResources: (state, action: PayloadAction<Partial<Resources>>) => {
+      const costs = action.payload;
+      Object.entries(costs).forEach(([resource, amount]) => {
+        if (state.resources[resource as keyof Resources] !== undefined) {
+          // @ts-ignore
+          state.resources[resource as keyof Resources] -= amount;
+        }
+      });
+    },
   },
 });
 
@@ -228,6 +237,7 @@ export const {
   resetResources,
   setAssignments,
   tradeResource,
+  deductResources,
 } = resourcesSlice.actions;
 
 export default resourcesSlice.reducer;
