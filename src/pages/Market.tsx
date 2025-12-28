@@ -1,11 +1,10 @@
-import React, { useState } from "react";
+import React from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { tradeResource } from "../store/resourcesSlice";
 import { RootState } from "../store/store";
 import {
   Wheat,
   Mountain,
-  Pickaxe,
   Hammer,
   Coins,
   LucideIcon,

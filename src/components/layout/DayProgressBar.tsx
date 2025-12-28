@@ -100,6 +100,17 @@ const DayProgressBar: React.FC = () => {
       {/* Markers */}
       <div className="absolute top-0 bottom-0 w-[1px] bg-white/20 z-20 left-1/3" />
       <div className="absolute top-0 bottom-0 w-[1px] bg-white/20 z-20 left-2/3" />
+
+      {/* Timer Overlay */}
+      <div className="absolute inset-0 flex items-center justify-center z-30 pointer-events-none">
+        <span className="text-xs font-mono font-bold text-white bg-zinc-900 border border-zinc-700 shadow-xl px-3 py-1 rounded-md z-40">
+          {Math.floor(progress / 60000)}:
+          {Math.floor((progress % 60000) / 1000)
+            .toString()
+            .padStart(2, "0")}{" "}
+          / 15:00
+        </span>
+      </div>
     </div>
   );
 };

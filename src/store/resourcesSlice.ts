@@ -75,7 +75,7 @@ export const resourcesSlice = createSlice({
       const { region, bonus } = action.payload;
 
       // Set initial base values
-      state.population = 10; // Default starting pop
+      state.population = 4; // Default starting pop
       state.resources = {
         food: 100,
         wood: 100,
@@ -99,7 +99,7 @@ export const resourcesSlice = createSlice({
         state.resources.wood += 100;
         state.resources.stone += 100;
       } else if (bonus === "Gathering") {
-        state.population += 15;
+        state.population += 8;
       } else if (bonus === "Fighting") {
         state.resources.iron += 50;
         state.resources.gold += 50;

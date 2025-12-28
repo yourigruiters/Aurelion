@@ -4,7 +4,6 @@ import Button from "./Button";
 import {
   Sword,
   CheckCircle,
-  Flame,
   ShieldAlert,
   Wheat,
   Coins,

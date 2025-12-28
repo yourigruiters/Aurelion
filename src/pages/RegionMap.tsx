@@ -4,6 +4,68 @@ import { Search } from "lucide-react";
 import worldMap from "../assets/region/worldmap.png";
 import Input from "../components/ui/Input";
 import { RootState } from "../store/store";
+import { Link } from "react-router-dom";
+import { MapPin, ArrowRightCircle } from "lucide-react";
+
+interface CityLabelProps {
+  name: string;
+  type: string;
+  x: number; // Percentage
+  y: number; // Percentage
+  isPlayer?: boolean;
+}
+
+const CityLabel: React.FC<CityLabelProps> = ({
+  name,
+
+  x,
+  y,
+  isPlayer,
+}) => (
+  <div
+    className="absolute transform -translate-x-1/2 -translate-y-1/2 group"
+    style={{ left: `${x}%`, top: `${y}%` }}
+  >
+    <div
+      className={`flex flex-col items-center cursor-pointer ${
+        isPlayer ? "z-20" : "z-10"
+      }`}
+    >
+      <div
+        className={`p-1.5 rounded-full border-2 transition-transform group-hover:scale-110 ${
+          isPlayer
+            ? "bg-accent border-white text-white shadow-[0_0_15px_rgba(255,255,0,0.5)]"
+            : "bg-bg-panel border-text-muted text-text-muted hover:border-white hover:text-white hover:bg-zinc-700"
+        }`}
+      >
+        <MapPin
+          size={isPlayer ? 24 : 16}
+          fill={isPlayer ? "currentColor" : "none"}
+        />
+      </div>
+
+      <div className="mt-1 flex flex-col items-center">
+        <span
+          className={`text-xs font-bold px-2 py-0.5 rounded shadow-lg whitespace-nowrap ${
+            isPlayer
+              ? "bg-accent text-zinc-900"
+              : "bg-bg-panel/90 text-text-main group-hover:bg-zinc-800"
+          }`}
+        >
+          {name}
+        </span>
+        {isPlayer && (
+          <Link
+            to="/overview"
+            className="mt-1 flex items-center gap-1 text-[10px] bg-bg-main/80 text-white px-2 py-0.5 rounded-full border border-white/20 hover:bg-white hover:text-zinc-900 transition-colors"
+          >
+            Your City <ArrowRightCircle size={10} />
+          </Link>
+        )}
+      </div>
+    </div>
+  </div>
+);
 
 const RegionMap: React.FC = () => {
   const { cityName } = useSelector((state: RootState) => state.game);
@@ -31,6 +93,13 @@ const RegionMap: React.FC = () => {
           alt="World Map"
           className="max-h-full max-w-full rounded-lg shadow-2xl border border-border-main object-contain"
         />
+
+        {/* Labels - positioned roughly based on map visual */}
+
+        <CityLabel name="Eldoria" type="Trade Hub" x={65} y={40} />
+        <CityLabel name="Stormhold" type="Fortress" x={25} y={30} />
+        <CityLabel name="Irondeep" type="Mining" x={35} y={70} />
+        <CityLabel name="Sylvana" type="Elven" x={75} y={65} />
       </div>
 
       {/* Right Side: Search & List */}
@@ -62,6 +131,18 @@ const RegionMap: React.FC = () => {
                   <h3 className="font-semibold text-text-main group-hover:text-brand transition-colors">
                     {city.name}
                   </h3>
+                  {city.name === (cityName || "Your City") && (
+                    <Link
+                      to="/overview"
+                      className="ml-2 inline-flex items-center gap-1 text-[10px] bg-accent/10 text-accent px-2 py-0.5 rounded-full border border-accent/20 hover:bg-accent hover:text-zinc-900 transition-colors"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      Go <ArrowRightCircle size={10} />
+                    </Link>
+                  )}
+                </div>
+                <div className="flex items-center justify-between mt-1">
+                  <div className="text-xs text-text-secondary">{city.type}</div>
                   <span
                     className={`text-[10px] px-1.5 py-0.5 rounded uppercase tracking-wider font-bold ${
                       city.status === "Friendly"
@@ -74,7 +155,6 @@ const RegionMap: React.FC = () => {
                     {city.status}
                   </span>
                 </div>
-                <div className="text-xs text-text-secondary">{city.type}</div>
               </div>
             ))
           ) : (

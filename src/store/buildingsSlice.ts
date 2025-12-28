@@ -1,6 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import {
-  LucideIcon,
   Castle,
   Wheat,
   Fish,
@@ -148,10 +147,10 @@ const initialState: BuildingsState = {
     wheat_fields: { level: 1, unlocked: true },
     fishermans_hut: { level: 1, unlocked: true },
     lumberjacks_camp: { level: 1, unlocked: true },
-    deep_mine: { level: 1, unlocked: true },
-    the_forge: { level: 1, unlocked: true },
-    trade_post: { level: 1, unlocked: true },
-    garrison: { level: 1, unlocked: true },
+    deep_mine: { level: 1, unlocked: false },
+    the_forge: { level: 1, unlocked: false },
+    trade_post: { level: 1, unlocked: false },
+    garrison: { level: 1, unlocked: false },
   },
   housing: {
     1: { type: "cottage", populationCap: 4 },
@@ -192,10 +191,16 @@ export const buildingsSlice = createSlice({
         state.housing[plotId].populationCap = 10;
       }
     },
+    unlockBuilding: (state, action: PayloadAction<BuildingId>) => {
+      const id = action.payload;
+      if (state.buildings[id]) {
+        state.buildings[id].unlocked = true;
+      }
+    },
   },
 });
 
-export const { upgradeBuilding, constructHouse, upgradeHouse } =
+export const { upgradeBuilding, constructHouse, upgradeHouse, unlockBuilding } =
   buildingsSlice.actions;
 
 export default buildingsSlice.reducer;

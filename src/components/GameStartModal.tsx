@@ -3,6 +3,7 @@ import { useDispatch } from "react-redux";
 import { startGame } from "../store/gameSlice";
 import { initializeResources } from "../store/resourcesSlice";
 import { generateDailyActivities } from "../store/activitiesSlice";
+import { constructHouse } from "../store/buildingsSlice";
 import regionsImage from "../assets/region/regions.png";
 import region1 from "../assets/region/region1.png";
 import region2 from "../assets/region/region2.png";
@@ -73,6 +74,12 @@ const GameStartModal: React.FC = () => {
       })
     );
     dispatch(initializeResources({ ...formData }));
+    dispatch(initializeResources({ ...formData }));
+
+    if (formData.bonus === "Gathering") {
+      dispatch(constructHouse({ plotId: 1, type: "homestead" }));
+    }
+
     dispatch(generateDailyActivities({ day: 1 }));
   };
 
@@ -125,8 +132,9 @@ const GameStartModal: React.FC = () => {
       preview.stone += 100;
       preview.bonuses.push("Start with extra resources");
     } else if (formData.bonus === "Gathering") {
-      preview.population += 15;
-      preview.bonuses.push("Start with +15 Population");
+      preview.population += 8;
+      preview.bonuses.push("Start with +8 Population");
+      preview.bonuses.push("Start with a Homestead");
     } else if (formData.bonus === "Fighting") {
       preview.iron += 50;
       preview.gold += 50;

@@ -16,6 +16,7 @@ import uiReducer from "./uiSlice";
 import gameReducer from "./gameSlice";
 import buildingsReducer from "./buildingsSlice";
 import activitiesReducer from "./activitiesSlice";
+import militaryReducer from "./militarySlice";
 
 const rootReducer = combineReducers({
   resources: resourcesReducer,
@@ -23,6 +24,7 @@ const rootReducer = combineReducers({
   game: gameReducer,
   buildings: buildingsReducer,
   activities: activitiesReducer,
+  military: militaryReducer,
 });
 
 const persistConfig = {

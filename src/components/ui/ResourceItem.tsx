@@ -8,6 +8,8 @@ interface ResourceItemProps {
   color?: string;
   tooltipLabel?: string;
   className?: string;
+  customValueDisplay?: string;
+  max?: number; // Optional max value for other usages if needed, but customValueDisplay overrides
 }
 
 const ResourceItem: React.FC<ResourceItemProps> = ({
@@ -17,6 +19,7 @@ const ResourceItem: React.FC<ResourceItemProps> = ({
   color,
   tooltipLabel,
   className = "",
+  customValueDisplay,
 }) => {
   // Determine arrow
   let ArrowIcon: LucideIcon | null = null;
@@ -37,7 +40,9 @@ const ResourceItem: React.FC<ResourceItemProps> = ({
       className={`group relative flex items-center space-x-1.5 bg-bg-panel/50 px-2 py-1 rounded cursor-default border border-transparent hover:border-border-light transition-colors ${className}`}
     >
       <Icon size={16} className={color} />
-      <span className="text-sm font-medium">{Math.floor(value)}</span>
+      <span className="text-sm font-medium">
+        {customValueDisplay || Math.floor(value)}
+      </span>
       {ArrowIcon && <ArrowIcon size={12} className={arrowColor} />}
 
       {/* Tooltip */}

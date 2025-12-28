@@ -56,8 +56,14 @@ const TopBar: React.FC<TopBarProps> = ({
     daysPassed = 0,
     rates,
   } = useSelector((state: RootState) => state.resources);
+  const { housing } = useSelector((state: RootState) => state.buildings);
   const { gameStarted, cityName, region } = useSelector(
     (state: RootState) => state.game
+  );
+
+  const totalHousingCapacity = Object.values(housing).reduce(
+    (total, house) => total + house.populationCap,
+    0
   );
 
   return (
@@ -99,9 +105,11 @@ const TopBar: React.FC<TopBarProps> = ({
           <ResourceItem
             icon={Users}
             value={population}
+            max={totalHousingCapacity} // Add max prop if supported or handle via value string
             rate={rates.population}
             color="text-info"
             tooltipLabel="Population"
+            customValueDisplay={`${population}/${totalHousingCapacity}`}
           />
           <ResourceItem
             icon={Apple}
