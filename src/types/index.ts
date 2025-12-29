@@ -6,8 +6,12 @@ export interface Resources {
   gold: number;
 }
 
-export interface Rates extends Resources {
+export interface FullResources {
   population: number;
+  resources: Resources;
+  modifiers: Resources;
+  rates: Resources;
+  bonuses: string[];
 }
 
 export type Role =
@@ -25,18 +29,20 @@ export interface ResourcesState {
   resources: Resources;
   daysPassed: number;
   gameStartTime: number | null;
-  rates: Rates;
+  rates: Resources;
   modifiers: Resources;
   assignments: Record<string, number>;
 }
+
+export type Region = "Forest Realm" | "Riverlands" | "Highland pass";
+
+export type Focus = "Building" | "Gathering" | "Fighting";
 
 export interface GameState {
   gameStarted: boolean;
   cityName: string;
   region: string;
-  bonus: string;
-  mode: string;
-  speed: string;
+  focus: string;
 }
 
 export interface UIState {

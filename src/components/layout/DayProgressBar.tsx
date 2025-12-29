@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 
-const DAY_DURATION_MS = 15 * 60 * 1000; // 15 minutes
-const SEGMENT_DURATION_MS = 5 * 60 * 1000; // 5 minutes
+const DAY_DURATION_MS = 3 * 60 * 1000; // 3 minutes
+const SEGMENT_DURATION_MS = 1 * 60 * 1000; // 1 minutes
 
 interface ZoneProps {
   startMs: number;
@@ -103,12 +103,12 @@ const DayProgressBar: React.FC = () => {
 
       {/* Timer Overlay */}
       <div className="absolute inset-0 flex items-center justify-center z-30 pointer-events-none">
-        <span className="text-xs font-mono font-bold text-white bg-zinc-900 border border-zinc-700 shadow-xl px-3 py-1 rounded-md z-40">
+        <span className="relative top-2 pointer-all text-xs font-mono font-bold text-white bg-zinc-900 border border-zinc-700 shadow-xl px-3 py-1 rounded-md z-40">
           {Math.floor(progress / 60000)}:
           {Math.floor((progress % 60000) / 1000)
             .toString()
             .padStart(2, "0")}{" "}
-          / 15:00
+          / 3:00
         </span>
       </div>
     </div>

@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { ResourcesState, Resources } from "../types";
+import { getDailyResources, getResourceDetails } from "../helpers/resource";
 
 const initialState: ResourcesState = {
   population: 0,
@@ -13,7 +14,6 @@ const initialState: ResourcesState = {
   daysPassed: 0,
   gameStartTime: null,
   rates: {
-    population: 0,
     food: 0,
     wood: 0,
     stone: 0,
@@ -63,60 +63,27 @@ export const resourcesSlice = createSlice({
           }
         }
       );
-      // Population growth if rate exists
-      if (state.rates.population) {
-        state.population += state.rates.population;
-      }
     },
     initializeResources: (
       state,
-      action: PayloadAction<{ region: string; bonus: string }>
+      action: PayloadAction<{ region: string; focus: string }>
     ) => {
-      const { region, bonus } = action.payload;
+      const { region, focus } = action.payload;
 
-      // Set initial base values
-      state.population = 4; // Default starting pop
-      state.resources = {
-        food: 100,
-        wood: 100,
-        stone: 50,
-        iron: 0,
-        gold: 50,
-      };
-      state.rates = {
-        population: 0,
-        food: 10,
-        wood: 5,
-        stone: 0,
-        iron: 0,
-        gold: 0,
-      };
+      const resourceDetails = getResourceDetails(region, focus);
+
+      state.population = resourceDetails.population;
+      state.resources = resourceDetails.resources;
+      state.modifiers = resourceDetails.resources;
+      state.rates = resourceDetails.rates;
       state.gameStartTime = Date.now();
-
-      // Apply Bonus
-      if (bonus === "Building") {
-        state.resources.food += 100;
-        state.resources.wood += 100;
-        state.resources.stone += 100;
-      } else if (bonus === "Gathering") {
-        state.population += 8;
-      } else if (bonus === "Fighting") {
-        state.resources.iron += 50;
-        state.resources.gold += 50;
-      }
-
-      // Apply Region Modifiers
-      if (region === "Forest Realm") {
-        state.modifiers.wood = 1.25;
-      } else if (region === "Riverlands") {
-        state.modifiers.food = 1.25;
-      } else if (region === "Highland pass") {
-        state.modifiers.stone = 1.15;
-        state.modifiers.iron = 1.15;
-      }
     },
     advanceDay: (state) => {
       state.daysPassed += 1;
+
+      const dailyResources = getDailyResources();
+
+      state.resources = dailyResources;
     },
     setRate: (
       state,
@@ -150,8 +117,7 @@ export const resourcesSlice = createSlice({
       };
 
       // Reset rates to base
-      let newRates = {
-        population: 0,
+      let newRates: Resources = {
         food: 0,
         wood: 0,
         stone: 0,

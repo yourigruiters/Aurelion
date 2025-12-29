@@ -5,9 +5,7 @@ const initialState: GameState = {
   gameStarted: false,
   cityName: "",
   region: "", // "Forest Realm", "Riverlands", "Highland pass"
-  bonus: "", // "Building", "Gathering", "Fighting"
-  mode: "", // "Friendly", "Aggressive"
-  speed: "", // "Active", "Regular", "Idle"
+  focus: "", // "Building", "Gathering", "Fighting"
 };
 
 export const gameSlice = createSlice({
@@ -15,13 +13,11 @@ export const gameSlice = createSlice({
   initialState,
   reducers: {
     startGame: (state, action: PayloadAction<GameState>) => {
-      const { cityName, region, bonus, mode, speed } = action.payload;
+      const { cityName, region, focus } = action.payload;
       state.gameStarted = true;
       state.cityName = cityName;
       state.region = region;
-      state.bonus = bonus;
-      state.mode = mode;
-      state.speed = speed;
+      state.focus = focus;
     },
     resetGame: () => {
       return initialState;

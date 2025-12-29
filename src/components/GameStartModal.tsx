@@ -21,21 +21,12 @@ import Button from "./ui/Button";
 import Input from "./ui/Input";
 import Select from "./ui/Select";
 import ResourceItem from "./ui/ResourceItem";
+import { getResourceDetails } from "../helpers/resource";
 
 interface FormData {
   cityName: string;
   region: string;
-  bonus: string;
-}
-
-interface PreviewData {
-  population: number;
-  food: number;
-  wood: number;
-  stone: number;
-  iron: number;
-  gold: number;
-  bonuses: string[];
+  focus: string;
 }
 
 const GameStartModal: React.FC = () => {
@@ -43,7 +34,7 @@ const GameStartModal: React.FC = () => {
   const [formData, setFormData] = useState<FormData>({
     cityName: "",
     region: "",
-    bonus: "",
+    focus: "",
   });
 
   const handleChange = (
@@ -58,98 +49,26 @@ const GameStartModal: React.FC = () => {
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    if (!formData.cityName.trim()) {
-      alert("Please enter a city name");
+    if (!formData.cityName.trim() || !formData.region || !formData.focus) {
+      alert("Please enter all details");
       return;
     }
 
     // Dispatch actions to start game
-    // Defaulting mode/speed since they are removed from UI
     dispatch(
       startGame({
         ...formData,
-        mode: "Friendly",
-        speed: "Regular",
         gameStarted: true,
       })
     );
-    dispatch(initializeResources({ ...formData }));
+
     dispatch(initializeResources({ ...formData }));
 
-    if (formData.bonus === "Gathering") {
+    if (formData.focus === "Gathering") {
       dispatch(constructHouse({ plotId: 1, type: "homestead" }));
     }
 
     dispatch(generateDailyActivities({ day: 1 }));
-  };
-
-  const getOptionDescription = (type: string, value: string) => {
-    switch (type) {
-      case "region":
-        if (value === "Forest Realm") return "25% wood production";
-        if (value === "Riverlands") return "25% food from fishing";
-        if (value === "Highland pass") return "15% stone & iron";
-        break;
-      case "bonus":
-        if (value === "Building") return "Start with more resources";
-        if (value === "Gathering") return "Start with higher population";
-        if (value === "Fighting") return "Start with better gear";
-        break;
-      default:
-        return "";
-    }
-    return "";
-  };
-
-  const getPreviewResources = (): PreviewData => {
-    // If nothing selected, return 0s
-    if (!formData.region && !formData.bonus) {
-      return {
-        population: 0,
-        food: 0,
-        wood: 0,
-        stone: 0,
-        iron: 0,
-        gold: 0,
-        bonuses: [],
-      };
-    }
-
-    let preview: PreviewData = {
-      population: 10,
-      food: 100,
-      wood: 100,
-      stone: 50,
-      iron: 0,
-      gold: 50,
-      bonuses: [],
-    };
-
-    // Apply Base Bonus from selection
-    if (formData.bonus === "Building") {
-      preview.food += 100;
-      preview.wood += 100;
-      preview.stone += 100;
-      preview.bonuses.push("Start with extra resources");
-    } else if (formData.bonus === "Gathering") {
-      preview.population += 8;
-      preview.bonuses.push("Start with +8 Population");
-      preview.bonuses.push("Start with a Homestead");
-    } else if (formData.bonus === "Fighting") {
-      preview.iron += 50;
-      preview.gold += 50;
-      preview.bonuses.push("Start with Iron & Gold");
-    }
-
-    // Determine modifiers for display textual
-    if (formData.region === "Forest Realm")
-      preview.bonuses.push("+25% Wood Production");
-    if (formData.region === "Riverlands")
-      preview.bonuses.push("+25% Food from Fishing");
-    if (formData.region === "Highland pass")
-      preview.bonuses.push("+15% Stone & Iron Production");
-
-    return preview;
   };
 
   const getImage = () => {
@@ -159,7 +78,7 @@ const GameStartModal: React.FC = () => {
     return regionsImage;
   };
 
-  const preview = getPreviewResources();
+  const resourceDetails = getResourceDetails(formData.region, formData.focus);
   const currentImage = getImage();
 
   return (
@@ -188,14 +107,14 @@ const GameStartModal: React.FC = () => {
                 <div className="flex gap-3">
                   <ResourceItem
                     icon={Users}
-                    value={preview.population}
+                    value={resourceDetails.population}
                     color="text-info"
                     tooltipLabel="Population"
                     className="bg-bg-panel flex-1"
                   />
                   <ResourceItem
                     icon={Apple}
-                    value={preview.food}
+                    value={resourceDetails.resources.food}
                     color="text-danger-light"
                     tooltipLabel="Food"
                     className="bg-bg-panel flex-1"
@@ -211,28 +130,28 @@ const GameStartModal: React.FC = () => {
                 <div className="flex gap-3">
                   <ResourceItem
                     icon={Wheat}
-                    value={preview.wood}
+                    value={resourceDetails.resources.wood}
                     color="text-brand"
                     tooltipLabel="Wood"
                     className="bg-bg-panel flex-1"
                   />
                   <ResourceItem
                     icon={Mountain}
-                    value={preview.stone}
+                    value={resourceDetails.resources.stone}
                     color="text-text-muted"
                     tooltipLabel="Stone"
                     className="bg-bg-panel flex-1"
                   />
                   <ResourceItem
                     icon={Hammer}
-                    value={preview.iron}
+                    value={resourceDetails.resources.iron}
                     color="text-text-secondary"
                     tooltipLabel="Iron"
                     className="bg-bg-panel flex-1"
                   />
                   <ResourceItem
                     icon={Gem}
-                    value={preview.gold}
+                    value={resourceDetails.resources.gold}
                     color="text-accent"
                     tooltipLabel="Gold"
                     className="bg-bg-panel flex-1"
@@ -242,13 +161,13 @@ const GameStartModal: React.FC = () => {
             </div>
 
             {/* Valid Bonuses Text */}
-            {preview.bonuses.length > 0 && (
+            {resourceDetails.bonuses.length > 0 && (
               <div className="mt-4 pt-4 border-t border-border-main">
                 <h4 className="text-xs text-text-dim mb-2 font-medium">
-                  Active Bonuses
+                  Selected starting gains:
                 </h4>
                 <ul className="text-xs text-success space-y-1">
-                  {preview.bonuses.map((bonus, idx) => (
+                  {resourceDetails.bonuses.map((bonus, idx) => (
                     <li key={idx} className="flex items-center">
                       <span className="mr-2">•</span> {bonus}
                     </li>
@@ -270,7 +189,7 @@ const GameStartModal: React.FC = () => {
         {/* Right Column: Form */}
         <div className="p-8 flex flex-col justify-center bg-bg-main">
           <h2 className="text-3xl font-bold mb-8 text-center text-text-main">
-            Configure City
+            City creation
           </h2>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -286,32 +205,30 @@ const GameStartModal: React.FC = () => {
 
             {/* Region */}
             <Select
-              label="Region"
+              label="Select your region"
               name="region"
-              value={formData.region}
+              value={formData.region || ""}
               onChange={handleChange}
-              helperText={getOptionDescription("region", formData.region)}
               required
             >
               <option value="" disabled>
-                Select a Region...
+                Select a region...
               </option>
               <option value="Forest Realm">Forest Realm</option>
               <option value="Riverlands">Riverlands</option>
               <option value="Highland pass">Highland pass</option>
             </Select>
 
-            {/* Bonus */}
+            {/* Focus */}
             <Select
-              label="Starting Bonus"
-              name="bonus"
-              value={formData.bonus}
+              label="Select your starting focus"
+              name="focus"
+              value={formData.focus || ""}
               onChange={handleChange}
-              helperText={getOptionDescription("bonus", formData.bonus)}
               required
             >
               <option value="" disabled>
-                Select a Bonus...
+                Select a focus...
               </option>
               <option value="Building">Building</option>
               <option value="Gathering">Gathering</option>
@@ -319,7 +236,7 @@ const GameStartModal: React.FC = () => {
             </Select>
 
             <Button type="submit" className="mt-8">
-              Start Journey
+              Create city
             </Button>
           </form>
         </div>

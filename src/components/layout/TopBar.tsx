@@ -106,7 +106,6 @@ const TopBar: React.FC<TopBarProps> = ({
             icon={Users}
             value={population}
             max={totalHousingCapacity} // Add max prop if supported or handle via value string
-            rate={rates.population}
             color="text-info"
             tooltipLabel="Population"
             customValueDisplay={`${population}/${totalHousingCapacity}`}
