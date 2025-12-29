@@ -36,7 +36,7 @@ const MainLayout: React.FC = () => {
       {/* Middle Section - Flex row, takes remaining height */}
       <div className="flex flex-1 overflow-hidden relative">
         {/* Left Sidebar - Fixed width */}
-        <aside className="w-64 flex-none border-r border-border-main bg-bg-panel z-40 shadow-lg">
+        <aside className="w-auto flex-none border-r border-border-main bg-bg-panel z-40 shadow-lg lg:w-64">
           <LeftSidebar />
         </aside>
 
@@ -47,7 +47,7 @@ const MainLayout: React.FC = () => {
 
         {/* Right Sidebar - Flexible width based on toggle */}
         {isRightSidebarOpen && (
-          <aside className="w-72 flex-none border-l border-border-main bg-bg-panel z-40 shadow-lg transition-all duration-300">
+          <aside className="w-auto flex-none border-l border-border-main bg-bg-panel z-40 shadow-lg transition-all duration-300 lg:w-64">
             <RightSidebar />
           </aside>
         )}

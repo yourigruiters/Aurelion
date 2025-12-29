@@ -206,7 +206,7 @@ const People: React.FC = () => {
         {/* Top Bar: 3 Sections */}
         <div className="flex-none h-24 border-b border-border-main bg-bg-panel flex items-center">
           {/* Section 1: Idle Villagers (Left) */}
-          <div className="w-64 flex-none h-full flex flex-col items-center justify-center border-r border-border-main p-4">
+          <div className="w-auto flex-none h-full flex flex-col items-center justify-center border-r border-border-main p-4 xl:w-64">
             <span className="text-xs text-text-muted uppercase tracking-wider font-semibold mb-1">
               Idle Villagers
             </span>
@@ -271,7 +271,7 @@ const People: React.FC = () => {
           </div>
 
           {/* Section 3: Save Button (Right) */}
-          <div className="w-48 flex-none h-full flex items-center justify-center p-4">
+          <div className="w-auto flex-none h-full flex items-center justify-center p-4 xl:w-48">
             <Button
               onClick={onSave}
               // @ts-ignore

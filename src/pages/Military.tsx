@@ -88,20 +88,20 @@ const Military: React.FC = () => {
                 {militaryPower}
               </div>
               <div className="text-xs uppercase text-text-muted font-bold tracking-wider">
-                Attack Power
+                Attack power
               </div>
             </div>
             <div className="text-center p-4 bg-bg-main rounded-lg border border-border-main min-w-[100px]">
               <div className="text-2xl font-bold text-blue-500">{defense}</div>
               <div className="text-xs uppercase text-text-muted font-bold tracking-wider">
-                Defense
+                Defense power
               </div>
             </div>
           </div>
         </div>
 
         {/* Research Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-4">
           {techList.map((tech) => {
             const isUnlocked = unlockedTechs.includes(tech.id);
             const isLocked = !hasRequirements(tech) && !isUnlocked;

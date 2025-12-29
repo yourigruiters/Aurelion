@@ -67,9 +67,9 @@ const TopBar: React.FC<TopBarProps> = ({
   );
 
   return (
-    <header className="h-full w-full bg-bg-main border-b border-border-main flex items-center justify-between px-4">
+    <header className="h-full w-full bg-bg-main border-b border-border-main flex items-center justify-between px-4 gap-4">
       {/* Left Area: Logo & Region */}
-      <div className="flex items-center space-x-4 min-w-[300px]">
+      <div className="flex flex-shrink-0 items-center space-x-4 xl:min-w-[300px]">
         <div className="flex items-center space-x-2">
           <Crown size={24} className="text-accent" />
           <h1 className="text-xl font-bold bg-gradient-to-r from-accent to-brand text-transparent bg-clip-text">
@@ -82,15 +82,16 @@ const TopBar: React.FC<TopBarProps> = ({
             {gameStarted ? cityName : "Uncharted Territory"}
           </span>
           <span className="text-xs text-text-muted uppercase tracking-wider">
-            {gameStarted ? `Region: ${region}` : "Region: Unknown"}
+            <span className="hidden lg:inline-flex">Region: </span>
+            {gameStarted ? `${region}` : "Unknown"}
           </span>
         </div>
       </div>
 
       {/* Center Area: Date & Resources */}
-      <div className="flex-1 flex items-center justify-center space-x-6">
+      <div className="flex-1 flex items-center justify-center space-x-4 xl:space-x-6">
         {/* Date */}
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-1.5 xl:space-x-2">
           <div className="flex flex-col items-center justify-center min-w-[120px]">
             <span className="text-sm font-bold text-white font-mono leading-none">
               {formatDate(daysPassed)}
@@ -101,7 +102,7 @@ const TopBar: React.FC<TopBarProps> = ({
         <div className="h-6 w-px bg-border-main" />
 
         {/* Population & Food Group */}
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-2 xl:space-x-3">
           <ResourceItem
             icon={Users}
             value={population}
@@ -122,7 +123,7 @@ const TopBar: React.FC<TopBarProps> = ({
         <div className="h-6 w-px bg-border-main" />
 
         {/* Other Resources */}
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-1.5 xl:space-x-2">
           <ResourceItem
             icon={Wheat}
             value={resources.wood}
@@ -155,7 +156,7 @@ const TopBar: React.FC<TopBarProps> = ({
       </div>
 
       {/* Right Area: Actions */}
-      <div className="flex items-center space-x-3 min-w-[300px] justify-end">
+      <div className="flex items-center space-x-3 justify-end xl:min-w-[300px]">
         <button
           onClick={onToggleRightSidebar}
           className={`p-2 rounded-full transition-colors relative cursor-pointer ${
