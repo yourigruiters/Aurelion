@@ -16,6 +16,7 @@ interface ActivityCardProps {
   userPower?: number; // Needed for risky analysis
   disabled?: boolean;
   canAfford?: boolean; // If we add costs later
+  isSelected?: boolean;
 }
 
 const ResourceIcon = ({ resource }: { resource: string }) => {
@@ -40,6 +41,7 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
   onPerform,
   userPower = 0,
   disabled = false,
+  isSelected = false,
 }) => {
   const isRisky = activity.type === "risky";
   const enemyPower = activity.enemyPower || 0;
@@ -57,8 +59,10 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
       className={`
       relative overflow-hidden rounded-lg border transition-all flex items-center p-4 gap-4
       ${
-        activity.isCompleted || disabled
+        activity.isCompleted || (disabled && !isSelected)
           ? "bg-bg-main border-border-main opacity-60 grayscale cursor-not-allowed"
+          : isSelected
+          ? "bg-bg-panel border-border-main shadow-sm"
           : isRisky
           ? "bg-bg-main border-border-main hover:border-danger hover:shadow-sm"
           : "bg-bg-main border-border-main hover:border-success hover:shadow-sm"
@@ -87,6 +91,17 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
           {activity.description}
         </p>
 
+        {/* Duration for Risky Activities */}
+        {isRisky && activity.durationDays && (
+          <p className="text-xs font-mono text-text-muted mt-1">
+            Duration:{" "}
+            <span className="text-text-main font-bold">
+              {activity.durationDays}{" "}
+              {activity.durationDays === 1 ? "day" : "days"}
+            </span>
+          </p>
+        )}
+
         {/* Info Row: Rewards */}
         <div className="flex items-center gap-4 mt-2 text-xs">
           {/* Rewards Inline */}
@@ -97,6 +112,13 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
                 <span className="font-bold">+{amount}</span>
               </div>
             ))}
+            {/* XP Reward */}
+            {activity.xp && (
+              <div className="flex items-center gap-1 text-text-main ml-2">
+                <span className="text-brand font-bold">XP</span>
+                <span className="font-bold">+{activity.xp}</span>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -139,6 +161,9 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
           >
             {activity.result === "success" ? "Completed" : "Failed"}
           </div>
+        ) : isSelected ? (
+          /* Selected State - No Button, maybe a text indicator or nothing? User said "button to select can be removed" */
+          <div className="text-xs font-bold text-text-main py-1.5 px-3"></div>
         ) : (
           <Button
             variant={isRisky ? "danger" : "secondary"}

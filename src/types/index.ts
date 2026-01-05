@@ -47,6 +47,7 @@ export interface GameState {
   level: number;
   experience: number;
   maxExperience: number;
+  isRightSidebarOpen: boolean;
 }
 
 export interface UIState {

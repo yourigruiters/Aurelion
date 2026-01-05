@@ -10,6 +10,7 @@ const initialState: GameState = {
   level: 1,
   experience: 0,
   maxExperience: 100,
+  isRightSidebarOpen: true, // Auto-open or default open
 };
 
 export const gameSlice = createSlice({
@@ -44,10 +45,23 @@ export const gameSlice = createSlice({
     resetGame: () => {
       return initialState;
     },
+    toggleRightSidebar: (state) => {
+      state.isRightSidebarOpen = !state.isRightSidebarOpen;
+    },
+    setRightSidebarOpen: (state, action: PayloadAction<boolean>) => {
+      state.isRightSidebarOpen = action.payload;
+    },
   },
 });
 
-export const { startGame, tickTime, resetDayTime, addExperience, resetGame } =
-  gameSlice.actions;
+export const {
+  startGame,
+  tickTime,
+  resetDayTime,
+  addExperience,
+  resetGame,
+  toggleRightSidebar,
+  setRightSidebarOpen,
+} = gameSlice.actions;
 
 export default gameSlice.reducer;

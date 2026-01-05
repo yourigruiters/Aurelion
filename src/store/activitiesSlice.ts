@@ -9,6 +9,8 @@ export interface ActivityTemplate {
   baseReward: Partial<Resources>;
   riskLevel?: number; // 0 for safe
   enemyPower?: number; // For risky
+  xp?: number;
+  durationDays?: number;
 }
 
 export interface ActivityInstance extends ActivityTemplate {
@@ -17,11 +19,25 @@ export interface ActivityInstance extends ActivityTemplate {
   isCompleted: boolean;
   result?: "success" | "failure";
   rewardClaimed?: boolean;
+  remainingDays?: number;
+  dayCompleted?: number; // Day number when it finished
+}
+
+export interface ActivityLogEntry {
+  id: string;
+  name: string;
+  day: number;
+  type: ActivityType;
+  result: "success" | "failure";
+  rewards: Partial<Resources>;
+  losses?: Partial<Resources>; // For risky failures
 }
 
 export interface ActivitiesState {
   dailyActivities: ActivityInstance[];
-  lastGenerationDay: number;
+  activeSafeActivity?: ActivityInstance;
+  activeRiskyActivity?: ActivityInstance;
+  activityLog: ActivityLogEntry[];
 }
 
 const SAFE_TEMPLATES: ActivityTemplate[] = [
@@ -29,26 +45,31 @@ const SAFE_TEMPLATES: ActivityTemplate[] = [
     name: "Gather Berries",
     description: "Collect wild berries from the forest edge.",
     baseReward: { food: 15 },
+    xp: 5,
   },
   {
     name: "Mend Fences",
     description: "Repair damages to the village perimeter.",
     baseReward: { wood: 10 },
+    xp: 8,
   },
   {
     name: "Help the Mason",
     description: "Assist in moving heavy stones.",
     baseReward: { stone: 5 },
+    xp: 10,
   },
   {
     name: "Forage Herbs",
     description: "Find medicinal plants.",
     baseReward: { food: 10, wood: 5 },
+    xp: 7,
   },
   {
     name: "Clear Debris",
     description: "Clear rubble from the mines.",
     baseReward: { stone: 8, iron: 1 },
+    xp: 12,
   },
 ];
 
@@ -59,6 +80,8 @@ const RISKY_TEMPLATES: ActivityTemplate[] = [
     baseReward: { gold: 50, food: 50 },
     riskLevel: 30,
     enemyPower: 20,
+    xp: 30,
+    durationDays: 2,
   },
   {
     name: "Explore Ancient Ruin",
@@ -66,6 +89,8 @@ const RISKY_TEMPLATES: ActivityTemplate[] = [
     baseReward: { gold: 100, iron: 20 },
     riskLevel: 60,
     enemyPower: 50,
+    xp: 50,
+    durationDays: 3,
   },
   {
     name: "Hunt Wild Beast",
@@ -73,6 +98,8 @@ const RISKY_TEMPLATES: ActivityTemplate[] = [
     baseReward: { food: 100, gold: 20 },
     riskLevel: 40,
     enemyPower: 30,
+    xp: 25,
+    durationDays: 1,
   },
   {
     name: "Defense Patrol",
@@ -80,6 +107,8 @@ const RISKY_TEMPLATES: ActivityTemplate[] = [
     baseReward: { gold: 30, iron: 5 },
     riskLevel: 20,
     enemyPower: 15,
+    xp: 15,
+    durationDays: 1,
   },
   {
     name: "Raid Rival Caravan",
@@ -87,12 +116,14 @@ const RISKY_TEMPLATES: ActivityTemplate[] = [
     baseReward: { gold: 150, wood: 50 },
     riskLevel: 80,
     enemyPower: 80,
+    xp: 80,
+    durationDays: 4,
   },
 ];
 
 const initialState: ActivitiesState = {
   dailyActivities: [],
-  lastGenerationDay: -1,
+  activityLog: [],
 };
 
 export const activitiesSlice = createSlice({
@@ -104,7 +135,6 @@ export const activitiesSlice = createSlice({
       action: PayloadAction<{ day: number }>
     ) => {
       const { day } = action.payload;
-      if (day <= state.lastGenerationDay) return;
 
       // Generate 3 Safe, 2 Risky
       const activities: ActivityInstance[] = [];
@@ -125,38 +155,120 @@ export const activitiesSlice = createSlice({
         }
       }
 
-      // Risky
-      while (activities.length < 5) {
-        const idx = Math.floor(Math.random() * RISKY_TEMPLATES.length);
-        if (!usedRisky.has(idx)) {
-          usedRisky.add(idx);
-          activities.push({
-            ...RISKY_TEMPLATES[idx],
-            id: `risky-${day}-${idx}`,
-            type: "risky",
-            isCompleted: false,
-          });
+      // Risky - Only generate if no active risky activity is running
+      if (!state.activeRiskyActivity) {
+        while (activities.length < 5) {
+          const idx = Math.floor(Math.random() * RISKY_TEMPLATES.length);
+          if (!usedRisky.has(idx)) {
+            usedRisky.add(idx);
+            activities.push({
+              ...RISKY_TEMPLATES[idx],
+              id: `risky-${day}-${idx}`,
+              type: "risky",
+              isCompleted: false,
+            });
+          }
         }
       }
 
+      // Reset active safe activity on new day generation?
+      // User said "remembered in the state for in the future when using it to provide daily information."
+      // But typically "Daily" activities reset. We'll keep the activeSafeActivity until it's seemingly replaced or day ends.
+      // Actually, let's clear daily selections when generating new ones.
+      state.activeSafeActivity = undefined;
+
       state.dailyActivities = activities;
-      state.lastGenerationDay = day;
+    },
+    startActivity: (state, action: PayloadAction<{ id: string }>) => {
+      const { id } = action.payload;
+      const activity = state.dailyActivities.find((a) => a.id === id);
+      if (!activity) return;
+
+      if (activity.type === "safe") {
+        if (!state.activeSafeActivity) {
+          state.activeSafeActivity = activity;
+          // Mark as "running" visually? Or just mapped to this state variable.
+        }
+      } else {
+        if (!state.activeRiskyActivity) {
+          state.activeRiskyActivity = {
+            ...activity,
+            remainingDays: activity.durationDays || 1,
+            isCompleted: false, // Ensure not completed
+          };
+        }
+      }
+    },
+    advanceActivityProgress: (state) => {
+      if (state.activeRiskyActivity) {
+        if (
+          state.activeRiskyActivity.remainingDays &&
+          state.activeRiskyActivity.remainingDays > 0
+        ) {
+          state.activeRiskyActivity.remainingDays -= 1;
+        }
+      }
     },
     completeActivity: (
       state,
       action: PayloadAction<{ id: string; success: boolean }>
     ) => {
       const { id, success } = action.payload;
+      // Check active risky
+      if (state.activeRiskyActivity && state.activeRiskyActivity.id === id) {
+        state.activeRiskyActivity.isCompleted = true;
+        state.activeRiskyActivity.result = success ? "success" : "failure";
+        state.activeRiskyActivity.remainingDays = 0;
+        return;
+      }
+
+      // Check daily list (mostly for instant safe ones if we kept old logic, but now safe ones just stick)
       const activity = state.dailyActivities.find((a) => a.id === id);
       if (activity) {
         activity.isCompleted = true;
         activity.result = success ? "success" : "failure";
       }
     },
+    addToHistory: (state, action: PayloadAction<ActivityLogEntry>) => {
+      state.activityLog.unshift(action.payload); // Add new entry to top
+    },
+    clearActiveSafeActivity: (state) => {
+      state.activeSafeActivity = undefined;
+    },
+    updateRiskyActivityStatus: (
+      state,
+      action: PayloadAction<{
+        isCompleted?: boolean;
+        result?: "success" | "failure";
+        remainingDays?: number;
+      }>
+    ) => {
+      if (state.activeRiskyActivity) {
+        if (action.payload.isCompleted !== undefined)
+          state.activeRiskyActivity.isCompleted = action.payload.isCompleted;
+        if (action.payload.result !== undefined)
+          state.activeRiskyActivity.result = action.payload.result;
+        if (action.payload.remainingDays !== undefined)
+          state.activeRiskyActivity.remainingDays =
+            action.payload.remainingDays;
+      }
+    },
+    // Clear risky activity from active slot (e.g. after it's done and logged)
+    clearActiveRiskyActivity: (state) => {
+      state.activeRiskyActivity = undefined;
+    },
   },
 });
 
-export const { generateDailyActivities, completeActivity } =
-  activitiesSlice.actions;
+export const {
+  generateDailyActivities,
+  completeActivity,
+  startActivity,
+  advanceActivityProgress,
+  addToHistory,
+  clearActiveSafeActivity,
+  updateRiskyActivityStatus,
+  clearActiveRiskyActivity,
+} = activitiesSlice.actions;
 
 export default activitiesSlice.reducer;

@@ -8,40 +8,51 @@ import DayProgressBar from "./DayProgressBar";
 
 import { useSelector, useDispatch } from "react-redux";
 import GameStartModal from "../GameStartModal";
-import { RootState } from "../../store/store";
-import { advanceDay } from "../../store/resourcesSlice";
-import { tickTime, resetDayTime } from "../../store/gameSlice";
-import { useEffect } from "react";
+import { RootState, AppDispatch } from "../../store/store";
+// import { advanceDay } from "../../store/resourcesSlice";
+import { handleDayRollover } from "../../store/gameThunks";
+import { toggleRightSidebar, tickTime } from "../../store/gameSlice";
 import { DAY_DURATION_MS } from "../../helpers/game";
+// ...
 
 const MainLayout: React.FC = () => {
-  const dispatch = useDispatch();
-  const { gameStarted, dayTime } = useSelector(
+  const dispatch = useDispatch<AppDispatch>();
+  const { gameStarted, dayTime, isRightSidebarOpen } = useSelector(
     (state: RootState) => state.game
   );
-  const [isRightSidebarOpen, setIsRightSidebarOpen] = React.useState(true);
+  // Removed local state
 
-  // Game Loop: Tick Time
-  useEffect(() => {
-    if (!gameStarted) return;
+  // Game Loop
+  React.useEffect(() => {
+    let interval: NodeJS.Timeout;
 
-    const intervalId = setInterval(() => {
-      dispatch(tickTime(1000));
-    }, 1000);
+    if (gameStarted) {
+      interval = setInterval(() => {
+        dispatch(tickTime(100)); // Tick every 100ms
 
-    return () => clearInterval(intervalId);
+        // Check for day rollover
+        // Note: dayTime is updated in Redux, but we need to check the state.
+        // However, since we are inside useEffect with only gameStarted dependency (initially),
+        // we might have stale state if we don't depend on dayTime.
+        // BETTER APPROACH: Check this in the reducer or pass current time to tickTime?
+        // OR: Just rely on the component re-rendering with new dayTime.
+      }, 100);
+    }
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
   }, [gameStarted, dispatch]);
 
-  // Game Loop: Check Day End
-  useEffect(() => {
-    if (dayTime >= DAY_DURATION_MS) {
-      dispatch(advanceDay());
-      dispatch(resetDayTime());
+  // Check for day rollover in a separate effect that tracks dayTime
+  React.useEffect(() => {
+    if (gameStarted && dayTime >= DAY_DURATION_MS) {
+      dispatch(handleDayRollover());
     }
-  }, [dayTime, dispatch]);
+  }, [dayTime, gameStarted, dispatch]);
 
-  const toggleRightSidebar = () => {
-    setIsRightSidebarOpen((prev) => !prev);
+  const handleToggleRightSidebar = () => {
+    dispatch(toggleRightSidebar());
   };
 
   return (
@@ -51,7 +62,7 @@ const MainLayout: React.FC = () => {
       <div className="h-16 flex-none z-50 shadow-md">
         <TopBar
           isRightSidebarOpen={isRightSidebarOpen}
-          onToggleRightSidebar={toggleRightSidebar}
+          onToggleRightSidebar={handleToggleRightSidebar}
         />
       </div>
 

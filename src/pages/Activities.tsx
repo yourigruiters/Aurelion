@@ -1,74 +1,44 @@
 import React from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../store/store";
-import { completeActivity } from "../store/activitiesSlice";
-import { updateResource } from "../store/resourcesSlice";
+import { startActivity } from "../store/activitiesSlice";
+import { setRightSidebarOpen } from "../store/gameSlice";
 import ActivityCard from "../components/ui/ActivityCard";
 import { ShieldCheck, Skull } from "lucide-react";
-import { Resources } from "../types";
 
 import { SEGMENT_DURATION_MS } from "../helpers/game";
 
 const Activities: React.FC = () => {
   const dispatch = useDispatch();
-  const { dailyActivities, lastGenerationDay } = useSelector(
-    (state: RootState) => state.activities
-  );
+  const { dailyActivities, activeSafeActivity, activeRiskyActivity } =
+    useSelector((state: RootState) => state.activities);
   const { assignments } = useSelector((state: RootState) => state.resources);
-  const { dayTime } = useSelector((state: RootState) => state.game); // Add dayTime selector
+  const { dayTime } = useSelector((state: RootState) => state.game);
 
   // Activities expire after the yellow zone (2/3 of day)
   const expireThreshold = SEGMENT_DURATION_MS * 2;
   const expired = dayTime >= expireThreshold;
 
   // Calculate User Power from Warriors
-  // 1 Warrior = 10 Power? Simplified logic.
   const warriorCount = assignments["warrior"] || 0;
   const userPower = warriorCount * 10;
 
   const handlePerformActivity = (id: string, type: "safe" | "risky") => {
-    const activity = dailyActivities.find((a) => a.id === id);
-    if (!activity || activity.isCompleted) return;
-
-    let success = true;
-
-    if (type === "risky") {
-      // Combat Logic
-      // Win Chance = UserPower / EnemyPower
-      const enemyPower = activity.enemyPower || 1;
-
-      let chance = 0;
-      if (userPower >= enemyPower) chance = 0.95;
-      else chance = userPower / enemyPower;
-
-      // Roll
-      if (Math.random() > chance) {
-        success = false;
-      }
-    }
-
-    // Dispatch Completion
-    dispatch(completeActivity({ id, success }));
-
-    // Handle Rewards / Losses
-    if (success) {
-      // Add rewards
-      Object.entries(activity.baseReward).forEach(([res, amount]) => {
-        dispatch(updateResource({ resource: res as keyof Resources, amount }));
-      });
-      // Risky bonus?
-      if (type === "risky") {
-        // Maybe extra XP or renown later
-      }
-    } else {
-      // Failure penalty?
-      // For now just no rewards.
-      // Could injure warriors here.
-    }
+    // Dispatch Start
+    dispatch(startActivity({ id }));
+    dispatch(setRightSidebarOpen(true)); // Open sidebar
   };
 
   const safeActivities = dailyActivities.filter((a) => a.type === "safe");
   const riskyActivities = dailyActivities.filter((a) => a.type === "risky");
+
+  const displaySafeActivities = activeSafeActivity
+    ? [activeSafeActivity]
+    : safeActivities;
+
+  const displayRiskyActivities = activeRiskyActivity
+    ? [activeRiskyActivity]
+    : riskyActivities;
 
   return (
     <div className="h-full w-full p-6 flex flex-col overflow-hidden bg-bg-main">
@@ -77,7 +47,7 @@ const Activities: React.FC = () => {
         <div className="flex-none p-8 pb-4 flex justify-between items-start">
           <div>
             <h1 className="text-3xl font-bold text-text-main">
-              Daily Activities
+              Daily activities
             </h1>
           </div>
 
@@ -111,24 +81,36 @@ const Activities: React.FC = () => {
         <div className="flex-1 overflow-y-auto p-8 pt-2 space-y-8">
           {/* Safe Section */}
           <section>
-            <div className="flex items-center gap-2 mb-4">
+            <div className="flex items-center gap-2 mb-2">
               <ShieldCheck className="text-success" size={24} />
-              <h2 className="text-xl font-bold text-text-main">
-                Community Tasks
-              </h2>
+              <h2 className="text-xl font-bold text-text-main">Daily tasks</h2>
             </div>
+            <p className="text-sm text-text-secondary mb-4">
+              Simple tasks to help the settlement. Only 1 task can be selected
+              per day.
+            </p>
+
             <div className="flex flex-col gap-4">
-              {safeActivities.map((activity) => (
-                <ActivityCard
-                  key={activity.id}
-                  activity={activity}
-                  onPerform={handlePerformActivity}
-                  disabled={expired}
-                />
-              ))}
+              {displaySafeActivities.map((activity) => {
+                const isActive = activeSafeActivity?.id === activity.id;
+
+                return (
+                  <div
+                    key={activity.id}
+                    className="transition-opacity duration-300 opacity-100"
+                  >
+                    <ActivityCard
+                      activity={activity}
+                      onPerform={handlePerformActivity}
+                      disabled={expired || !!activeSafeActivity}
+                      isSelected={isActive}
+                    />
+                  </div>
+                );
+              })}
               {safeActivities.length === 0 && (
                 <p className="text-text-muted italic">
-                  No community tasks available.
+                  No daily tasks available.
                 </p>
               )}
             </div>
@@ -136,29 +118,50 @@ const Activities: React.FC = () => {
 
           {/* Risky Section */}
           <section>
-            <div className="flex items-center gap-2 mb-4">
+            <div className="flex items-center gap-2 mb-2">
               <Skull className="text-danger" size={24} />
               <h2 className="text-xl font-bold text-text-main">Expeditions</h2>
             </div>
+            <div className="mb-4 space-y-1">
+              <p className="text-sm text-text-secondary">
+                High risk, high reward missions. Only 1 Raid can be selected at
+                a time.
+              </p>
+              <p className="text-sm text-text-secondary">
+                <span className="text-danger font-bold">Warning:</span> Warriors
+                can potentially die in combat.
+              </p>
+            </div>
+
             {userPower === 0 && (
               <div className="mb-4 p-3 bg-danger/10 text-danger border border-danger/20 rounded text-sm">
                 WARNING: You have no active Warriors. Expeditions are highly
                 dangerous!
               </div>
             )}
+
             <div className="flex flex-col gap-4">
-              {riskyActivities.map((activity) => (
-                <ActivityCard
-                  key={activity.id}
-                  activity={activity}
-                  onPerform={handlePerformActivity}
-                  userPower={userPower}
-                  disabled={expired}
-                />
-              ))}
+              {displayRiskyActivities.map((activity) => {
+                const isActive = activeRiskyActivity?.id === activity.id;
+
+                return (
+                  <div
+                    key={activity.id}
+                    className="transition-opacity duration-300 opacity-100"
+                  >
+                    <ActivityCard
+                      activity={activity}
+                      onPerform={handlePerformActivity}
+                      userPower={userPower}
+                      disabled={expired || !!activeRiskyActivity}
+                      isSelected={isActive}
+                    />
+                  </div>
+                );
+              })}
               {riskyActivities.length === 0 && (
                 <p className="text-text-muted italic">
-                  No expeditions reported.
+                  Your warriors are still on their way.
                 </p>
               )}
             </div>
