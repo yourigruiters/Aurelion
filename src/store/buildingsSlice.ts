@@ -44,9 +44,25 @@ export interface BuildingInstance {
   unlocked: boolean;
 }
 
+export interface QueuedConstruction {
+  id: string;
+  buildingId: string; // "town_keep" or "1" (plotId)
+  type:
+    | "building_upgrade"
+    | "building_unlock"
+    | "house_construct"
+    | "house_upgrade";
+  targetLevel?: number;
+  targetHouseType?: HouseType;
+  remainingDays: number;
+  name: string;
+  totalDays: number;
+}
+
 export interface BuildingsState {
   buildings: Record<BuildingId, BuildingInstance>;
   housing: Record<number, { type: HouseType; populationCap: number }>;
+  constructionQueue: QueuedConstruction[];
 }
 
 // --- Data ---
@@ -185,6 +201,7 @@ const initialState: BuildingsState = {
     3: { type: "none", populationCap: 0 },
     4: { type: "none", populationCap: 0 },
   },
+  constructionQueue: [],
 };
 
 export const buildingsSlice = createSlice({
@@ -224,10 +241,35 @@ export const buildingsSlice = createSlice({
         state.buildings[id].unlocked = true;
       }
     },
+    addToQueue: (state, action: PayloadAction<QueuedConstruction>) => {
+      state.constructionQueue.push(action.payload);
+    },
+    updateQueueItem: (
+      state,
+      action: PayloadAction<{ id: string; remainingDays: number }>
+    ) => {
+      const { id, remainingDays } = action.payload;
+      const index = state.constructionQueue.findIndex((item) => item.id === id);
+      if (index !== -1) {
+        state.constructionQueue[index].remainingDays = remainingDays;
+      }
+    },
+    removeFromQueue: (state, action: PayloadAction<string>) => {
+      state.constructionQueue = state.constructionQueue.filter(
+        (item) => item.id !== action.payload
+      );
+    },
   },
 });
 
-export const { upgradeBuilding, constructHouse, upgradeHouse, unlockBuilding } =
-  buildingsSlice.actions;
+export const {
+  upgradeBuilding,
+  constructHouse,
+  upgradeHouse,
+  unlockBuilding,
+  addToQueue,
+  updateQueueItem,
+  removeFromQueue,
+} = buildingsSlice.actions;
 
 export default buildingsSlice.reducer;

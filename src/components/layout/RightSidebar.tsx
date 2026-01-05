@@ -39,6 +39,9 @@ const RightSidebar: React.FC = () => {
   const { activeSafeActivity, activeRiskyActivity } = useSelector(
     (state: RootState) => state.activities
   );
+  const { constructionQueue } = useSelector(
+    (state: RootState) => state.buildings
+  );
   const { reports } = useSelector((state: RootState) => state.reports);
 
   const [selectedReport, setSelectedReport] =
@@ -153,9 +156,48 @@ const RightSidebar: React.FC = () => {
         <h2 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-3">
           Construction Queue
         </h2>
-        <div className="text-sm text-text-dim italic py-2">
-          No active construction
-        </div>
+        {constructionQueue.length === 0 ? (
+          <div className="text-sm text-text-dim italic py-2">
+            No active construction
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {constructionQueue.map((item) => (
+              <div
+                key={item.id}
+                className="bg-bg-main p-3 rounded border border-brand/30"
+              >
+                <div className="flex items-center gap-2 mb-1 justify-between">
+                  <div className="flex items-center gap-2">
+                    <Hammer size={16} className="text-brand" />
+                    <span className="text-sm font-bold text-brand">
+                      Construction
+                    </span>
+                  </div>
+                  <span className="text-xs text-text-secondary font-mono">
+                    {item.remainingDays}d left
+                  </span>
+                </div>
+                <p className="text-sm text-text-main font-medium mb-1">
+                  {item.name}
+                </p>
+                {/* Progress Bar */}
+                <div className="h-1.5 w-full bg-bg-panel rounded-full overflow-hidden mt-2">
+                  <div
+                    className="h-full bg-brand transition-all duration-500"
+                    style={{
+                      width: `${
+                        ((item.totalDays - item.remainingDays) /
+                          item.totalDays) *
+                        100
+                      }%`,
+                    }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Notifications / Reports */}

@@ -4,14 +4,9 @@ import { RootState } from "../store/store";
 import {
   BUILDING_DEFINITIONS,
   BuildingId,
-  upgradeBuilding,
-  constructHouse,
-  upgradeHouse,
-  unlockBuilding,
   HouseType,
 } from "../store/buildingsSlice";
-import { addExperience } from "../store/gameSlice";
-import { deductResources } from "../store/resourcesSlice";
+import { startBuildingProject } from "../store/gameThunks";
 import Button from "../components/ui/Button";
 import {
   Home,
@@ -54,7 +49,8 @@ const ResourceIcon = ({
 
 const Buildings: React.FC = () => {
   const dispatch = useDispatch();
-  const { buildings, housing } = useSelector(
+  // @ts-ignore
+  const { buildings, housing, constructionQueue } = useSelector(
     (state: RootState) => state.buildings
   );
   const { resources } = useSelector((state: RootState) => state.resources);
@@ -92,6 +88,8 @@ const Buildings: React.FC = () => {
     return cost;
   };
 
+  // NOTE: We now use dispatch(startBuildingProject(...)) instead of direct actions
+
   const handleUpgradeBuilding = (id: BuildingId) => {
     const building = buildings[id];
     if (!building) return;
@@ -103,9 +101,27 @@ const Buildings: React.FC = () => {
     const cost = getUpgradeCost(id, building.level);
 
     if (canAfford(cost)) {
-      dispatch(deductResources(cost));
-      dispatch(upgradeBuilding(id));
-      dispatch(addExperience(def.experience));
+      // dispatch(deductResources(cost));
+      // dispatch(upgradeBuilding(id));
+      // dispatch(addExperience(def.experience));
+
+      // NEW: Start Project
+      dispatch(
+        // @ts-ignore
+        startBuildingProject(
+          {
+            buildingId: id,
+            type: "building_upgrade",
+            targetLevel: building.level + 1,
+            remainingDays: def.buildTimeDays,
+            name: `Upgrade ${def.name} to Level ${building.level + 1}`,
+            totalDays: def.buildTimeDays,
+          },
+          cost
+        )
+      );
+      // We do NOT add experience immediately now? Or should we?
+      // Usually XP is on completion.
     }
   };
 
@@ -117,9 +133,23 @@ const Buildings: React.FC = () => {
     const cost = def.baseCost;
 
     if (canAfford(cost)) {
-      dispatch(deductResources(cost));
-      dispatch(unlockBuilding(id));
-      dispatch(addExperience(def.experience));
+      // dispatch(deductResources(cost));
+      // dispatch(unlockBuilding(id));
+      // dispatch(addExperience(def.experience));
+
+      dispatch(
+        // @ts-ignore
+        startBuildingProject(
+          {
+            buildingId: id,
+            type: "building_unlock",
+            remainingDays: def.buildTimeDays,
+            name: `Construct ${def.name}`,
+            totalDays: def.buildTimeDays,
+          },
+          cost
+        )
+      );
     }
   };
 
@@ -144,16 +174,58 @@ const Buildings: React.FC = () => {
     }
 
     if (canAfford(cost)) {
-      dispatch(deductResources(cost));
+      // dispatch(deductResources(cost));
+
       if (type === "cottage") {
-        dispatch(constructHouse({ plotId, type }));
+        // dispatch(constructHouse({ plotId, type }));
+        dispatch(
+          // @ts-ignore
+          startBuildingProject(
+            {
+              buildingId: plotId.toString(),
+              type: "house_construct",
+              targetHouseType: "cottage",
+              remainingDays: 1, // Cottages are fast? Let's say 1 day.
+              name: `Build Cottage (Plot ${plotId})`,
+              totalDays: 1,
+            },
+            cost
+          )
+        );
       } else if (type === "homestead") {
         if (housing[plotId].type === "cottage") {
-          dispatch(upgradeHouse(plotId));
+          // dispatch(upgradeHouse(plotId));
+          dispatch(
+            // @ts-ignore
+            startBuildingProject(
+              {
+                buildingId: plotId.toString(),
+                type: "house_upgrade",
+                targetHouseType: "homestead",
+                remainingDays: 2, // Upgrade takes 2 days
+                name: `Upgrade to Homestead (Plot ${plotId})`,
+                totalDays: 2,
+              },
+              cost
+            )
+          );
         } else {
-          // Direct build need to simulate build cottage then upgrade?
-          // Or just set type. existing reducer `constructHouse` sets type/cap.
-          dispatch(constructHouse({ plotId, type }));
+          // Direct build
+          // dispatch(constructHouse({ plotId, type }));
+          dispatch(
+            // @ts-ignore
+            startBuildingProject(
+              {
+                buildingId: plotId.toString(),
+                type: "house_construct",
+                targetHouseType: "homestead",
+                remainingDays: 3, // Direct build takes longer
+                name: `Build Homestead (Plot ${plotId})`,
+                totalDays: 3,
+              },
+              cost
+            )
+          );
         }
       }
     }
@@ -184,6 +256,11 @@ const Buildings: React.FC = () => {
               const isCottage = plot.type === "cottage";
               const isHomestead = plot.type === "homestead";
               const isEmpty = plot.type === "none";
+
+              // Check if in queue
+              const underConstruction = constructionQueue.find(
+                (q) => q.buildingId === plotId.toString()
+              );
 
               return (
                 <div
@@ -226,134 +303,147 @@ const Buildings: React.FC = () => {
                   </div>
 
                   <div className="mt-auto pt-2 border-t border-border-main/50 space-y-2">
-                    {isEmpty && (
-                      <div className="space-y-3">
-                        {/* Cottage Option */}
-                        <div className="bg-bg-panel/50 p-2 rounded border border-border-main/50">
-                          <div className="flex justify-between items-center mb-2">
-                            <span className="text-xs font-bold text-text-main">
-                              Small Cottage
-                            </span>
-                            <div className="flex items-center gap-2">
-                              <span
-                                className={`text-xs ${
-                                  resources.wood >= 50
-                                    ? "text-text-main"
-                                    : "text-danger"
-                                }`}
-                              >
-                                50
-                              </span>
-                              <ResourceIcon resource="wood" size={12} />
-                            </div>
-                          </div>
-                          <Button
-                            className="w-full text-xs"
-                            variant="outline"
-                            onClick={() =>
-                              handleConstructHouse(plotId, "cottage")
-                            }
-                            disabled={!canAfford({ wood: 50 })}
-                          >
-                            Build Cottage
-                          </Button>
+                    {underConstruction ? (
+                      <div className="bg-bg-panel/50 p-3 rounded border border-brand/30 text-center">
+                        <div className="text-xs font-bold text-brand uppercase mb-1">
+                          Under Construction
                         </div>
+                        <div className="text-sm font-bold text-text-main">
+                          {underConstruction.remainingDays} Days Left
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        {isEmpty && (
+                          <div className="space-y-3">
+                            {/* Cottage Option */}
+                            <div className="bg-bg-panel/50 p-2 rounded border border-border-main/50">
+                              <div className="flex justify-between items-center mb-2">
+                                <span className="text-xs font-bold text-text-main">
+                                  Small Cottage
+                                </span>
+                                <div className="flex items-center gap-2">
+                                  <span
+                                    className={`text-xs ${
+                                      resources.wood >= 50
+                                        ? "text-text-main"
+                                        : "text-danger"
+                                    }`}
+                                  >
+                                    50
+                                  </span>
+                                  <ResourceIcon resource="wood" size={12} />
+                                </div>
+                              </div>
+                              <Button
+                                className="w-full text-xs"
+                                variant="outline"
+                                onClick={() =>
+                                  handleConstructHouse(plotId, "cottage")
+                                }
+                                disabled={!canAfford({ wood: 50 })}
+                              >
+                                Build Cottage
+                              </Button>
+                            </div>
 
-                        {/* Homestead Option */}
-                        <div className="bg-bg-panel/50 p-2 rounded border border-border-main/50">
-                          <div className="flex justify-between items-center mb-2">
-                            <span className="text-xs font-bold text-text-main">
-                              Homestead
-                            </span>
-                            <div className="flex items-center gap-3">
-                              <div className="flex items-center gap-1">
-                                <span
-                                  className={`text-xs ${
-                                    resources.wood >= 150
-                                      ? "text-text-main"
-                                      : "text-danger"
-                                  }`}
-                                >
-                                  150
+                            {/* Homestead Option */}
+                            <div className="bg-bg-panel/50 p-2 rounded border border-border-main/50">
+                              <div className="flex justify-between items-center mb-2">
+                                <span className="text-xs font-bold text-text-main">
+                                  Homestead
                                 </span>
-                                <ResourceIcon resource="wood" size={12} />
+                                <div className="flex items-center gap-3">
+                                  <div className="flex items-center gap-1">
+                                    <span
+                                      className={`text-xs ${
+                                        resources.wood >= 150
+                                          ? "text-text-main"
+                                          : "text-danger"
+                                      }`}
+                                    >
+                                      150
+                                    </span>
+                                    <ResourceIcon resource="wood" size={12} />
+                                  </div>
+                                  <div className="flex items-center gap-1">
+                                    <span
+                                      className={`text-xs ${
+                                        resources.stone >= 50
+                                          ? "text-text-main"
+                                          : "text-danger"
+                                      }`}
+                                    >
+                                      50
+                                    </span>
+                                    <ResourceIcon resource="stone" size={12} />
+                                  </div>
+                                </div>
                               </div>
-                              <div className="flex items-center gap-1">
-                                <span
-                                  className={`text-xs ${
-                                    resources.stone >= 50
-                                      ? "text-text-main"
-                                      : "text-danger"
-                                  }`}
-                                >
-                                  50
-                                </span>
-                                <ResourceIcon resource="stone" size={12} />
-                              </div>
+                              <Button
+                                className="w-full text-xs"
+                                variant="outline"
+                                onClick={() =>
+                                  handleConstructHouse(plotId, "homestead")
+                                }
+                                disabled={!canAfford({ wood: 150, stone: 50 })}
+                              >
+                                Build Homestead
+                              </Button>
                             </div>
                           </div>
-                          <Button
-                            className="w-full text-xs"
-                            variant="outline"
-                            onClick={() =>
-                              handleConstructHouse(plotId, "homestead")
-                            }
-                            disabled={!canAfford({ wood: 150, stone: 50 })}
-                          >
-                            Build Homestead
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-                    {isCottage && (
-                      <div className="bg-bg-panel/50 p-2 rounded border border-border-main/50">
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="text-xs font-bold text-text-main">
-                            Upgrade to Homestead
-                          </span>
-                          <div className="flex items-center gap-3">
-                            <div className="flex items-center gap-1">
-                              <span
-                                className={`text-xs ${
-                                  resources.wood >= 100
-                                    ? "text-text-main"
-                                    : "text-danger"
-                                }`}
-                              >
-                                100
+                        )}
+                        {isCottage && (
+                          <div className="bg-bg-panel/50 p-2 rounded border border-border-main/50">
+                            <div className="flex justify-between items-center mb-2">
+                              <span className="text-xs font-bold text-text-main">
+                                Upgrade to Homestead
                               </span>
-                              <ResourceIcon resource="wood" size={12} />
+                              <div className="flex items-center gap-3">
+                                <div className="flex items-center gap-1">
+                                  <span
+                                    className={`text-xs ${
+                                      resources.wood >= 100
+                                        ? "text-text-main"
+                                        : "text-danger"
+                                    }`}
+                                  >
+                                    100
+                                  </span>
+                                  <ResourceIcon resource="wood" size={12} />
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <span
+                                    className={`text-xs ${
+                                      resources.stone >= 50
+                                        ? "text-text-main"
+                                        : "text-danger"
+                                    }`}
+                                  >
+                                    50
+                                  </span>
+                                  <ResourceIcon resource="stone" size={12} />
+                                </div>
+                              </div>
                             </div>
-                            <div className="flex items-center gap-1">
-                              <span
-                                className={`text-xs ${
-                                  resources.stone >= 50
-                                    ? "text-text-main"
-                                    : "text-danger"
-                                }`}
-                              >
-                                50
-                              </span>
-                              <ResourceIcon resource="stone" size={12} />
-                            </div>
+                            <Button
+                              className="w-full text-xs"
+                              variant="outline"
+                              onClick={() =>
+                                handleConstructHouse(plotId, "homestead")
+                              }
+                              disabled={!canAfford({ wood: 100, stone: 50 })}
+                            >
+                              Upgrade
+                            </Button>
                           </div>
-                        </div>
-                        <Button
-                          className="w-full text-xs"
-                          variant="outline"
-                          onClick={() =>
-                            handleConstructHouse(plotId, "homestead")
-                          }
-                          disabled={!canAfford({ wood: 100, stone: 50 })}
-                        >
-                          Upgrade
-                        </Button>
-                      </div>
-                    )}
-                    {isHomestead && (
-                      <div className="text-center text-xs text-success font-semibold py-2">
-                        Fully Upgraded
-                      </div>
+                        )}
+                        {isHomestead && (
+                          <div className="text-center text-xs text-success font-semibold py-2">
+                            Fully Upgraded
+                          </div>
+                        )}
+                      </>
                     )}
                   </div>
                 </div>
@@ -382,6 +472,10 @@ const Buildings: React.FC = () => {
               const levelLocked = playerLevel < def.requiredLevel;
               const Icon = def.icon;
 
+              const underConstruction = constructionQueue.find(
+                (q) => q.buildingId === id
+              );
+
               return (
                 <div
                   key={id}
@@ -391,164 +485,247 @@ const Buildings: React.FC = () => {
                       : "border-border-main hover:border-border-light"
                   }`}
                 >
-                  {/* LOCKED OVERLAY / STATE */}
-                  {!building.unlocked ? (
-                    <div className="p-4 flex flex-col md:flex-row items-center justify-between gap-4 opacity-75">
-                      <div className="flex items-center flex-1 min-w-0">
-                        <div className="flex-none p-3 rounded-full bg-zinc-900/50 mr-4 text-text-muted border border-border-main">
+                  {/* UNIFIED CARD HEADER (Locked or Unlocked) */}
+                  <div
+                    className="flex items-center p-4 cursor-pointer"
+                    onClick={() => toggleExpand(id)}
+                  >
+                    {/* Left: Info */}
+                    <div className="flex items-center flex-1 min-w-0">
+                      <div
+                        className={`flex-none p-3 rounded-full mr-4 border ${
+                          !building.unlocked
+                            ? "bg-zinc-900/50 text-text-muted border-border-main"
+                            : "bg-bg-panel text-text-main border-border-main"
+                        }`}
+                      >
+                        {!building.unlocked ? (
                           <Lock size={24} />
-                        </div>
-                        <div>
-                          <h3 className="font-bold text-lg text-text-muted">
-                            {def.name}
-                          </h3>
-                          <p className="text-sm text-text-muted">
-                            {levelLocked
-                              ? `Requires City Level ${def.requiredLevel}`
-                              : "Locked structure."}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-4">
-                        <div className="text-sm font-mono text-text-muted flex gap-2">
-                          {Object.entries(def.baseCost).map(([res, amt]) => (
-                            <span key={res} className="flex items-center gap-1">
-                              {amt} <ResourceIcon resource={res} size={12} />
-                            </span>
-                          ))}
-                        </div>
-                        {levelLocked ? null : (
-                          <Button
-                            onClick={() =>
-                              handleUnlockBuilding(id as BuildingId)
-                            }
-                            disabled={!canAfford(def.baseCost)}
-                            variant="outline"
-                            className="min-w-[100px]"
-                          >
-                            Unlock
-                          </Button>
+                        ) : (
+                          <Icon size={24} />
                         )}
                       </div>
+                      <div className="min-w-0 truncate">
+                        <h3
+                          className={`font-bold text-lg truncate ${
+                            !building.unlocked
+                              ? "text-text-muted"
+                              : "text-text-main"
+                          }`}
+                        >
+                          {def.name}
+                        </h3>
+                        <p className="text-sm text-text-secondary truncate">
+                          {def.description}
+                        </p>
+                      </div>
                     </div>
-                  ) : (
-                    <>
-                      {/* Row Header - Info | Material | Level */}
-                      <div
-                        className="flex items-center p-4 cursor-pointer"
-                        onClick={() => toggleExpand(id)}
-                      >
-                        {/* Left: Info */}
-                        <div className="flex items-center flex-1 min-w-0">
-                          <div className="flex-none p-3 rounded-full bg-bg-panel mr-4 text-text-main border border-border-main">
-                            <Icon size={24} />
+
+                    {/* Middle: Material Output (Hidden if locked) */}
+                    {building.unlocked && (
+                      <div className="hidden md:flex flex-1 justify-center px-4 border-l border-r border-border-main/20 mx-4">
+                        <span className="text-sm text-text-muted italic text-center">
+                          {def.effectDescription.split(".")[0]}
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Right: Level & Chevron */}
+                    <div className="flex items-center gap-6 flex-none justify-end w-32">
+                      <div className="flex flex-col items-end">
+                        <span className="text-xs text-text-muted uppercase font-bold">
+                          {!building.unlocked ? "Locked" : "Level"}
+                        </span>
+                        {!building.unlocked ? (
+                          <span className="text-xs text-danger font-bold">
+                            Req Lvl {def.requiredLevel}
+                          </span>
+                        ) : (
+                          <div className="text-xl font-bold text-text-main">
+                            {building.level}
+                            <span className="text-text-muted text-base font-normal ml-1">
+                              / {def.maxLevel}
+                            </span>
                           </div>
-                          <div className="min-w-0 truncate">
-                            <h3 className="font-bold text-lg text-text-main truncate">
-                              {def.name}
-                            </h3>
-                            <p className="text-sm text-text-secondary truncate">
+                        )}
+                        {underConstruction && (
+                          <span className="text-xs text-brand font-bold animate-pulse">
+                            Scaling Up...
+                          </span>
+                        )}
+                      </div>
+                      {isExpanded ? (
+                        <ChevronUp size={20} className="text-text-muted" />
+                      ) : (
+                        <ChevronDown size={20} className="text-text-muted" />
+                      )}
+                    </div>
+                  </div>
+
+                  {/* EXPANDED CONTENT */}
+                  {isExpanded && (
+                    <div className="p-4 border-t border-border-main bg-bg-panel/30 flex flex-col sm:flex-row gap-6">
+                      {/* LEFT: Info / Upgrade Progression */}
+                      <div className="flex-1 space-y-4">
+                        {!building.unlocked ? (
+                          <div className="space-y-2">
+                            <div className="text-sm font-bold text-text-main">
+                              Building Information
+                            </div>
+                            <p className="text-sm text-text-secondary">
                               {def.description}
                             </p>
-                          </div>
-                        </div>
-
-                        {/* Middle: Material Output */}
-                        <div className="hidden md:flex flex-1 justify-center px-4 border-l border-r border-border-main/20 mx-4">
-                          <span className="text-sm text-text-muted italic text-center">
-                            {def.effectDescription.split(".")[0]}
-                          </span>
-                        </div>
-
-                        {/* Right: Level & Chevron */}
-                        <div className="flex items-center gap-6 flex-none justify-end w-32">
-                          <div className="flex flex-col items-end">
-                            <span className="text-xs text-text-muted uppercase font-bold">
-                              Level
-                            </span>
-                            <div className="text-xl font-bold text-text-main">
-                              {building.level}
-                              <span className="text-text-muted text-base font-normal ml-1">
-                                / {def.maxLevel}
-                              </span>
+                            <div className="p-3 bg-bg-main rounded border border-border-main mt-2">
+                              <div className="text-xs font-bold text-text-muted uppercase mb-1">
+                                Effect
+                              </div>
+                              <div className="text-sm text-text-main">
+                                {def.effectDescription}
+                              </div>
                             </div>
-                          </div>
-                          {isExpanded ? (
-                            <ChevronUp size={20} className="text-text-muted" />
-                          ) : (
-                            <ChevronDown
-                              size={20}
-                              className="text-text-muted"
-                            />
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Expanded Section */}
-                      {isExpanded && !isMaxLevel && (
-                        <div className="p-4 border-t border-border-main bg-bg-panel/30 flex flex-col sm:flex-row gap-6">
-                          {/* Upgrade Details */}
-                          <div className="flex-1 space-y-3">
-                            <h4 className="font-bold text-text-main flex items-center gap-2">
-                              <ArrowUpCircle
-                                size={18}
-                                className="text-accent"
-                              />
-                              Upgrade to Level {nextLevel}
-                            </h4>
-                            <p className="text-sm text-text-secondary">
-                              <span className="font-semibold text-text-main">
-                                Effect:
-                              </span>{" "}
-                              {def.effectDescription}
-                            </p>
-                            <div className="flex items-center gap-4 text-sm text-text-muted">
+                            <div className="flex items-center gap-4 text-sm text-text-muted mt-2">
                               <div className="flex items-center gap-1">
                                 <Clock size={16} />
-                                <span>{def.buildTimeDays} Days</span>
-                              </div>
-                              <div className="flex items-center gap-1 text-accent">
-                                <span>+{def.experience} XP</span>
+                                <span>
+                                  {def.buildTimeDays} Days Construction
+                                </span>
                               </div>
                             </div>
                           </div>
+                        ) : (
+                          <div className="space-y-4">
+                            {/* Current Benefit - Maybe redundant if we show progression? */}
+                            {/* FUTURE LEVELS LIST */}
+                            {building.level < def.maxLevel && (
+                              <div className="space-y-2">
+                                <h4 className="font-bold text-text-main flex items-center gap-2 text-sm uppercase tracking-wider">
+                                  <ArrowUpCircle
+                                    size={16}
+                                    className="text-accent"
+                                  />
+                                  Upgrade Progression
+                                </h4>
+                                <div className="space-y-2">
+                                  {Array.from(
+                                    { length: def.maxLevel - building.level },
+                                    (_, i) => {
+                                      const lvl = building.level + 1 + i;
+                                      // We only show next 3 levels to avoid clutter? Or all? User said "exact information for what a user will get at every single level upgrade"
+                                      // Let's show all remaining levels.
 
-                          {/* Cost & Action */}
-                          <div className="w-full sm:w-64 flex flex-col gap-3">
-                            <div className="bg-bg-main p-3 rounded border border-border-main">
-                              <div className="text-xs font-bold text-text-muted uppercase mb-2">
-                                Required Resources
+                                      // For description scaling, we might have to just repeat the static description if we don't have formula.
+                                      // But we can format it nicely.
+                                      const isNext = lvl === building.level + 1;
+                                      const lvlCost = getUpgradeCost(
+                                        id as BuildingId,
+                                        lvl - 1
+                                      ); // Cost to get TO this level (from prev)
+
+                                      return (
+                                        <div
+                                          key={lvl}
+                                          className={`p-2 rounded border ${
+                                            isNext
+                                              ? "bg-bg-main border-brand/50"
+                                              : "border-transparent opacity-60"
+                                          }`}
+                                        >
+                                          <div className="flex justify-between items-center mb-1">
+                                            <span
+                                              className={`font-bold text-sm ${
+                                                isNext
+                                                  ? "text-brand"
+                                                  : "text-text-muted"
+                                              }`}
+                                            >
+                                              Level {lvl} {isNext && "(Next)"}
+                                            </span>
+                                            {/* Cost Display for this level */}
+                                            <div className="flex items-center gap-2 text-xs text-text-secondary">
+                                              {Object.entries(lvlCost).map(
+                                                ([res, amt]) => (
+                                                  <span
+                                                    key={res}
+                                                    className="flex items-center gap-1"
+                                                  >
+                                                    {amt}{" "}
+                                                    <ResourceIcon
+                                                      resource={res}
+                                                      size={10}
+                                                    />
+                                                  </span>
+                                                )
+                                              )}
+                                            </div>
+                                          </div>
+                                          <div className="text-xs text-text-secondary">
+                                            Effect:{" "}
+                                            <span className="text-text-main">
+                                              {def.effectDescription}
+                                            </span>
+                                            {/* If we had specific numbers we would put them here. E.g. "Production: 100 -> 120" */}
+                                          </div>
+                                        </div>
+                                      );
+                                    }
+                                  )}
+                                </div>
                               </div>
-                              <div className="space-y-1">
-                                {Object.entries(cost).map(([res, amount]) => (
-                                  <div
-                                    key={res}
-                                    className="flex items-center justify-between text-sm"
-                                  >
-                                    <div className="flex items-center gap-2">
-                                      <ResourceIcon resource={res} />
-                                      <span className="capitalize text-text-secondary">
-                                        {res}
-                                      </span>
-                                    </div>
-                                    <span
-                                      className={`${
-                                        (resources[
-                                          res as keyof typeof resources
-                                        ] || 0) >= amount
-                                          ? "text-text-main"
-                                          : "text-danger"
-                                      }`}
-                                    >
-                                      {amount}
+                            )}
+
+                            {/* If Max Level */}
+                            {isMaxLevel && (
+                              <div className="p-4 text-center text-accent font-bold border border-accent/20 rounded bg-accent/5">
+                                Max Level Reached
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* RIGHT: Action / Cost (Next Level Only) */}
+                      {!isMaxLevel && (
+                        <div className="w-full sm:w-64 flex flex-col gap-3">
+                          {/* Only show cost block for the NEXT action */}
+                          <div className="bg-bg-main p-3 rounded border border-border-main">
+                            <div className="text-xs font-bold text-text-muted uppercase mb-2">
+                              {building.unlocked
+                                ? "Next Upgrade Cost"
+                                : "Unlock Cost"}
+                            </div>
+                            <div className="space-y-1">
+                              {Object.entries(
+                                building.unlocked ? cost : def.baseCost
+                              ).map(([res, amount]) => (
+                                <div
+                                  key={res}
+                                  className="flex items-center justify-between text-sm"
+                                >
+                                  <div className="flex items-center gap-2">
+                                    <ResourceIcon resource={res} />
+                                    <span className="capitalize text-text-secondary">
+                                      {res}
                                     </span>
                                   </div>
-                                ))}
-                              </div>
+                                  <span
+                                    className={`${
+                                      (resources[
+                                        res as keyof typeof resources
+                                      ] || 0) >= amount
+                                        ? "text-text-main"
+                                        : "text-danger"
+                                    }`}
+                                  >
+                                    {amount}
+                                  </span>
+                                </div>
+                              ))}
                             </div>
+                          </div>
 
-                            {levelLocked ? (
+                          {/* ACTION BUTTONS */}
+                          {!building.unlocked ? (
+                            levelLocked ? (
                               <div className="bg-bg-main p-3 rounded border border-danger/30">
                                 <span className="text-xs font-bold text-danger uppercase mb-1 block">
                                   Requirements
@@ -557,28 +734,51 @@ const Buildings: React.FC = () => {
                                   <li>City Level {def.requiredLevel}</li>
                                 </ul>
                               </div>
+                            ) : underConstruction ? (
+                              <div className="bg-bg-main p-3 rounded border border-brand/30 text-center">
+                                <span className="text-xs font-bold text-brand uppercase block mb-1">
+                                  Construction in progress
+                                </span>
+                                <span className="text-lg font-bold text-text-main">
+                                  {underConstruction?.remainingDays} Days Left
+                                </span>
+                              </div>
                             ) : (
                               <Button
                                 onClick={() =>
-                                  handleUpgradeBuilding(id as BuildingId)
+                                  handleUnlockBuilding(id as BuildingId)
                                 }
-                                disabled={!affordable}
+                                disabled={!canAfford(def.baseCost)}
                                 variant="outline"
                                 className="w-full justify-center"
                               >
-                                Upgrade
+                                Unlock Building
                               </Button>
-                            )}
-                          </div>
+                            )
+                          ) : underConstruction ? (
+                            <div className="bg-bg-main p-3 rounded border border-brand/30 text-center">
+                              <span className="text-xs font-bold text-brand uppercase block mb-1">
+                                Construction in progress
+                              </span>
+                              <span className="text-lg font-bold text-text-main">
+                                {underConstruction?.remainingDays} Days Left
+                              </span>
+                            </div>
+                          ) : (
+                            <Button
+                              onClick={() =>
+                                handleUpgradeBuilding(id as BuildingId)
+                              }
+                              disabled={!affordable}
+                              variant="outline"
+                              className="w-full justify-center"
+                            >
+                              Upgrade to Level {nextLevel}
+                            </Button>
+                          )}
                         </div>
                       )}
-
-                      {isExpanded && isMaxLevel && (
-                        <div className="p-4 border-t border-border-main bg-bg-panel/30 text-center text-accent font-bold">
-                          Max Level Reached
-                        </div>
-                      )}
-                    </>
+                    </div>
                   )}
                 </div>
               );

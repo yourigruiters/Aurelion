@@ -21,6 +21,7 @@ export interface DailyReport {
     expGained: number; // XP gained THIS day
   };
   constructionQueue: string[]; // Snapshot of queue
+  completedConstructions: string[]; // Names of completed buildings
   read: boolean;
 }
 

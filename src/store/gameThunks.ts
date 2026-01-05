@@ -1,5 +1,5 @@
 import { AppThunk } from "./store";
-import { advanceDay, updateResource } from "./resourcesSlice";
+import { advanceDay, deductResources, updateResource } from "./resourcesSlice";
 import { resetDayTime, addExperience } from "./gameSlice";
 import {
   generateDailyActivities,
@@ -11,6 +11,18 @@ import {
 } from "./activitiesSlice";
 import { addReport, DailyReport, NightEvent } from "./reportsSlice";
 import { Resources } from "../types";
+import {
+  addToQueue,
+  BuildingId,
+  constructHouse,
+  QueuedConstruction,
+  removeFromQueue,
+  unlockBuilding,
+  updateQueueItem,
+  upgradeBuilding,
+  upgradeHouse,
+} from "./buildingsSlice";
+import { setRightSidebarOpen } from "./gameSlice";
 
 // Simple Night Event Generator
 const generateNightEvent = (): NightEvent | undefined => {
@@ -38,6 +50,23 @@ const generateNightEvent = (): NightEvent | undefined => {
   }
 };
 
+export const startBuildingProject =
+  (
+    project: Omit<QueuedConstruction, "id">,
+    cost: Record<string, number>
+  ): AppThunk =>
+  (dispatch) => {
+    // 1. Deduct Resources
+    dispatch(deductResources(cost));
+
+    // 2. Add to Queue
+    const id = Math.random().toString(36).substr(2, 9);
+    dispatch(addToQueue({ ...project, id }));
+
+    // 3. Open Queue
+    dispatch(setRightSidebarOpen(true));
+  };
+
 export const handleDayRollover = (): AppThunk => (dispatch, getState) => {
   // 0. Snapshot State & Setup
   const state = getState();
@@ -45,8 +74,10 @@ export const handleDayRollover = (): AppThunk => (dispatch, getState) => {
   const prevLevel = state.game.level;
   const prevExp = state.game.experience;
   const { activeSafeActivity, activeRiskyActivity } = state.activities;
+  const { constructionQueue } = state.buildings;
   const { daysPassed, assignments } = state.resources;
   const completedActivities: ActivityLogEntry[] = [];
+  const completedConstructions: string[] = [];
 
   // 1. Process Active Safe Activity
   if (activeSafeActivity) {
@@ -145,7 +176,35 @@ export const handleDayRollover = (): AppThunk => (dispatch, getState) => {
     }
   }
 
-  // 3. Night Event
+  // 3. Process Construction Queue
+  constructionQueue.forEach((item) => {
+    const newRemaining = item.remainingDays - 1;
+
+    if (newRemaining <= 0) {
+      // Construction Complete!
+      if (item.type === "building_upgrade") {
+        dispatch(upgradeBuilding(item.buildingId as BuildingId));
+      } else if (item.type === "building_unlock") {
+        dispatch(unlockBuilding(item.buildingId as BuildingId));
+      } else if (item.type === "house_construct") {
+        dispatch(
+          constructHouse({
+            plotId: parseInt(item.buildingId),
+            type: item.targetHouseType!,
+          })
+        );
+      } else if (item.type === "house_upgrade") {
+        dispatch(upgradeHouse(parseInt(item.buildingId)));
+      }
+
+      completedConstructions.push(item.name);
+      dispatch(removeFromQueue(item.id));
+    } else {
+      dispatch(updateQueueItem({ id: item.id, remainingDays: newRemaining }));
+    }
+  });
+
+  // 4. Night Event
   const nightEvent = generateNightEvent();
   if (nightEvent && nightEvent.effect) {
     Object.entries(nightEvent.effect).forEach(([key, amount]) => {
@@ -153,14 +212,14 @@ export const handleDayRollover = (): AppThunk => (dispatch, getState) => {
     });
   }
 
-  // 4. Advance Day (Production)
+  // 5. Advance Day (Production)
   dispatch(advanceDay());
   dispatch(resetDayTime());
 
-  // 5. Generate New Activities
+  // 6. Generate New Activities
   dispatch(generateDailyActivities({ day: daysPassed + 1 }));
 
-  // 6. Generate Report
+  // 7. Generate Report
   // Calculate Deltas
   const newState = getState();
   const newResources = newState.resources.resources;
@@ -193,7 +252,8 @@ export const handleDayRollover = (): AppThunk => (dispatch, getState) => {
       level: newLevel,
       expGained: newLevel > prevLevel ? 0 : newExp - prevExp, // Simplified
     },
-    constructionQueue: [], // Mock for now
+    constructionQueue: constructionQueue.map((i) => i.name), // Snapshot active
+    completedConstructions,
     read: false,
   };
 

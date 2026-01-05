@@ -217,11 +217,27 @@ const DailyReportModal: React.FC<DailyReportModalProps> = ({
             <h3 className="text-sm font-bold text-text-main mb-3 uppercase tracking-wider">
               Construction Queue
             </h3>
-            {report.constructionQueue.length > 0 ? (
-              <div>{/* Map items */}</div>
+            {report.completedConstructions &&
+            report.completedConstructions.length > 0 ? (
+              <div className="space-y-2">
+                {report.completedConstructions.map((name, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-center gap-3 p-3 bg-bg-main rounded border border-success/30"
+                  >
+                    <Hammer size={16} className="text-success" />
+                    <span className="text-sm font-bold text-text-main">
+                      {name}
+                    </span>
+                    <span className="ml-auto text-xs text-success font-bold uppercase">
+                      Finished
+                    </span>
+                  </div>
+                ))}
+              </div>
             ) : (
               <div className="text-sm text-text-muted italic">
-                No active construction projects.
+                No construction projects were completed today.
               </div>
             )}
           </div>
