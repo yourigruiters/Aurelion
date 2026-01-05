@@ -14,7 +14,7 @@ const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   const baseStyles =
-    "w-full font-bold py-3 px-4 rounded transition-colors shadow-lg transform cursor-pointer hover:scale-[1.02] flex items-center justify-center gap-2";
+    "w-auto font-bold py-3 px-4 rounded transition-colors shadow-lg transform cursor-pointer hover:scale-[1.02] flex items-center justify-center gap-2";
 
   const variants = {
     primary: "bg-brand hover:bg-brand-hover text-white",

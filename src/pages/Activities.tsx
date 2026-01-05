@@ -85,7 +85,7 @@ const Activities: React.FC = () => {
                 Community Tasks
               </h2>
             </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-4">
+            <div className="flex flex-col gap-4">
               {safeActivities.map((activity) => (
                 <ActivityCard
                   key={activity.id}
@@ -113,7 +113,7 @@ const Activities: React.FC = () => {
                 dangerous!
               </div>
             )}
-            <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-4">
+            <div className="flex flex-col gap-4">
               {riskyActivities.map((activity) => (
                 <ActivityCard
                   key={activity.id}

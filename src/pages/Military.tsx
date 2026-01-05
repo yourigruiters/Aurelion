@@ -100,8 +100,8 @@ const Military: React.FC = () => {
           </div>
         </div>
 
-        {/* Research Grid */}
-        <div className="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-4">
+        {/* Research List */}
+        <div className="flex flex-col gap-4">
           {techList.map((tech) => {
             const isUnlocked = unlockedTechs.includes(tech.id);
             const isLocked = !hasRequirements(tech) && !isUnlocked;
@@ -110,26 +110,18 @@ const Military: React.FC = () => {
             return (
               <div
                 key={tech.id}
-                className={`relative p-5 rounded-lg border transition-all flex flex-col gap-4 ${
+                className={`flex flex-col md:flex-row items-center p-4 rounded-lg border transition-all gap-4 ${
                   isUnlocked
-                    ? "bg-bg-main/50 border-success/30 shadow-[0_0_10px_rgba(34,197,94,0.1)]"
+                    ? "bg-bg-main border-success/30 shadow-[0_0_5px_rgba(34,197,94,0.05)]"
                     : isLocked
                     ? "bg-bg-main/30 border-border-main opacity-60 grayscale"
                     : "bg-bg-main border-border-main hover:border-brand shadow-sm"
                 }`}
               >
-                {/* Status Icon Overlay */}
-                <div className="absolute top-4 right-4">
-                  {isUnlocked ? (
-                    <CheckCircle size={20} className="text-success" />
-                  ) : isLocked ? (
-                    <Lock size={20} className="text-text-muted" />
-                  ) : null}
-                </div>
-
-                <div className="flex items-center gap-4">
+                {/* Icon & Name */}
+                <div className="flex items-center flex-1 w-full md:w-auto gap-4">
                   <div
-                    className={`p-3 rounded-full border ${
+                    className={`p-3 rounded-full border flex-none ${
                       isUnlocked
                         ? "bg-success/10 border-success/20"
                         : "bg-bg-panel border-border-main"
@@ -141,72 +133,69 @@ const Military: React.FC = () => {
                     <h3 className="font-bold text-lg text-text-main">
                       {tech.name}
                     </h3>
-                    <div className="text-xs font-mono mt-0.5 flex gap-2">
+                    <p className="text-sm text-text-secondary">
+                      {tech.description}
+                    </p>
+
+                    {/* Stats Inline */}
+                    <div className="flex gap-3 mt-1 text-xs font-mono">
                       {tech.effects.power && (
-                        <span className="text-danger">
-                          +{tech.effects.power} Power
+                        <span className="text-danger flex items-center gap-1">
+                          <Swords size={12} /> +{tech.effects.power} Power
                         </span>
                       )}
                       {tech.effects.defense && (
-                        <span className="text-blue-400">
-                          +{tech.effects.defense} Defense
+                        <span className="text-blue-400 flex items-center gap-1">
+                          <Shield size={12} /> +{tech.effects.defense} Defense
                         </span>
                       )}
                     </div>
                   </div>
                 </div>
 
-                <p className="text-sm text-text-secondary h-10 line-clamp-2">
-                  {tech.description}
-                </p>
-
-                {!isUnlocked && !isLocked && (
-                  <div className="mt-auto pt-4 border-t border-border-main/50 space-y-3">
-                    <div className="grid grid-cols-2 gap-2 text-xs text-text-muted">
-                      {Object.entries(tech.cost).map(([res, amt]) => (
-                        <div
-                          key={res}
-                          className={`flex items-center justify-between px-2 py-1 rounded bg-bg-panel ${
-                            (resources[res as keyof typeof resources] || 0) <
-                            amt
-                              ? "text-danger"
-                              : ""
-                          }`}
-                        >
-                          <span className="capitalize">{res}</span>
-                          <span className="font-mono">{amt}</span>
-                        </div>
-                      ))}
+                {/* Right Side: Status or Action */}
+                <div className="flex items-center gap-4 w-full md:w-auto justify-end">
+                  {isUnlocked ? (
+                    <div className="px-4 py-2 bg-success/10 text-success text-sm font-bold rounded flex items-center gap-2 border border-success/20">
+                      <CheckCircle size={16} /> Researched
                     </div>
-                    <Button
-                      onClick={() => handleUnlock(tech)}
-                      disabled={!affordable}
-                      variant="primary"
-                      className="w-full text-sm py-1"
-                    >
-                      Research
-                    </Button>
-                  </div>
-                )}
-
-                {isLocked && (
-                  <div className="mt-auto pt-4 border-t border-border-main/50">
-                    <div className="text-xs text-danger flex items-center gap-1 justify-center py-2 bg-danger/5 rounded border border-danger/10">
-                      <Lock size={12} /> Requires:{" "}
+                  ) : isLocked ? (
+                    <div className="px-4 py-2 bg-danger/5 text-danger text-xs font-bold rounded flex items-center gap-2 border border-danger/10">
+                      <Lock size={16} /> Needs:{" "}
                       {tech.requires
                         ?.map((id) => MILITARY_TECHS[id].name)
                         .join(", ")}
                     </div>
-                  </div>
-                )}
-
-                {isUnlocked && (
-                  <div className="mt-auto pt-4 border-t border-border-main/50">
-                    <div className="text-xs text-success flex items-center gap-1 justify-center py-2 bg-success/5 rounded border border-success/10">
-                      <CheckCircle size={12} /> Researched
-                    </div>
-                  </div>
-                )}
+                  ) : (
+                    <>
+                      {/* Costs */}
+                      <div className="flex flex-wrap gap-2 justify-end max-w-[200px]">
+                        {Object.entries(tech.cost).map(([res, amt]) => (
+                          <div
+                            key={res}
+                            className={`flex items-center gap-1.5 px-2 py-1 rounded bg-bg-panel border border-border-main text-xs ${
+                              (resources[res as keyof typeof resources] || 0) <
+                              amt
+                                ? "text-danger border-danger/30"
+                                : "text-text-main"
+                            }`}
+                          >
+                            <span className="capitalize">{res}</span>
+                            <span className="font-bold">{amt}</span>
+                          </div>
+                        ))}
+                      </div>
+                      <Button
+                        onClick={() => handleUnlock(tech)}
+                        disabled={!affordable}
+                        variant="primary"
+                        className="min-w-[100px]"
+                      >
+                        Research
+                      </Button>
+                    </>
+                  )}
+                </div>
               </div>
             );
           })}

@@ -1,6 +1,8 @@
-import React from "react";
+import { useSelector } from "react-redux";
 import { ActivityInstance } from "../../store/activitiesSlice";
 import Button from "./Button";
+import { RootState } from "../../store/store";
+import { DAY_DURATION_MS } from "../../helpers/game";
 import {
   Sword,
   CheckCircle,
@@ -9,6 +11,7 @@ import {
   Coins,
   Mountain,
   Hammer,
+  Clock, // Added Clock
 } from "lucide-react";
 
 interface ActivityCardProps {
@@ -43,6 +46,23 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
   const isRisky = activity.type === "risky";
   const enemyPower = activity.enemyPower || 0;
 
+  // Access dayTime from store for "Time Remaining" (Expires in)
+  // Note: We might want to pass this as a prop to avoid selecting in every card if we map many,
+  // but for simplicity/cleanness inside the card, we can select or assume passed.
+  // Let's assume we pass it or select it. Since it's not in props, let's select.
+  // Actually, selecting in a map list is okay for small lists.
+  // Wait, I can't select inside here without importing useSelector.
+  // Let's modify props to include `expiresIn`.
+  // Or just pick it here.
+  // Adding useSelector:
+  const dayTime = useSelector((state: RootState) => state.game.dayTime);
+  const timeLeftMs = DAY_DURATION_MS - dayTime;
+  const timeDisplay = `${Math.floor(timeLeftMs / 60000)}:${Math.floor(
+    (timeLeftMs % 60000) / 1000
+  )
+    .toString()
+    .padStart(2, "0")}`;
+
   // Calculate win chance for display (simple logic: User >= Enemy = 100%, else proportional)
   let winChance = 100;
   if (isRisky && enemyPower > 0) {
@@ -54,119 +74,115 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
   return (
     <div
       className={`
-      relative overflow-hidden rounded-lg border transition-all
+      relative overflow-hidden rounded-lg border transition-all flex items-center p-4 gap-4
       ${
         activity.isCompleted
           ? "bg-bg-main border-border-main opacity-60 grayscale"
           : isRisky
-          ? "bg-bg-panel border-danger/30 hover:border-danger hover:shadow-lg hover:shadow-danger/10"
-          : "bg-bg-panel border-success/30 hover:border-success hover:shadow-lg hover:shadow-success/10"
+          ? "bg-bg-main border-border-main hover:border-danger hover:shadow-sm"
+          : "bg-bg-main border-border-main hover:border-success hover:shadow-sm"
       }
     `}
     >
-      {/* Risk Badge */}
+      {/* Icon */}
       <div
-        className={`absolute top-0 right-0 px-3 py-1 text-xs font-bold rounded-bl-lg
-        ${isRisky ? "bg-danger text-white" : "bg-success text-white"}
-      `}
+        className={`flex-none p-3 rounded-full border ${
+          isRisky
+            ? "bg-danger/10 border-danger/20 text-danger"
+            : "bg-success/10 border-success/20 text-success"
+        }`}
       >
-        {isRisky ? "Dangerous" : "Safe"}
+        {isRisky ? <Sword size={24} /> : <CheckCircle size={24} />}
       </div>
 
-      <div className="p-5 flex flex-col h-full">
-        <div className="flex items-start gap-4 mb-4">
+      {/* Content */}
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 mb-1">
+          <h3 className="font-bold text-lg text-text-main leading-none truncate">
+            {activity.name}
+          </h3>
           <div
-            className={`p-3 rounded-full ${
+            className={`px-2 py-0.5 text-[10px] font-bold rounded uppercase tracking-wider
+            ${
               isRisky
                 ? "bg-danger/20 text-danger"
                 : "bg-success/20 text-success"
-            }`}
+            }
+          `}
           >
-            {isRisky ? <Sword size={24} /> : <CheckCircle size={24} />}
-          </div>
-          <div>
-            <h3 className="font-bold text-lg text-text-main leading-none mb-1">
-              {activity.name}
-            </h3>
-            <p className="text-sm text-text-secondary line-clamp-2">
-              {activity.description}
-            </p>
+            {isRisky ? "Dangerous" : "Safe"}
           </div>
         </div>
+        <p className="text-sm text-text-secondary line-clamp-1">
+          {activity.description}
+        </p>
 
-        {/* Stats / Info */}
-        <div className="flex-1 space-y-3 mb-4">
-          {/* Reward Preview */}
-          <div className="bg-bg-main p-2 rounded border border-border-light flex flex-wrap gap-3">
-            <span className="text-xs font-bold text-text-muted w-full">
-              Rewards:
-            </span>
+        {/* Info Row: Time & Rewards */}
+        <div className="flex items-center gap-4 mt-2 text-xs">
+          <div className="flex items-center gap-1 text-text-muted font-mono">
+            <Clock size={12} />
+            <span>Expires: {timeDisplay}</span>
+          </div>
+
+          {/* Rewards Inline */}
+          <div className="flex items-center gap-2">
             {Object.entries(activity.baseReward).map(([res, amount]) => (
-              <div
-                key={res}
-                className="flex items-center gap-1.5 text-sm text-text-main bg-bg-panel px-2 py-0.5 rounded border border-border-main"
-              >
+              <div key={res} className="flex items-center gap-1 text-text-main">
                 <ResourceIcon resource={res} />
-                <span className="capitalize">{res}</span>
                 <span className="font-bold">+{amount}</span>
               </div>
             ))}
           </div>
-
-          {/* Risk Analysis */}
-          {isRisky && !activity.isCompleted && (
-            <div className="flex items-center gap-2 text-sm bg-bg-main p-2 rounded border border-border-light">
-              <ShieldAlert
-                size={16}
-                className={
-                  winChance > 75
-                    ? "text-success"
-                    : winChance > 40
-                    ? "text-accent"
-                    : "text-danger"
-                }
-              />
-              <span className="text-text-muted">Analyze:</span>
-              <span
-                className={`font-bold ${
-                  winChance > 75
-                    ? "text-success"
-                    : winChance > 40
-                    ? "text-accent"
-                    : "text-danger"
-                }`}
-              >
-                {winChance}% Win Rate
-              </span>
-              <span className="text-xs text-text-secondary ml-auto">
-                (Str: {userPower} vs {enemyPower})
-              </span>
-            </div>
-          )}
         </div>
+      </div>
 
-        {/* Action */}
-        <div>
-          {activity.isCompleted ? (
-            <div
-              className={`w-full py-2 text-center font-bold border rounded bg-bg-main ${
-                activity.result === "success"
-                  ? "text-success border-success"
-                  : "text-danger border-danger"
+      {/* Right Action / Stats */}
+      <div className="flex-none flex flex-col items-end gap-2 w-32 md:w-48">
+        {isRisky && !activity.isCompleted && (
+          <div className="flex items-center gap-1 text-xs">
+            <ShieldAlert
+              size={14}
+              className={
+                winChance > 75
+                  ? "text-success"
+                  : winChance > 40
+                  ? "text-accent"
+                  : "text-danger"
+              }
+            />
+            <span
+              className={`font-bold ${
+                winChance > 75
+                  ? "text-success"
+                  : winChance > 40
+                  ? "text-accent"
+                  : "text-danger"
               }`}
             >
-              {activity.result === "success" ? "Completed" : "Failed"}
-            </div>
-          ) : (
-            <Button
-              variant={isRisky ? "danger" : "secondary"}
-              onClick={() => onPerform(activity.id, activity.type)}
-              className="w-full text-sm py-2"
-            >
-              {isRisky ? "Raid Target" : "Start Task"}
-            </Button>
-          )}
-        </div>
+              {winChance}% Win Rate
+            </span>
+          </div>
+        )}
+
+        {activity.isCompleted ? (
+          <div
+            className={`w-full py-1.5 text-center text-xs font-bold border rounded ${
+              activity.result === "success"
+                ? "text-success border-success bg-success/5"
+                : "text-danger border-danger bg-danger/5"
+            }`}
+          >
+            {activity.result === "success" ? "Completed" : "Failed"}
+          </div>
+        ) : (
+          <Button
+            variant={isRisky ? "danger" : "secondary"} // "secondary" or "outline" creates standard look
+            onClick={() => onPerform(activity.id, activity.type)}
+            className="w-full text-xs py-1.5 h-8"
+          >
+            {isRisky ? "Raid Target" : "Start Task"}
+          </Button>
+        )}
       </div>
     </div>
   );
