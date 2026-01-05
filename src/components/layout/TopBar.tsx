@@ -55,6 +55,7 @@ const TopBar: React.FC<TopBarProps> = ({
     resources,
     daysPassed = 0,
     rates,
+    modifiers,
   } = useSelector((state: RootState) => state.resources);
   const { housing } = useSelector((state: RootState) => state.buildings);
   const { gameStarted, cityName, region } = useSelector(
@@ -115,6 +116,7 @@ const TopBar: React.FC<TopBarProps> = ({
             icon={Apple}
             value={resources.food}
             rate={rates.food}
+            modifier={modifiers.food}
             color="text-danger-light"
             tooltipLabel="Food"
           />
@@ -128,6 +130,7 @@ const TopBar: React.FC<TopBarProps> = ({
             icon={Wheat}
             value={resources.wood}
             rate={rates.wood}
+            modifier={modifiers.wood}
             color="text-brand"
             tooltipLabel="Wood"
           />
@@ -135,6 +138,7 @@ const TopBar: React.FC<TopBarProps> = ({
             icon={Mountain}
             value={resources.stone}
             rate={rates.stone}
+            modifier={modifiers.stone}
             color="text-text-muted"
             tooltipLabel="Stone"
           />
@@ -142,6 +146,7 @@ const TopBar: React.FC<TopBarProps> = ({
             icon={Hammer}
             value={resources.iron}
             rate={rates.iron}
+            modifier={modifiers.iron}
             color="text-text-secondary"
             tooltipLabel="Iron"
           />
@@ -149,6 +154,7 @@ const TopBar: React.FC<TopBarProps> = ({
             icon={Gem}
             value={resources.gold}
             rate={rates.gold}
+            modifier={modifiers.gold}
             color="text-accent"
             tooltipLabel="Gold"
           />

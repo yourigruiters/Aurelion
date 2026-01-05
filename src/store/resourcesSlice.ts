@@ -74,11 +74,6 @@ export const resourcesSlice = createSlice({
           if (state.rates[key]) {
             // @ts-ignore
             const modifier = state.modifiers[key] || 1;
-            console.log(
-              state.rates[key],
-              modifier,
-              state.rates[key] * modifier
-            );
             state.resources[key] += state.rates[key] * modifier;
           }
         }
