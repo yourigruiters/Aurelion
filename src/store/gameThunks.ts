@@ -1,6 +1,6 @@
 import { AppThunk } from "./store";
-import { advanceDay, updateResource, deductResources } from "./resourcesSlice";
-import { resetDayTime } from "./gameSlice";
+import { advanceDay, updateResource } from "./resourcesSlice";
+import { resetDayTime, addExperience } from "./gameSlice";
 import {
   generateDailyActivities,
   addToHistory,
@@ -23,6 +23,11 @@ export const handleDayRollover = (): AppThunk => (dispatch, getState) => {
     Object.entries(activeSafeActivity.baseReward).forEach(([key, amount]) => {
       dispatch(updateResource({ resource: key as keyof Resources, amount }));
     });
+
+    // Add XP
+    if (activeSafeActivity.xp) {
+      dispatch(addExperience(activeSafeActivity.xp));
+    }
 
     // Log History
     const logEntry: ActivityLogEntry = {
@@ -72,7 +77,10 @@ export const handleDayRollover = (): AppThunk => (dispatch, getState) => {
           }
         );
 
-        // XP? (Not implemented in resources yet fully, but ignored for now)
+        // Add XP
+        if (activeRiskyActivity.xp) {
+          dispatch(addExperience(activeRiskyActivity.xp));
+        }
 
         dispatch(
           addToHistory({
