@@ -7,7 +7,7 @@ interface ResourceItemProps {
   rate?: number;
   modifier?: number;
   color?: string;
-  tooltipLabel?: string;
+  tooltipLabel?: React.ReactNode;
   className?: string;
   customValueDisplay?: string;
   max?: number; // Optional max value for other usages if needed, but customValueDisplay overrides

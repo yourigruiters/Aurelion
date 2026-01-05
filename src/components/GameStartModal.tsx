@@ -64,10 +64,13 @@ const GameStartModal: React.FC = () => {
     dispatch(
       startGame({
         cityName: formData.cityName,
-        region: formData.region!,
-        focus: formData.focus!,
+        region: formData.region as Region,
+        focus: formData.focus as Focus,
         gameStarted: true,
         dayTime: 0,
+        level: 1,
+        experience: 0,
+        maxExperience: 100,
       })
     );
 

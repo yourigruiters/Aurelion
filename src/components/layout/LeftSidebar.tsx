@@ -1,5 +1,7 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { RootState } from "../../store/store";
 import {
   Users,
   Hammer,
@@ -34,6 +36,10 @@ const SidebarItem: React.FC<SidebarItemProps> = ({ to, icon: Icon, label }) => (
 );
 
 const LeftSidebar: React.FC = () => {
+  const { level, experience, maxExperience } = useSelector(
+    (state: RootState) => state.game
+  );
+
   const menuItems = [
     { to: "/overview", icon: Home, label: "Overview" },
     { to: "/people", icon: Users, label: "Population" },
@@ -44,14 +50,42 @@ const LeftSidebar: React.FC = () => {
     { to: "/map", icon: Map, label: "Region Map" },
   ];
 
+  const xpPercentage = Math.min(
+    100,
+    Math.floor((experience / maxExperience) * 100)
+  );
+
   return (
     <div className="flex flex-col h-full">
-      <div className="p-4 border-b border-border-main">
+      {/* Level & XP Section */}
+      <div className="p-4 border-b border-border-main bg-bg-panel/30">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-xs font-semibold text-text-muted uppercase tracking-wider">
+            City Level
+          </span>
+          <span className="text-sm font-bold text-accent">{level}</span>
+        </div>
+        <div className="w-full h-2 bg-bg-main rounded-full overflow-hidden border border-border-main">
+          <div
+            className="h-full bg-accent transition-all duration-500 ease-out"
+            style={{ width: `${xpPercentage}%` }}
+          />
+        </div>
+        <div className="flex justify-between mt-1">
+          <span className="text-[10px] text-text-muted">XP</span>
+          <span className="text-[10px] text-text-muted">
+            {experience} / {maxExperience}
+          </span>
+        </div>
+      </div>
+
+      <div className="p-4 pb-2">
         <h2 className="text-xs font-semibold text-text-muted uppercase tracking-wider">
-          City Management
+          Management
         </h2>
       </div>
-      <nav className="flex-1 overflow-y-auto py-2">
+
+      <nav className="flex-1 overflow-y-auto py-2 flex flex-col justify-center">
         {menuItems.map((item) => (
           <SidebarItem
             key={item.to}
@@ -61,22 +95,6 @@ const LeftSidebar: React.FC = () => {
           />
         ))}
       </nav>
-
-      {/* City Status Summary */}
-      <NavLink
-        to="/people"
-        className="p-4 border-t border-border-main bg-bg-panel cursor-pointer transition-colors hover:bg-bg-main/20"
-      >
-        <div className="space-y-2">
-          <div className="flex justify-between items-center text-xs">
-            <span className="text-text-muted">Idle Villagers</span>
-            <span className="text-danger font-bold">2</span>
-          </div>
-          <div className="w-full bg-border-main h-1.5 rounded-full overflow-hidden">
-            <div className="bg-danger h-full w-1/5" />
-          </div>
-        </div>
-      </NavLink>
     </div>
   );
 };

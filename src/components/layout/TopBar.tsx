@@ -62,9 +62,36 @@ const TopBar: React.FC<TopBarProps> = ({
     (state: RootState) => state.game
   );
 
+  // Calculate assigned population
+  const assignments = useSelector(
+    (state: RootState) => state.resources.assignments
+  );
+  const totalAssigned = Object.values(assignments).reduce(
+    (sum, count) => sum + count,
+    0
+  );
+  const idleVillagers = population - totalAssigned;
+
   const totalHousingCapacity = Object.values(housing).reduce(
     (total, house) => total + house.populationCap,
     0
+  );
+
+  const populationTooltip = (
+    <div>
+      <div>Population</div>
+      {idleVillagers > 0 ? (
+        <div className="text-danger flex justify-between mt-1 font-normal">
+          <span>Idle:</span>
+          <span>{idleVillagers}</span>
+        </div>
+      ) : (
+        <div className="text-success flex justify-between mt-1 font-normal">
+          <span>Status:</span>
+          <span>All Active</span>
+        </div>
+      )}
+    </div>
   );
 
   return (
@@ -109,7 +136,7 @@ const TopBar: React.FC<TopBarProps> = ({
             value={population}
             max={totalHousingCapacity} // Add max prop if supported or handle via value string
             color="text-info"
-            tooltipLabel="Population"
+            tooltipLabel={populationTooltip}
             customValueDisplay={`${population}/${totalHousingCapacity}`}
           />
           <ResourceItem

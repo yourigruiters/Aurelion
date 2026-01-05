@@ -44,6 +44,9 @@ export interface GameState {
   region: Region;
   focus: Focus;
   dayTime: number;
+  level: number;
+  experience: number;
+  maxExperience: number;
 }
 
 export interface UIState {
