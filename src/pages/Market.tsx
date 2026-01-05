@@ -67,7 +67,14 @@ const Market: React.FC = () => {
   const { resources, population } = useSelector(
     (state: RootState) => state.resources
   );
+  const { housing } = useSelector((state: RootState) => state.buildings);
   const gold = resources.gold;
+
+  // Calculate Max Population
+  const maxPopulation = Object.values(housing).reduce(
+    (sum, house) => sum + house.populationCap,
+    0
+  );
 
   const getBuyPrice = (basePrice: number) => Math.ceil(basePrice * 1);
   const getSellPrice = (basePrice: number) => Math.floor(basePrice * 0.5);
@@ -95,12 +102,21 @@ const Market: React.FC = () => {
   const CanAfford = (itemId: string, amount: number) => {
     const item = TRADE_ITEMS.find((i) => i.id === itemId);
     if (!item) return false;
+
+    // Population Cap Check
+    if (itemId === "population") {
+      if (population + amount > maxPopulation) return false;
+    }
+
     const price = getBuyPrice(item.basePrice) * amount;
     return gold >= price;
   };
 
   const HasResource = (itemId: string, amount: number) => {
-    if (itemId === "population") return population >= amount;
+    if (itemId === "population") {
+      // Must leave at least 1 population
+      return population - amount >= 1;
+    }
     // @ts-ignore
     return (resources[itemId] || 0) >= amount;
   };
@@ -243,7 +259,9 @@ const Market: React.FC = () => {
                           {item.name}
                         </span>
                         <span className="text-xs text-text-muted">
-                          In Stock: ∞
+                          {item.id === "population"
+                            ? `Housing Cap: ${maxPopulation}`
+                            : "In Stock: ∞"}
                         </span>
                       </div>
                     </div>
