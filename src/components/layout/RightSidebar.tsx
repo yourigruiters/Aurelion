@@ -9,13 +9,12 @@ import {
   Coins,
   Mountain,
   Hammer,
+  FileText,
 } from "lucide-react";
-
-interface NotificationProps {
-  title: string;
-  time: string;
-  type?: string;
-}
+import DailyReportModal from "../ui/DailyReportModal";
+import { DailyReport, markReportAsRead } from "../../store/reportsSlice";
+import { useDispatch } from "react-redux";
+import clsx from "clsx";
 
 const ResourceIcon = ({ resource }: { resource: string }) => {
   switch (resource) {
@@ -34,23 +33,28 @@ const ResourceIcon = ({ resource }: { resource: string }) => {
   }
 };
 
-const Notification: React.FC<NotificationProps> = ({
-  title,
-  time,
-  type: _type,
-}) => (
-  <div className="p-3 bg-bg-main rounded border-l-2 border-border-light hover:bg-bg-panel transition-colors cursor-pointer">
-    <h4 className="text-sm font-medium text-text-main">{title}</h4>
-    <span className="text-xs text-text-muted">{time}</span>
-  </div>
-);
-
 // ... Notification component ...
 
 const RightSidebar: React.FC = () => {
   const { activeSafeActivity, activeRiskyActivity } = useSelector(
     (state: RootState) => state.activities
   );
+  const { reports } = useSelector((state: RootState) => state.reports);
+
+  const [selectedReport, setSelectedReport] =
+    React.useState<DailyReport | null>(null);
+  const dispatch = useDispatch();
+
+  const handleOpenReport = (report: DailyReport) => {
+    setSelectedReport(report);
+    if (!report.read) {
+      dispatch(markReportAsRead(report.id));
+    }
+  };
+
+  const handleCloseReport = () => {
+    setSelectedReport(null);
+  };
 
   return (
     <div className="flex flex-col h-full bg-bg-panel border-l border-border-main">
@@ -154,17 +158,54 @@ const RightSidebar: React.FC = () => {
         </div>
       </div>
 
-      {/* Notifications */}
+      {/* Notifications / Reports */}
       <div className="flex-1 overflow-y-auto">
         <div className="sticky top-0 bg-bg-panel p-4 pb-2 z-10">
           <h2 className="text-xs font-semibold text-text-muted uppercase tracking-wider">
-            Notifications
+            Reports
           </h2>
         </div>
         <div className="px-4 pb-4 space-y-2">
-          <Notification title="Daily report generated" time="2m ago" />
+          {reports.slice(0, 2).map((report, index) => (
+            <div
+              key={report.id}
+              onClick={() => handleOpenReport(report)}
+              className={clsx(
+                "p-3 bg-bg-main rounded border-l-2 transition-colors cursor-pointer group",
+                report.read
+                  ? "border-transparent opacity-60 hover:opacity-100"
+                  : "border-brand"
+              )}
+            >
+              <div className="flex items-center justify-between mb-1">
+                <h4 className="text-sm font-medium text-text-main flex items-center gap-2">
+                  <FileText
+                    size={14}
+                    className={clsx(
+                      "group-hover:text-brand-hover",
+                      report.read ? "text-text-muted" : "text-brand"
+                    )}
+                  />
+                  {index === 0 ? "Today" : "Yesterday"}
+                </h4>
+                {/* User requested to remove day number or ensure it says Today/Yesterday. Index logic covers it. */}
+              </div>
+              <p className="text-xs text-text-secondary line-clamp-1">
+                {report.nightEvent
+                  ? `Event: ${report.nightEvent.title}`
+                  : "A quiet night."}
+              </p>
+            </div>
+          ))}
+          {reports.length === 0 && (
+            <div className="text-sm text-text-dim italic">No reports yet.</div>
+          )}
         </div>
       </div>
+
+      {selectedReport && (
+        <DailyReportModal report={selectedReport} onClose={handleCloseReport} />
+      )}
     </div>
   );
 };
