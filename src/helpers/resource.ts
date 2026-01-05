@@ -1,8 +1,8 @@
-import { FullResources } from "../types";
+import { FullResources, Region, Focus } from "../types";
 
 export const getResourceDetails = (
-  region: string,
-  focus: string
+  region: Region,
+  focus: Focus
 ): FullResources => {
   const resources: FullResources = {
     population: 3,

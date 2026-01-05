@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { ResourcesState, Resources } from "../types";
+import { ResourcesState, Resources, Region, Focus } from "../types";
 import { getResourceDetails } from "../helpers/resource";
 
 const initialState: ResourcesState = {
@@ -66,7 +66,7 @@ export const resourcesSlice = createSlice({
     },
     initializeResources: (
       state,
-      action: PayloadAction<{ region: string; focus: string }>
+      action: PayloadAction<{ region: Region; focus: Focus }>
     ) => {
       const { region, focus } = action.payload;
 

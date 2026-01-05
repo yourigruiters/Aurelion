@@ -22,19 +22,20 @@ import Input from "./ui/Input";
 import Select from "./ui/Select";
 import ResourceItem from "./ui/ResourceItem";
 import { getResourceDetails } from "../helpers/resource";
+import { Focus, Region } from "../types";
 
 interface FormData {
   cityName: string;
-  region: string;
-  focus: string;
+  region?: Region;
+  focus?: Focus;
 }
 
 const GameStartModal: React.FC = () => {
   const dispatch = useDispatch();
   const [formData, setFormData] = useState<FormData>({
     cityName: "",
-    region: "",
-    focus: "",
+    region: undefined,
+    focus: undefined,
   });
 
   const handleChange = (
@@ -54,15 +55,24 @@ const GameStartModal: React.FC = () => {
       return;
     }
 
+    if (!formData.region || !formData.focus) {
+      alert("Please select a region and focus");
+      return;
+    }
+
     // Dispatch actions to start game
     dispatch(
       startGame({
-        ...formData,
+        cityName: formData.cityName,
+        region: formData.region,
+        focus: formData.focus,
         gameStarted: true,
       })
     );
 
-    dispatch(initializeResources({ ...formData }));
+    dispatch(
+      initializeResources({ region: formData.region, focus: formData.focus })
+    );
 
     if (formData.focus === "Gathering") {
       dispatch(constructHouse({ plotId: 1, type: "homestead" }));

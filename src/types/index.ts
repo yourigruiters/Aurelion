@@ -41,8 +41,8 @@ export type Focus = "Building" | "Gathering" | "Fighting";
 export interface GameState {
   gameStarted: boolean;
   cityName: string;
-  region: string;
-  focus: string;
+  region: Region;
+  focus: Focus;
 }
 
 export interface UIState {

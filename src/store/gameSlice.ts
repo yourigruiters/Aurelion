@@ -1,11 +1,11 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { GameState } from "../types";
+import { Focus, GameState, Region } from "../types";
 
 const initialState: GameState = {
   gameStarted: false,
   cityName: "",
-  region: "", // "Forest Realm", "Riverlands", "Highland pass"
-  focus: "", // "Building", "Gathering", "Fighting"
+  region: "" as Region, // "Forest Realm", "Riverlands", "Highland pass"
+  focus: "" as Focus, // "Building", "Gathering", "Fighting"
 };
 
 export const gameSlice = createSlice({
