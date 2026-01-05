@@ -6,13 +6,39 @@ import RightSidebar from "./RightSidebar";
 import Footer from "./Footer";
 import DayProgressBar from "./DayProgressBar";
 
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import GameStartModal from "../GameStartModal";
 import { RootState } from "../../store/store";
+import { advanceDay } from "../../store/resourcesSlice";
+import { tickTime, resetDayTime } from "../../store/gameSlice";
+import { useEffect } from "react";
+import { DAY_DURATION_MS } from "../../helpers/game";
 
 const MainLayout: React.FC = () => {
-  const { gameStarted } = useSelector((state: RootState) => state.game);
+  const dispatch = useDispatch();
+  const { gameStarted, dayTime } = useSelector(
+    (state: RootState) => state.game
+  );
   const [isRightSidebarOpen, setIsRightSidebarOpen] = React.useState(true);
+
+  // Game Loop: Tick Time
+  useEffect(() => {
+    if (!gameStarted) return;
+
+    const intervalId = setInterval(() => {
+      dispatch(tickTime(1000));
+    }, 1000);
+
+    return () => clearInterval(intervalId);
+  }, [gameStarted, dispatch]);
+
+  // Game Loop: Check Day End
+  useEffect(() => {
+    if (dayTime >= DAY_DURATION_MS) {
+      dispatch(advanceDay());
+      dispatch(resetDayTime());
+    }
+  }, [dayTime, dispatch]);
 
   const toggleRightSidebar = () => {
     setIsRightSidebarOpen((prev) => !prev);

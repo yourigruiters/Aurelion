@@ -64,14 +64,15 @@ const GameStartModal: React.FC = () => {
     dispatch(
       startGame({
         cityName: formData.cityName,
-        region: formData.region,
-        focus: formData.focus,
+        region: formData.region!,
+        focus: formData.focus!,
         gameStarted: true,
+        dayTime: 0,
       })
     );
 
     dispatch(
-      initializeResources({ region: formData.region, focus: formData.focus })
+      initializeResources({ region: formData.region!, focus: formData.focus! })
     );
 
     if (formData.focus === "Gathering") {

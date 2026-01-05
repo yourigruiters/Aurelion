@@ -52,18 +52,6 @@ export const resourcesSlice = createSlice({
         state.resources[resource] += amount;
       }
     },
-    tickResources: (state) => {
-      // Simulate resource generation based on rates and modifiers
-      (Object.keys(state.resources) as Array<keyof Resources>).forEach(
-        (key) => {
-          if (state.rates[key]) {
-            // @ts-ignore - Index signature for modifiers might be needed or strict keys
-            const modifier = state.modifiers[key] || 1;
-            state.resources[key] += state.rates[key] * modifier;
-          }
-        }
-      );
-    },
     initializeResources: (
       state,
       action: PayloadAction<{ region: Region; focus: Focus }>
@@ -74,7 +62,7 @@ export const resourcesSlice = createSlice({
 
       state.population = resourceDetails.population;
       state.resources = resourceDetails.resources;
-      state.modifiers = resourceDetails.resources;
+      state.modifiers = resourceDetails.modifiers;
       state.rates = resourceDetails.rates;
       state.gameStartTime = Date.now();
     },
@@ -86,6 +74,11 @@ export const resourcesSlice = createSlice({
           if (state.rates[key]) {
             // @ts-ignore
             const modifier = state.modifiers[key] || 1;
+            console.log(
+              state.rates[key],
+              modifier,
+              state.rates[key] * modifier
+            );
             state.resources[key] += state.rates[key] * modifier;
           }
         }
@@ -202,7 +195,6 @@ export const resourcesSlice = createSlice({
 
 export const {
   updateResource,
-  tickResources,
   advanceDay,
   setRate,
   initializeResources,

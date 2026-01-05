@@ -43,6 +43,7 @@ export interface GameState {
   cityName: string;
   region: Region;
   focus: Focus;
+  dayTime: number;
 }
 
 export interface UIState {

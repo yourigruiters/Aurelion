@@ -1,9 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
-
-const DAY_DURATION_MS = 3 * 60 * 1000; // 3 minutes
-const SEGMENT_DURATION_MS = 1 * 60 * 1000; // 1 minutes
+import { DAY_DURATION_MS, SEGMENT_DURATION_MS } from "../../helpers/game";
 
 interface ZoneProps {
   startMs: number;
@@ -49,24 +47,7 @@ const Zone: React.FC<ZoneProps> = ({
 };
 
 const DayProgressBar: React.FC = () => {
-  const gameStartTime = useSelector(
-    (state: RootState) => state.resources.gameStartTime
-  );
-  const [progress, setProgress] = useState(0);
-
-  useEffect(() => {
-    const updateProgress = () => {
-      const now = Date.now();
-      const start = gameStartTime || now; // Handle null start time
-      const elapsed = (now - start) % DAY_DURATION_MS;
-      setProgress(elapsed);
-    };
-
-    const interval = setInterval(updateProgress, 1000);
-    updateProgress();
-
-    return () => clearInterval(interval);
-  }, [gameStartTime]);
+  const { dayTime } = useSelector((state: RootState) => state.game);
 
   return (
     <div className="w-full h-[10px] bg-zinc-800 flex relative overflow-visible border-b border-zinc-700">
@@ -74,7 +55,7 @@ const DayProgressBar: React.FC = () => {
       <Zone
         startMs={0}
         endMs={SEGMENT_DURATION_MS}
-        currentProgressMs={progress}
+        currentProgressMs={dayTime}
         colorClass="bg-gradient-to-r from-green-600 to-green-400"
         tooltipText="You can setup your population and run activities for today"
       />
@@ -83,7 +64,7 @@ const DayProgressBar: React.FC = () => {
       <Zone
         startMs={SEGMENT_DURATION_MS}
         endMs={SEGMENT_DURATION_MS * 2}
-        currentProgressMs={progress}
+        currentProgressMs={dayTime}
         colorClass="bg-gradient-to-r from-yellow-600 to-yellow-400"
         tooltipText="You can run activities for today"
       />
@@ -92,7 +73,7 @@ const DayProgressBar: React.FC = () => {
       <Zone
         startMs={SEGMENT_DURATION_MS * 2}
         endMs={DAY_DURATION_MS}
-        currentProgressMs={progress}
+        currentProgressMs={dayTime}
         colorClass="bg-gradient-to-r from-red-600 to-red-400"
         tooltipText="Activities are now stopped until the next day"
       />
@@ -104,11 +85,11 @@ const DayProgressBar: React.FC = () => {
       {/* Timer Overlay */}
       <div className="absolute inset-0 flex items-center justify-center z-30 pointer-events-none">
         <span className="relative top-2 pointer-all text-xs font-mono font-bold text-white bg-zinc-900 border border-zinc-700 shadow-xl px-3 py-1 rounded-md z-40">
-          {Math.floor(progress / 60000)}:
-          {Math.floor((progress % 60000) / 1000)
+          {Math.floor(dayTime / 60000)}:
+          {Math.floor((dayTime % 60000) / 1000)
             .toString()
             .padStart(2, "0")}{" "}
-          / 3:00
+          / 1:00
         </span>
       </div>
     </div>
