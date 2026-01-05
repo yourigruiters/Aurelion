@@ -70,12 +70,15 @@ const ResourceItem: React.FC<ResourceItemProps> = ({
               </span>
             </div>
           )}
-          {modifier !== undefined && modifier > 1 && rate !== undefined && (
-            <div className="mt-2 pt-2 border-t border-border-light flex justify-between font-bold text-text-main">
-              <span>Total:</span>
-              <span>+{Math.round(rate * modifier)} / day</span>
-            </div>
-          )}
+          {modifier !== undefined &&
+            modifier > 1 &&
+            rate !== undefined &&
+            rate > 0 && (
+              <div className="mt-2 pt-2 border-t border-border-light flex justify-between font-bold text-text-main">
+                <span>Total:</span>
+                <span>+{Math.round(rate * modifier)} / day</span>
+              </div>
+            )}
         </div>
       )}
     </div>

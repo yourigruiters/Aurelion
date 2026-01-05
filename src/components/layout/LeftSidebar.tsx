@@ -11,6 +11,8 @@ import {
   ShieldAlert,
   Activity,
   LucideIcon,
+  Swords,
+  Shield,
 } from "lucide-react";
 
 interface SidebarItemProps {
@@ -36,8 +38,12 @@ const SidebarItem: React.FC<SidebarItemProps> = ({ to, icon: Icon, label }) => (
 );
 
 const LeftSidebar: React.FC = () => {
+  /* Restore game state selectors */
   const { level, experience, maxExperience } = useSelector(
     (state: RootState) => state.game
+  );
+  const { militaryPower, defense } = useSelector(
+    (state: RootState) => state.military
   );
 
   const menuItems = [
@@ -71,11 +77,35 @@ const LeftSidebar: React.FC = () => {
             style={{ width: `${xpPercentage}%` }}
           />
         </div>
-        <div className="flex justify-between mt-1">
+        <div className="flex justify-between mt-1 mb-4">
           <span className="text-[10px] text-text-muted">XP</span>
           <span className="text-[10px] text-text-muted">
             {experience} / {maxExperience}
           </span>
+        </div>
+
+        {/* Military Stats */}
+        <div className="grid grid-cols-2 gap-2">
+          <div className="flex items-center gap-2 px-2 py-1 bg-bg-main rounded border border-border-main">
+            <Swords size={14} className="text-danger" />
+            <div className="flex flex-col">
+              <span className="text-[10px] text-text-muted uppercase leading-none">
+                Atk
+              </span>
+              <span className="text-xs font-bold leading-none">
+                {militaryPower}
+              </span>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 px-2 py-1 bg-bg-main rounded border border-border-main">
+            <Shield size={14} className="text-blue-500" />
+            <div className="flex flex-col">
+              <span className="text-[10px] text-text-muted uppercase leading-none">
+                Def
+              </span>
+              <span className="text-xs font-bold leading-none">{defense}</span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -85,7 +115,7 @@ const LeftSidebar: React.FC = () => {
         </h2>
       </div>
 
-      <nav className="flex-1 overflow-y-auto py-2 flex flex-col justify-center">
+      <nav className="flex-1 overflow-y-auto py-2 flex flex-col">
         {menuItems.map((item) => (
           <SidebarItem
             key={item.to}
