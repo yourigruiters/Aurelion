@@ -53,7 +53,6 @@ const LeftSidebar: React.FC = () => {
     { to: "/buildings", icon: Hammer, label: "Buildings" },
     { to: "/market", icon: ShoppingCart, label: "Market Hall" },
     { to: "/military", icon: ShieldAlert, label: "Military" },
-    { to: "/map", icon: Map, label: "Region Map" },
   ];
 
   const xpPercentage = Math.min(
@@ -90,7 +89,7 @@ const LeftSidebar: React.FC = () => {
             <Swords size={14} className="text-danger" />
             <div className="flex flex-col">
               <span className="text-[10px] text-text-muted uppercase leading-none">
-                Atk
+                Attack
               </span>
               <span className="text-xs font-bold leading-none">
                 {militaryPower}
@@ -101,7 +100,7 @@ const LeftSidebar: React.FC = () => {
             <Shield size={14} className="text-blue-500" />
             <div className="flex flex-col">
               <span className="text-[10px] text-text-muted uppercase leading-none">
-                Def
+                Defense
               </span>
               <span className="text-xs font-bold leading-none">{defense}</span>
             </div>

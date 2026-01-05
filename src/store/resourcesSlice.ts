@@ -105,6 +105,12 @@ export const resourcesSlice = createSlice({
           resource2: "iron",
           amount2: 1,
         },
+        "Deep Miner": {
+          resource: "stone",
+          amount: 8,
+          resource2: "iron",
+          amount2: 3,
+        },
         // Builder: Construction Speed
         // Blacksmith: Tools
         Merchant: { resource: "gold", amount: 5 },

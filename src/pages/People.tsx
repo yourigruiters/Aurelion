@@ -8,7 +8,6 @@ import {
   Axe,
   Pickaxe,
   Hammer,
-  Anvil,
   Coins,
   Swords,
   Lock,
@@ -22,6 +21,9 @@ import {
 } from "lucide-react";
 import Button from "../components/ui/Button";
 
+import { SEGMENT_DURATION_MS } from "../helpers/game";
+import { BUILDING_DEFINITIONS, BuildingId } from "../store/buildingsSlice"; // Import BuildingId
+
 interface Impact {
   resource: string; // keyof Resources but flexible for now
   val: number;
@@ -34,7 +36,8 @@ interface RoleDefinition {
   description: string;
   icon: LucideIcon;
   color: string;
-  locked: boolean;
+  locked?: boolean; // Deprecated in favor of requiredBuilding, but kept for simple locks
+  requiredBuilding?: BuildingId; // Properly typed using BuildingId
   impacts: Impact[];
 }
 
@@ -46,7 +49,6 @@ const ROLE_DEFINITIONS: RoleDefinition[] = [
     description: "Cultivates crops for food.",
     icon: Wheat,
     color: "text-succes",
-    locked: false,
     impacts: [{ resource: "food", val: 12, icon: Apple }],
   },
   {
@@ -55,7 +57,6 @@ const ROLE_DEFINITIONS: RoleDefinition[] = [
     description: "Catches fish from local waters.",
     icon: Fish,
     color: "text-blue-400",
-    locked: false,
     impacts: [{ resource: "food", val: 8, icon: Apple }],
   },
   {
@@ -64,7 +65,6 @@ const ROLE_DEFINITIONS: RoleDefinition[] = [
     description: "Chops trees for timber.",
     icon: Axe,
     color: "text-brand",
-    locked: false,
     impacts: [{ resource: "wood", val: 10, icon: Wheat }],
   },
   {
@@ -73,28 +73,30 @@ const ROLE_DEFINITIONS: RoleDefinition[] = [
     description: "Digs deep for stone and iron.",
     icon: Pickaxe,
     color: "text-text-secondary",
-    locked: false,
     impacts: [
       { resource: "stone", val: 5, icon: Mountain },
       { resource: "iron", val: 1, icon: Hammer },
     ],
   },
   {
-    id: "Builder",
-    name: "Builder",
-    description: "Constructs buildings faster.",
-    icon: Hammer,
-    color: "text-orange-400",
-    locked: true,
-    impacts: [],
+    id: "Deep Miner",
+    name: "Deep Miner",
+    description: "Extracts deep earth minerals.",
+    icon: Pickaxe,
+    color: "text-indigo-400",
+    requiredBuilding: "deep_mine", // Requires Deep Mine
+    impacts: [
+      { resource: "stone", val: 8, icon: Mountain },
+      { resource: "iron", val: 3, icon: Hammer },
+    ],
   },
+
   {
-    id: "Blacksmith",
-    name: "Blacksmith",
-    description: "Forges tools and weapons.",
-    icon: Anvil,
-    color: "text-gray-400",
-    locked: true,
+    id: "Warrior",
+    name: "Warrior",
+    description: "Defends the colony.",
+    icon: Swords,
+    color: "text-danger",
     impacts: [],
   },
   {
@@ -103,21 +105,10 @@ const ROLE_DEFINITIONS: RoleDefinition[] = [
     description: "Trades goods for profit.",
     icon: Coins,
     color: "text-accent",
-    locked: true,
+    requiredBuilding: "trade_post", // Requires Trade Post
     impacts: [{ resource: "gold", val: 5, icon: Gem }],
   },
-  {
-    id: "Warrior",
-    name: "Warrior",
-    description: "Defends the colony.",
-    icon: Swords,
-    color: "text-danger",
-    locked: true,
-    impacts: [],
-  },
 ];
-
-import { SEGMENT_DURATION_MS } from "../helpers/game";
 
 const People: React.FC = () => {
   const dispatch = useDispatch();
@@ -127,6 +118,7 @@ const People: React.FC = () => {
     rates: currentRates,
   } = useSelector((state: RootState) => state.resources);
   const { dayTime } = useSelector((state: RootState) => state.game);
+  const { buildings } = useSelector((state: RootState) => state.buildings); // Add buildings selector
 
   // Expire after 1st segment (20s)
   const expireThreshold = SEGMENT_DURATION_MS;
@@ -329,7 +321,24 @@ const People: React.FC = () => {
           <div className="grid grid-cols-1 gap-4">
             {ROLE_DEFINITIONS.map((role) => {
               const count = localAssignments[role.id] || 0;
-              const isLocked = role.locked;
+
+              // Dynamic Lock Logic
+              let isLocked = role.locked || false;
+              let lockReason = "Locked";
+
+              if (role.requiredBuilding) {
+                // @ts-ignore
+                const building = buildings[role.requiredBuilding];
+                if (!building || !building.unlocked) {
+                  isLocked = true;
+                  // @ts-ignore
+                  const buildingName =
+                    BUILDING_DEFINITIONS[role.requiredBuilding]?.name ||
+                    "Building";
+                  lockReason = `Requires ${buildingName}`;
+                }
+              }
+
               const Icon = role.icon;
 
               return (
@@ -350,13 +359,18 @@ const People: React.FC = () => {
                     >
                       {isLocked ? <Lock size={24} /> : <Icon size={24} />}
                     </div>
-                    <div className="overflow-hidden">
-                      <h3 className="text-lg font-bold text-text-main truncate">
+                    <div className="overflow-hidden flex flex-col justify-center">
+                      <h3 className="text-lg font-bold text-text-main truncate leading-tight">
                         {role.name}
                       </h3>
-                      <p className="text-sm text-text-secondary truncate">
+                      <p className="text-sm text-text-secondary truncate leading-tight">
                         {role.description}
                       </p>
+                      {isLocked && (
+                        <p className="text-xs text-danger font-bold mt-0.5">
+                          {lockReason}
+                        </p>
+                      )}
                     </div>
                   </div>
 

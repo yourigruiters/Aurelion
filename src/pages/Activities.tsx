@@ -7,7 +7,7 @@ import ActivityCard from "../components/ui/ActivityCard";
 import { ShieldCheck, Skull } from "lucide-react";
 import { Resources } from "../types";
 
-import { DAY_DURATION_MS, SEGMENT_DURATION_MS } from "../helpers/game";
+import { SEGMENT_DURATION_MS } from "../helpers/game";
 
 const Activities: React.FC = () => {
   const dispatch = useDispatch();

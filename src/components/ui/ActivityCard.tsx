@@ -8,7 +8,6 @@ import {
   Coins,
   Mountain,
   Hammer,
-  Clock, // Added Clock
 } from "lucide-react";
 
 interface ActivityCardProps {

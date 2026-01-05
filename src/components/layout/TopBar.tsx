@@ -77,20 +77,49 @@ const TopBar: React.FC<TopBarProps> = ({
     0
   );
 
+  // Define roles to display (excluding Warrior for the main list)
+  const civilianRoles = [
+    "Farmer",
+    "Fisher",
+    "Woodcutter",
+    "Miner",
+    "Deep Miner",
+    "Merchant",
+  ];
+
   const populationTooltip = (
-    <div>
-      <div>Population</div>
-      {idleVillagers > 0 ? (
-        <div className="text-danger flex justify-between mt-1 font-normal">
-          <span>Idle:</span>
-          <span>{idleVillagers}</span>
+    <div className="min-w-[140px]">
+      <div className="font-bold pb-1 mb-1">Population</div>
+      <div className="space-y-1">
+        {civilianRoles.map((role) => (
+          <div key={role} className="flex justify-between text-xs">
+            <span className="text-text-secondary">{role}:</span>
+            <span className="font-mono">{assignments[role] || 0}</span>
+          </div>
+        ))}
+      </div>
+
+      <div className="my-2 border-t border-border-light opacity-50" />
+
+      <div className="space-y-1">
+        <div className="flex justify-between text-xs">
+          <span className="font-semibold text-text-secondary">Warrior:</span>
+          <span className="font-mono font-bold">
+            {assignments["Warrior"] || 0}
+          </span>
         </div>
-      ) : (
-        <div className="text-success flex justify-between mt-1 font-normal">
-          <span>Status:</span>
-          <span>All Active</span>
+
+        <div className="my-2 border-t border-border-light opacity-50" />
+
+        <div
+          className={`flex justify-between text-xs ${
+            idleVillagers > 0 ? "text-danger" : "text-success"
+          }`}
+        >
+          <span className="font-semibold">Idle:</span>
+          <span className="font-mono font-bold">{idleVillagers}</span>
         </div>
-      )}
+      </div>
     </div>
   );
 
@@ -137,7 +166,20 @@ const TopBar: React.FC<TopBarProps> = ({
             max={totalHousingCapacity} // Add max prop if supported or handle via value string
             color="text-info"
             tooltipLabel={populationTooltip}
-            customValueDisplay={`${population}/${totalHousingCapacity}`}
+            customValueDisplay={
+              <span className="flex items-center">
+                <span
+                  className={
+                    idleVillagers > 0
+                      ? "font-bold text-danger"
+                      : "text-text-muted"
+                  }
+                >
+                  {population}
+                </span>
+                <span className="text-text-muted">/{totalHousingCapacity}</span>
+              </span>
+            }
           />
           <ResourceItem
             icon={Apple}

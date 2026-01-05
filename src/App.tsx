@@ -5,7 +5,6 @@ import People from "./pages/People";
 import Market from "./pages/Market";
 import Military from "./pages/Military";
 import Activities from "./pages/Activities";
-import RegionMap from "./pages/RegionMap";
 import MainLayout from "./components/layout/MainLayout";
 
 function App() {
@@ -19,7 +18,6 @@ function App() {
         <Route path="market" element={<Market />} />
         <Route path="military" element={<Military />} />
         <Route path="activities" element={<Activities />} />
-        <Route path="map" element={<RegionMap />} />
       </Route>
     </Routes>
   );
