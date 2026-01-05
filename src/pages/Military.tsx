@@ -7,6 +7,7 @@ import {
   unlockTech,
   TechDefinition,
 } from "../store/militarySlice";
+import { addExperience } from "../store/gameSlice";
 import { deductResources } from "../store/resourcesSlice";
 import Button from "../components/ui/Button";
 import {
@@ -17,6 +18,7 @@ import {
   Castle,
   Lock,
   CheckCircle,
+  Clock, // Added Clock
 } from "lucide-react";
 
 // Helper for icons
@@ -43,6 +45,7 @@ const Military: React.FC = () => {
     (state: RootState) => state.military
   );
   const { resources } = useSelector((state: RootState) => state.resources);
+  const { level: playerLevel } = useSelector((state: RootState) => state.game);
 
   const canAfford = (cost: Record<string, number>) => {
     return Object.entries(cost).every(([res, amount]) => {

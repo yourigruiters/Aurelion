@@ -23,6 +23,9 @@ export interface TechDefinition {
     defense?: number;
   };
   requires?: TechId[];
+  researchTimeDays?: number; // In game days
+  requiredLevel?: number; // Player level
+  experience?: number; // XP gained
 }
 
 export const MILITARY_TECHS: Record<TechId, TechDefinition> = {
@@ -32,6 +35,9 @@ export const MILITARY_TECHS: Record<TechId, TechDefinition> = {
     description: "Equip your militia with simple swords and spears.",
     cost: { wood: 100, stone: 50 },
     effects: { power: 5 },
+    researchTimeDays: 1,
+    requiredLevel: 1,
+    experience: 20,
   },
   leather_armor: {
     id: "leather_armor",
@@ -39,6 +45,9 @@ export const MILITARY_TECHS: Record<TechId, TechDefinition> = {
     description: "Basic protection for your troops.",
     cost: { food: 150, wood: 50 },
     effects: { defense: 5 },
+    researchTimeDays: 1,
+    requiredLevel: 1,
+    experience: 20,
   },
   archery: {
     id: "archery",
@@ -46,6 +55,9 @@ export const MILITARY_TECHS: Record<TechId, TechDefinition> = {
     description: "Train archers to strike from a distance.",
     cost: { wood: 200 },
     effects: { power: 10 },
+    researchTimeDays: 2,
+    requiredLevel: 2,
+    experience: 30,
   },
   iron_forging: {
     id: "iron_forging",
@@ -54,6 +66,9 @@ export const MILITARY_TECHS: Record<TechId, TechDefinition> = {
     cost: { wood: 300, iron: 100 },
     effects: { power: 20 },
     requires: ["basic_weaponry"],
+    researchTimeDays: 3,
+    requiredLevel: 3,
+    experience: 50,
   },
   fortifications: {
     id: "fortifications",
@@ -62,6 +77,9 @@ export const MILITARY_TECHS: Record<TechId, TechDefinition> = {
     cost: { stone: 500, iron: 200 },
     effects: { defense: 50 },
     requires: ["iron_forging"],
+    researchTimeDays: 4,
+    requiredLevel: 4,
+    experience: 80,
   },
 };
 

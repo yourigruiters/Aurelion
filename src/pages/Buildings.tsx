@@ -10,6 +10,7 @@ import {
   unlockBuilding,
   HouseType,
 } from "../store/buildingsSlice";
+import { addExperience } from "../store/gameSlice";
 import { deductResources } from "../store/resourcesSlice";
 import Button from "../components/ui/Button";
 import {
@@ -57,6 +58,7 @@ const Buildings: React.FC = () => {
     (state: RootState) => state.buildings
   );
   const { resources } = useSelector((state: RootState) => state.resources);
+  const { level: playerLevel } = useSelector((state: RootState) => state.game);
 
   // Expanded state for building rows
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
@@ -93,24 +95,31 @@ const Buildings: React.FC = () => {
   const handleUpgradeBuilding = (id: BuildingId) => {
     const building = buildings[id];
     if (!building) return;
+    const def = BUILDING_DEFINITIONS[id];
+
+    // Check level req
+    if (playerLevel < def.requiredLevel) return;
+
     const cost = getUpgradeCost(id, building.level);
 
     if (canAfford(cost)) {
       dispatch(deductResources(cost));
       dispatch(upgradeBuilding(id));
-      // If unlocking was separate, we'd handle it, but here unlocking logic can be part of upgrade/unlock button
+      dispatch(addExperience(def.experience));
     }
   };
 
   const handleUnlockBuilding = (id: BuildingId) => {
-    // Determine Unlock Cost - maybe same as base cost?
-    // Let's assume unlocking costs the baseCost of the building
     const def = BUILDING_DEFINITIONS[id];
+    // Check level req
+    if (playerLevel < def.requiredLevel) return;
+
     const cost = def.baseCost;
 
     if (canAfford(cost)) {
       dispatch(deductResources(cost));
       dispatch(unlockBuilding(id));
+      dispatch(addExperience(def.experience));
     }
   };
 
@@ -218,47 +227,128 @@ const Buildings: React.FC = () => {
 
                   <div className="mt-auto pt-2 border-t border-border-main/50 space-y-2">
                     {isEmpty && (
-                      <>
+                      <div className="space-y-3">
+                        {/* Cottage Option */}
+                        <div className="bg-bg-panel/50 p-2 rounded border border-border-main/50">
+                          <div className="flex justify-between items-center mb-2">
+                            <span className="text-xs font-bold text-text-main">
+                              Small Cottage
+                            </span>
+                            <div className="flex items-center gap-2">
+                              <span
+                                className={`text-xs ${
+                                  resources.wood >= 50
+                                    ? "text-text-main"
+                                    : "text-danger"
+                                }`}
+                              >
+                                50
+                              </span>
+                              <ResourceIcon resource="wood" size={12} />
+                            </div>
+                          </div>
+                          <Button
+                            className="w-full text-xs"
+                            variant="outline"
+                            onClick={() =>
+                              handleConstructHouse(plotId, "cottage")
+                            }
+                            disabled={!canAfford({ wood: 50 })}
+                          >
+                            Build Cottage
+                          </Button>
+                        </div>
+
+                        {/* Homestead Option */}
+                        <div className="bg-bg-panel/50 p-2 rounded border border-border-main/50">
+                          <div className="flex justify-between items-center mb-2">
+                            <span className="text-xs font-bold text-text-main">
+                              Homestead
+                            </span>
+                            <div className="flex items-center gap-3">
+                              <div className="flex items-center gap-1">
+                                <span
+                                  className={`text-xs ${
+                                    resources.wood >= 150
+                                      ? "text-text-main"
+                                      : "text-danger"
+                                  }`}
+                                >
+                                  150
+                                </span>
+                                <ResourceIcon resource="wood" size={12} />
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <span
+                                  className={`text-xs ${
+                                    resources.stone >= 50
+                                      ? "text-text-main"
+                                      : "text-danger"
+                                  }`}
+                                >
+                                  50
+                                </span>
+                                <ResourceIcon resource="stone" size={12} />
+                              </div>
+                            </div>
+                          </div>
+                          <Button
+                            className="w-full text-xs"
+                            variant="outline"
+                            onClick={() =>
+                              handleConstructHouse(plotId, "homestead")
+                            }
+                            disabled={!canAfford({ wood: 150, stone: 50 })}
+                          >
+                            Build Homestead
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                    {isCottage && (
+                      <div className="bg-bg-panel/50 p-2 rounded border border-border-main/50">
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-xs font-bold text-text-main">
+                            Upgrade to Homestead
+                          </span>
+                          <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-1">
+                              <span
+                                className={`text-xs ${
+                                  resources.wood >= 100
+                                    ? "text-text-main"
+                                    : "text-danger"
+                                }`}
+                              >
+                                100
+                              </span>
+                              <ResourceIcon resource="wood" size={12} />
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <span
+                                className={`text-xs ${
+                                  resources.stone >= 50
+                                    ? "text-text-main"
+                                    : "text-danger"
+                                }`}
+                              >
+                                50
+                              </span>
+                              <ResourceIcon resource="stone" size={12} />
+                            </div>
+                          </div>
+                        </div>
                         <Button
-                          className="w-full text-xs flex items-center justify-center gap-1"
-                          variant="outline"
-                          onClick={() =>
-                            handleConstructHouse(plotId, "cottage")
-                          }
-                          disabled={!canAfford({ wood: 50 })}
-                        >
-                          Build Cottage (50{" "}
-                          <ResourceIcon resource="wood" size={12} />)
-                        </Button>
-                        <Button
-                          className="w-full text-xs flex items-center justify-center gap-1"
+                          className="w-full text-xs"
                           variant="outline"
                           onClick={() =>
                             handleConstructHouse(plotId, "homestead")
                           }
-                          disabled={!canAfford({ wood: 150, stone: 50 })}
+                          disabled={!canAfford({ wood: 100, stone: 50 })}
                         >
-                          Build Homestead (150{" "}
-                          <ResourceIcon resource="wood" size={12} />, 50{" "}
-                          <ResourceIcon resource="stone" size={12} />)
+                          Upgrade
                         </Button>
-                      </>
-                    )}
-                    {isCottage && (
-                      <Button
-                        className="w-full text-xs flex items-center justify-center gap-1"
-                        variant="primary" // Keeping primary for upgrade urgency/importance? Or outline? User said "For the other plots, also just directly place the buttons...". User said "The orange buttons... are kind of IN YOUR FACE... maybe transparent". Okay, let's use outline for these too mostly.
-                        // I'll stick to primary for "Upgrade" to distinguish from build, but maybe user wants all less screamy.
-                        // Let's try Outline for Upgrade too, or Secondary.
-                        onClick={() =>
-                          handleConstructHouse(plotId, "homestead")
-                        }
-                        disabled={!canAfford({ wood: 100, stone: 50 })}
-                      >
-                        Upgrade to Homestead (100{" "}
-                        <ResourceIcon resource="wood" size={12} />, 50{" "}
-                        <ResourceIcon resource="stone" size={12} />)
-                      </Button>
+                      </div>
                     )}
                     {isHomestead && (
                       <div className="text-center text-xs text-success font-semibold py-2">
@@ -289,6 +379,7 @@ const Buildings: React.FC = () => {
               const nextLevel = building.level + 1;
               const cost = getUpgradeCost(id as BuildingId, building.level);
               const affordable = canAfford(cost);
+              const levelLocked = playerLevel < def.requiredLevel;
               const Icon = def.icon;
 
               return (
@@ -312,7 +403,9 @@ const Buildings: React.FC = () => {
                             {def.name}
                           </h3>
                           <p className="text-sm text-text-muted">
-                            Locked structure.
+                            {levelLocked
+                              ? `Requires City Level ${def.requiredLevel}`
+                              : "Locked structure."}
                           </p>
                         </div>
                       </div>
@@ -325,14 +418,18 @@ const Buildings: React.FC = () => {
                             </span>
                           ))}
                         </div>
-                        <Button
-                          onClick={() => handleUnlockBuilding(id as BuildingId)}
-                          disabled={!canAfford(def.baseCost)}
-                          variant="outline"
-                          className="min-w-[100px]"
-                        >
-                          Unlock
-                        </Button>
+                        {levelLocked ? null : (
+                          <Button
+                            onClick={() =>
+                              handleUnlockBuilding(id as BuildingId)
+                            }
+                            disabled={!canAfford(def.baseCost)}
+                            variant="outline"
+                            className="min-w-[100px]"
+                          >
+                            Unlock
+                          </Button>
+                        )}
                       </div>
                     </div>
                   ) : (
@@ -406,9 +503,14 @@ const Buildings: React.FC = () => {
                               </span>{" "}
                               {def.effectDescription}
                             </p>
-                            <div className="flex items-center gap-2 text-sm text-text-muted">
-                              <Clock size={16} />
-                              <span>Time to build: {def.baseTime}s</span>
+                            <div className="flex items-center gap-4 text-sm text-text-muted">
+                              <div className="flex items-center gap-1">
+                                <Clock size={16} />
+                                <span>{def.buildTimeDays} Days</span>
+                              </div>
+                              <div className="flex items-center gap-1 text-accent">
+                                <span>+{def.experience} XP</span>
+                              </div>
                             </div>
                           </div>
 
@@ -446,16 +548,27 @@ const Buildings: React.FC = () => {
                               </div>
                             </div>
 
-                            <Button
-                              onClick={() =>
-                                handleUpgradeBuilding(id as BuildingId)
-                              }
-                              disabled={!affordable}
-                              variant="outline" // Using outline as requested
-                              className="w-full justify-center"
-                            >
-                              Upgrade
-                            </Button>
+                            {levelLocked ? (
+                              <div className="bg-bg-main p-3 rounded border border-danger/30">
+                                <span className="text-xs font-bold text-danger uppercase mb-1 block">
+                                  Requirements
+                                </span>
+                                <ul className="list-disc list-inside text-xs text-danger/80 space-y-0.5">
+                                  <li>City Level {def.requiredLevel}</li>
+                                </ul>
+                              </div>
+                            ) : (
+                              <Button
+                                onClick={() =>
+                                  handleUpgradeBuilding(id as BuildingId)
+                                }
+                                disabled={!affordable}
+                                variant="outline"
+                                className="w-full justify-center"
+                              >
+                                Upgrade
+                              </Button>
+                            )}
                           </div>
                         </div>
                       )}

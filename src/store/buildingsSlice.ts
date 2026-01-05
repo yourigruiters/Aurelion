@@ -31,7 +31,10 @@ export interface BuildingDefinition {
   maxLevel: number;
   baseCost: Record<string, number>; // e.g. { wood: 100, stone: 50 }
   costScaling: number; // multiplier per level
-  baseTime: number; // in seconds (for display mostly)
+  baseTime: number; // in seconds (for display mostly) - keeping for legacy or animation
+  buildTimeDays: number; // New: In game days
+  requiredLevel: number; // New: Player level required
+  experience: number; // New: XP gained
   effectDescription: string;
   icon: any; // LucideIcon
 }
@@ -58,6 +61,9 @@ export const BUILDING_DEFINITIONS: Record<BuildingId, BuildingDefinition> = {
     baseCost: { wood: 500, stone: 200, gold: 100 },
     costScaling: 1.5,
     baseTime: 60,
+    buildTimeDays: 2,
+    requiredLevel: 1,
+    experience: 50,
     effectDescription: "Unlocks new buildings and increases global efficiency.",
     icon: Castle,
   },
@@ -69,6 +75,9 @@ export const BUILDING_DEFINITIONS: Record<BuildingId, BuildingDefinition> = {
     baseCost: { wood: 50, gold: 10 },
     costScaling: 1.4,
     baseTime: 30,
+    buildTimeDays: 1,
+    requiredLevel: 1,
+    experience: 20,
     effectDescription: "+20% Food production per level.",
     icon: Wheat,
   },
@@ -80,6 +89,9 @@ export const BUILDING_DEFINITIONS: Record<BuildingId, BuildingDefinition> = {
     baseCost: { wood: 80, gold: 15 },
     costScaling: 1.4,
     baseTime: 30,
+    buildTimeDays: 1,
+    requiredLevel: 2,
+    experience: 25,
     effectDescription: "+20% Fish production per level.",
     icon: Fish,
   },
@@ -91,6 +103,9 @@ export const BUILDING_DEFINITIONS: Record<BuildingId, BuildingDefinition> = {
     baseCost: { wood: 50, food: 50 },
     costScaling: 1.4,
     baseTime: 45,
+    buildTimeDays: 1,
+    requiredLevel: 1,
+    experience: 20,
     effectDescription: "+20% Wood production per level.",
     icon: Axe,
   },
@@ -102,6 +117,9 @@ export const BUILDING_DEFINITIONS: Record<BuildingId, BuildingDefinition> = {
     baseCost: { wood: 200, food: 100 },
     costScaling: 1.6,
     baseTime: 90,
+    buildTimeDays: 2,
+    requiredLevel: 3,
+    experience: 40,
     effectDescription: "+20% Stone and Iron production per level.",
     icon: Pickaxe,
   },
@@ -113,6 +131,9 @@ export const BUILDING_DEFINITIONS: Record<BuildingId, BuildingDefinition> = {
     baseCost: { wood: 300, stone: 100, iron: 50 },
     costScaling: 1.5,
     baseTime: 120,
+    buildTimeDays: 3,
+    requiredLevel: 4,
+    experience: 60,
     effectDescription:
       "Increases tool quality and military equipment production.",
     icon: Hammer,
@@ -125,6 +146,9 @@ export const BUILDING_DEFINITIONS: Record<BuildingId, BuildingDefinition> = {
     baseCost: { wood: 400, stone: 200, gold: 200 },
     costScaling: 1.5,
     baseTime: 60,
+    buildTimeDays: 2,
+    requiredLevel: 3,
+    experience: 45,
     effectDescription: "Improves trade rates and market access.",
     icon: Store,
   },
@@ -136,6 +160,9 @@ export const BUILDING_DEFINITIONS: Record<BuildingId, BuildingDefinition> = {
     baseCost: { wood: 500, stone: 300, iron: 100 },
     costScaling: 1.5,
     baseTime: 180,
+    buildTimeDays: 3,
+    requiredLevel: 2,
+    experience: 50,
     effectDescription: "Increases max standing army and defense.",
     icon: Shield,
   },

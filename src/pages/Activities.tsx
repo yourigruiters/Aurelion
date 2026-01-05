@@ -7,12 +7,19 @@ import ActivityCard from "../components/ui/ActivityCard";
 import { ShieldCheck, Skull } from "lucide-react";
 import { Resources } from "../types";
 
+import { DAY_DURATION_MS, SEGMENT_DURATION_MS } from "../helpers/game";
+
 const Activities: React.FC = () => {
   const dispatch = useDispatch();
   const { dailyActivities, lastGenerationDay } = useSelector(
     (state: RootState) => state.activities
   );
   const { assignments } = useSelector((state: RootState) => state.resources);
+  const { dayTime } = useSelector((state: RootState) => state.game); // Add dayTime selector
+
+  // Activities expire after the yellow zone (2/3 of day)
+  const expireThreshold = SEGMENT_DURATION_MS * 2;
+  const expired = dayTime >= expireThreshold;
 
   // Calculate User Power from Warriors
   // 1 Warrior = 10 Power? Simplified logic.
@@ -67,13 +74,38 @@ const Activities: React.FC = () => {
     <div className="h-full w-full p-6 flex flex-col overflow-hidden bg-bg-main">
       <div className="flex-1 flex flex-col rounded-xl overflow-hidden shadow-xl border border-border-main bg-bg-panel">
         {/* Top Header */}
-        <div className="flex-none p-8 pb-4">
-          <h1 className="text-3xl font-bold text-text-main">
-            Daily Activities
-          </h1>
-          <p className="text-text-secondary">
-            Day {lastGenerationDay} - Choose your undertakings carefully.
-          </p>
+        <div className="flex-none p-8 pb-4 flex justify-between items-start">
+          <div>
+            <h1 className="text-3xl font-bold text-text-main">
+              Daily Activities
+            </h1>
+          </div>
+
+          {/* Global Timer */}
+          <div
+            className={`
+             flex items-center gap-2 px-3 py-1 rounded border font-mono font-bold text-xs
+             ${
+               expired
+                 ? "bg-danger/10 border-danger text-danger"
+                 : "bg-bg-main border-accent text-accent"
+             }
+          `}
+          >
+            {expired ? (
+              <span className="uppercase">Activities locked</span>
+            ) : (
+              <>
+                <span className="text-text-muted mr-1">Time Left:</span>
+                <span>
+                  {Math.floor((expireThreshold - dayTime) / 60000)}:
+                  {Math.floor(((expireThreshold - dayTime) % 60000) / 1000)
+                    .toString()
+                    .padStart(2, "0")}
+                </span>
+              </>
+            )}
+          </div>
         </div>
 
         <div className="flex-1 overflow-y-auto p-8 pt-2 space-y-8">
@@ -91,6 +123,7 @@ const Activities: React.FC = () => {
                   key={activity.id}
                   activity={activity}
                   onPerform={handlePerformActivity}
+                  disabled={expired}
                 />
               ))}
               {safeActivities.length === 0 && (
@@ -120,6 +153,7 @@ const Activities: React.FC = () => {
                   activity={activity}
                   onPerform={handlePerformActivity}
                   userPower={userPower}
+                  disabled={expired}
                 />
               ))}
               {riskyActivities.length === 0 && (

@@ -117,6 +117,8 @@ const ROLE_DEFINITIONS: RoleDefinition[] = [
   },
 ];
 
+import { SEGMENT_DURATION_MS } from "../helpers/game";
+
 const People: React.FC = () => {
   const dispatch = useDispatch();
   const {
@@ -124,6 +126,11 @@ const People: React.FC = () => {
     assignments = {},
     rates: currentRates,
   } = useSelector((state: RootState) => state.resources);
+  const { dayTime } = useSelector((state: RootState) => state.game);
+
+  // Expire after 1st segment (20s)
+  const expireThreshold = SEGMENT_DURATION_MS;
+  const expired = dayTime >= expireThreshold;
 
   // Local state for editing assignments
   const [localAssignments, setLocalAssignments] =
@@ -270,26 +277,54 @@ const People: React.FC = () => {
             </div>
           </div>
 
-          {/* Section 3: Save Button (Right) */}
-          <div className="w-auto flex-none h-full flex items-center justify-center p-4 xl:w-48">
+          {/* Section 3: Timer & Save (Right) */}
+          <div className="w-auto flex-none h-full flex flex-col items-center justify-center p-4 xl:w-64 gap-2">
+            {/* Timer Removed */}
+
             <Button
               onClick={onSave}
               // @ts-ignore
               variant="primary"
               icon={Save}
-              disabled={idlePop < 0}
-              className="w-full justify-center"
+              disabled={idlePop < 0 || expired}
             >
-              Save
+              Save Changes
             </Button>
           </div>
         </div>
 
         {/* Role List */}
         <div className="flex-1 overflow-y-auto p-8 space-y-4">
-          <h1 className="text-3xl font-bold text-text-main mb-6">
-            Population Management
-          </h1>
+          <div className="flex items-center justify-between mb-6">
+            <h1 className="text-3xl font-bold text-text-main">
+              Population Management
+            </h1>
+            {/* Timer moved here */}
+            <div
+              className={`
+                flex items-center gap-2 px-3 py-1 rounded border font-mono font-bold text-xs
+                ${
+                  expired
+                    ? "bg-danger/10 border-danger text-danger"
+                    : "bg-bg-main border-accent text-accent"
+                }
+             `}
+            >
+              {expired ? (
+                <span className="uppercase">Assignments Locked</span>
+              ) : (
+                <>
+                  <span className="text-text-muted mr-1">Time Left:</span>
+                  <span>
+                    {Math.floor((expireThreshold - dayTime) / 60000)}:
+                    {Math.floor(((expireThreshold - dayTime) % 60000) / 1000)
+                      .toString()
+                      .padStart(2, "0")}
+                  </span>
+                </>
+              )}
+            </div>
+          </div>
 
           <div className="grid grid-cols-1 gap-4">
             {ROLE_DEFINITIONS.map((role) => {
@@ -347,7 +382,7 @@ const People: React.FC = () => {
                   <div className="w-48 h-full flex items-center justify-center space-x-4 p-4">
                     <button
                       onClick={() => handleAdjust(role.id, -1)}
-                      disabled={isLocked || count <= 0}
+                      disabled={isLocked || count <= 0 || expired}
                       className="p-2 rounded-full border border-border-main hover:bg-bg-main disabled:opacity-30 disabled:cursor-not-allowed text-text-secondary transition-colors"
                     >
                       <Minus size={20} />
@@ -357,7 +392,7 @@ const People: React.FC = () => {
                     </span>
                     <button
                       onClick={() => handleAdjust(role.id, 1)}
-                      disabled={isLocked || idlePop <= 0}
+                      disabled={isLocked || idlePop <= 0 || expired}
                       className="p-2 rounded-full border border-border-main hover:bg-bg-main disabled:opacity-30 disabled:cursor-not-allowed text-text-secondary transition-colors"
                     >
                       <Plus size={20} />

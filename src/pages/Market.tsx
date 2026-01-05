@@ -69,12 +69,19 @@ const Market: React.FC = () => {
   );
   const gold = resources.gold;
 
+  const getBuyPrice = (basePrice: number) => Math.ceil(basePrice * 1);
+  const getSellPrice = (basePrice: number) => Math.floor(basePrice * 0.5);
+
   const handleTrade = (
     type: "buy" | "sell",
     item: TradeItem,
     amount: number
   ) => {
-    const cost = item.basePrice * amount;
+    const unitPrice =
+      type === "buy"
+        ? getBuyPrice(item.basePrice)
+        : getSellPrice(item.basePrice);
+    const cost = unitPrice * amount;
     dispatch(
       tradeResource({
         type,
@@ -85,7 +92,13 @@ const Market: React.FC = () => {
     );
   };
 
-  const CanAfford = (cost: number) => gold >= cost;
+  const CanAfford = (itemId: string, amount: number) => {
+    const item = TRADE_ITEMS.find((i) => i.id === itemId);
+    if (!item) return false;
+    const price = getBuyPrice(item.basePrice) * amount;
+    return gold >= price;
+  };
+
   const HasResource = (itemId: string, amount: number) => {
     if (itemId === "population") return population >= amount;
     // @ts-ignore
@@ -109,7 +122,7 @@ const Market: React.FC = () => {
 
           <div className="flex items-center gap-4 bg-bg-main px-6 py-3 rounded-lg border border-border-main">
             <span className="text-text-muted font-medium uppercase text-xs tracking-wider">
-              Treasury
+              Gold
             </span>
             <div className="flex items-center gap-2">
               <Coins size={24} className="text-accent" />
@@ -138,6 +151,8 @@ const Market: React.FC = () => {
                   item.id === "population"
                     ? population
                     : resources[item.id as keyof typeof resources] || 0;
+                const sellPrice = getSellPrice(item.basePrice);
+
                 return (
                   <div
                     key={`sell-${item.id}`}
@@ -166,7 +181,7 @@ const Market: React.FC = () => {
                         Sell for{" "}
                       </span>
                       <span className="text-accent font-bold px-1">
-                        {item.basePrice}
+                        {sellPrice}
                       </span>
                       <span className="text-text-secondary text-sm">Gold</span>
                     </div>
@@ -210,6 +225,7 @@ const Market: React.FC = () => {
 
             <div className="grid grid-cols-1 gap-4">
               {TRADE_ITEMS.map((item) => {
+                const buyPrice = getBuyPrice(item.basePrice);
                 return (
                   <div
                     key={`buy-${item.id}`}
@@ -238,7 +254,7 @@ const Market: React.FC = () => {
                         Buy for{" "}
                       </span>
                       <span className="text-accent font-bold px-1">
-                        {item.basePrice}
+                        {buyPrice}
                       </span>
                       <span className="text-text-secondary text-sm">Gold</span>
                     </div>
@@ -247,7 +263,7 @@ const Market: React.FC = () => {
                     <div className="w-1/3 flex items-center justify-end gap-2 pl-4">
                       <Button
                         onClick={() => handleTrade("buy", item, 1)}
-                        disabled={!CanAfford(item.basePrice)}
+                        disabled={!CanAfford(item.id, 1)}
                         variant="secondary"
                         className="px-4 py-1 text-sm bg-bg-main border border-border-main hover:bg-bg-dark"
                       >
@@ -255,7 +271,7 @@ const Market: React.FC = () => {
                       </Button>
                       <Button
                         onClick={() => handleTrade("buy", item, 10)}
-                        disabled={!CanAfford(item.basePrice * 10)}
+                        disabled={!CanAfford(item.id, 10)}
                         variant="outline"
                         className="px-4 py-1 text-sm bg-bg-main border border-border-main hover:bg-bg-dark"
                       >

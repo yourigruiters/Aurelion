@@ -180,9 +180,17 @@ const GameStartModal: React.FC = () => {
                 <h4 className="text-xs text-text-dim mb-2 font-medium">
                   Selected starting gains:
                 </h4>
-                <ul className="text-xs text-success space-y-1">
+                <ul className="text-xs space-y-1">
                   {resourceDetails.bonuses.map((bonus, idx) => (
-                    <li key={idx} className="flex items-center">
+                    <li
+                      key={idx}
+                      className={`flex items-center ${
+                        bonus === "Select your region.." ||
+                        bonus === "Select your focus.."
+                          ? "text-white"
+                          : "text-success"
+                      }`}
+                    >
                       <span className="mr-2">•</span> {bonus}
                     </li>
                   ))}

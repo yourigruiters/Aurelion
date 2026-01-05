@@ -47,7 +47,7 @@ export const gameSlice = createSlice({
   },
 });
 
-export const { startGame, tickTime, resetDayTime, resetGame } =
+export const { startGame, tickTime, resetDayTime, addExperience, resetGame } =
   gameSlice.actions;
 
 export default gameSlice.reducer;
