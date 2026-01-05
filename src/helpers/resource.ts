@@ -1,24 +1,22 @@
-import { FullResources, Resources } from "../types";
-
-const defaultResources: FullResources = {
-  population: 3,
-  resources: { food: 100, wood: 100, stone: 50, iron: 0, gold: 50 },
-  modifiers: { food: 1, wood: 1, stone: 1, iron: 1, gold: 1 },
-  rates: {
-    food: 0,
-    wood: 0,
-    stone: 0,
-    iron: 0,
-    gold: 0,
-  },
-  bonuses: ["Select your region..", "Select your focus.."],
-};
+import { FullResources } from "../types";
 
 export const getResourceDetails = (
   region: string,
   focus: string
 ): FullResources => {
-  const resources = defaultResources;
+  const resources: FullResources = {
+    population: 3,
+    resources: { food: 100, wood: 100, stone: 50, iron: 0, gold: 50 },
+    modifiers: { food: 1, wood: 1, stone: 1, iron: 1, gold: 1 },
+    rates: {
+      food: 0,
+      wood: 0,
+      stone: 0,
+      iron: 0,
+      gold: 0,
+    },
+    bonuses: ["Select your region..", "Select your focus.."],
+  };
 
   if (!region && !focus) {
     return resources;
@@ -59,14 +57,4 @@ export const getResourceDetails = (
   }
 
   return resources;
-};
-
-export const getDailyResources = (): Resources => {
-  return {
-    food: 10,
-    wood: 10,
-    stone: 10,
-    iron: 10,
-    gold: 10,
-  };
 };

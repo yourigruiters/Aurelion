@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { ResourcesState, Resources } from "../types";
-import { getDailyResources, getResourceDetails } from "../helpers/resource";
+import { getResourceDetails } from "../helpers/resource";
 
 const initialState: ResourcesState = {
   population: 0,
@@ -81,9 +81,15 @@ export const resourcesSlice = createSlice({
     advanceDay: (state) => {
       state.daysPassed += 1;
 
-      const dailyResources = getDailyResources();
-
-      state.resources = dailyResources;
+      (Object.keys(state.resources) as Array<keyof Resources>).forEach(
+        (key) => {
+          if (state.rates[key]) {
+            // @ts-ignore
+            const modifier = state.modifiers[key] || 1;
+            state.resources[key] += state.rates[key] * modifier;
+          }
+        }
+      );
     },
     setRate: (
       state,
