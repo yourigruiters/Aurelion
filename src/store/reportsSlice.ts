@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Resources } from "../types";
 import { ActivityLogEntry } from "./activitiesSlice";
+import { ActiveResearch } from "./militarySlice";
 
 export interface NightEvent {
   title: string;
@@ -22,6 +23,8 @@ export interface DailyReport {
   };
   constructionQueue: string[]; // Snapshot of queue
   completedConstructions: string[]; // Names of completed buildings
+  completedResearch?: string | null; // Name of completed research
+  activeResearchSnapshot?: ActiveResearch | null; // Snapshot of active research
   read: boolean;
 }
 

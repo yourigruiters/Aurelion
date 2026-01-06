@@ -1,5 +1,6 @@
 import React from "react";
 import { DailyReport } from "../../store/reportsSlice";
+import { MILITARY_TECHS } from "../../store/militarySlice";
 import {
   X,
   Moon,
@@ -10,6 +11,7 @@ import {
   Hammer,
   Skull,
   ShieldCheck,
+  Loader, // <--- Added
 } from "lucide-react";
 
 interface DailyReportModalProps {
@@ -238,6 +240,52 @@ const DailyReportModal: React.FC<DailyReportModalProps> = ({
             ) : (
               <div className="text-sm text-text-muted italic">
                 No construction projects were completed today.
+              </div>
+            )}
+          </div>
+
+          {/* Military Research Reports */}
+          <div>
+            <h3 className="text-sm font-bold text-text-main mb-3 uppercase tracking-wider">
+              Military Progress
+            </h3>
+            {report.completedResearch || report.activeResearchSnapshot ? (
+              <div className="space-y-2">
+                {report.completedResearch && (
+                  <div className="flex items-center gap-3 p-3 bg-bg-main rounded border border-brand/30">
+                    <ShieldCheck size={16} className="text-brand" />
+                    <div className="flex-1">
+                      <div className="text-sm font-bold text-text-main">
+                        Research Complete: {report.completedResearch}
+                      </div>
+                      <div className="text-xs text-success">
+                        New technology unlocked!
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {report.activeResearchSnapshot && (
+                  <div className="flex items-center gap-3 p-3 bg-bg-main rounded border border-brand/30 border-dashed">
+                    <Loader size={16} className="text-brand animate-spin" />
+                    <div className="flex-1">
+                      <div className="text-sm font-bold text-text-main">
+                        Researching:{" "}
+                        {
+                          MILITARY_TECHS[report.activeResearchSnapshot.techId]
+                            ?.name
+                        }
+                      </div>
+                      <div className="text-xs text-text-secondary">
+                        {report.activeResearchSnapshot.remainingDays} days
+                        remaining
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="text-sm text-text-muted italic">
+                No military research active or completed.
               </div>
             )}
           </div>

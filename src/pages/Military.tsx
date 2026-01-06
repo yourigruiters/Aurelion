@@ -4,7 +4,7 @@ import { RootState } from "../store/store";
 import {
   MILITARY_TECHS,
   TechId,
-  unlockTech,
+  startResearch,
   TechDefinition,
 } from "../store/militarySlice";
 import { deductResources } from "../store/resourcesSlice";
@@ -17,6 +17,7 @@ import {
   Castle,
   Lock,
   CheckCircle,
+  Loader,
 } from "lucide-react";
 
 // Helper for icons
@@ -26,7 +27,7 @@ const TechIcon = ({ id, size = 24 }: { id: TechId; size?: number }) => {
       return <Swords size={size} className="text-zinc-400" />;
     case "leather_armor":
       return <Shield size={size} className="text-amber-700" />;
-    case "archery":
+    case "warrior_training":
       return <Target size={size} className="text-green-600" />;
     case "iron_forging":
       return <Hammer size={size} className="text-zinc-200" />;
@@ -39,10 +40,15 @@ const TechIcon = ({ id, size = 24 }: { id: TechId; size?: number }) => {
 
 const Military: React.FC = () => {
   const dispatch = useDispatch();
-  const { unlockedTechs, militaryPower, defense } = useSelector(
-    (state: RootState) => state.military
+  const { unlockedTechs, activeResearch, totalAttackBonus, totalDefenseBonus } =
+    useSelector((state: RootState) => state.military);
+  const { resources, assignments } = useSelector(
+    (state: RootState) => state.resources
   );
-  const { resources } = useSelector((state: RootState) => state.resources);
+
+  // Derived stats
+  const warriorCount = assignments["Warrior"] || 0;
+  const attackValue = Math.floor(warriorCount * (1 + (totalAttackBonus || 0)));
 
   const canAfford = (cost: Record<string, number>) => {
     return Object.entries(cost).every(([res, amount]) => {
@@ -56,17 +62,13 @@ const Military: React.FC = () => {
     return tech.requires.every((reqId) => unlockedTechs.includes(reqId));
   };
 
-  const handleUnlock = (tech: TechDefinition) => {
-    if (canAfford(tech.cost)) {
+  const handleResearch = (tech: TechDefinition) => {
+    if (canAfford(tech.cost) && !activeResearch) {
       dispatch(deductResources(tech.cost));
-      dispatch(unlockTech(tech.id));
+      dispatch(startResearch(tech.id));
     }
   };
 
-  // Group techs by "Tier" roughly inferred by dependencies for display
-  // Tier 1: No reqs
-  // Tier 2: Reqs
-  // Ideally we map this out better, but a simple list or grid works for now.
   const techList = Object.values(MILITARY_TECHS);
 
   return (
@@ -85,14 +87,16 @@ const Military: React.FC = () => {
           <div className="flex gap-6">
             <div className="text-center p-4 bg-bg-main rounded-lg border border-border-main min-w-[100px]">
               <div className="text-2xl font-bold text-danger">
-                {militaryPower}
+                {attackValue}
               </div>
               <div className="text-xs uppercase text-text-muted font-bold tracking-wider">
                 Attack power
               </div>
             </div>
             <div className="text-center p-4 bg-bg-main rounded-lg border border-border-main min-w-[100px]">
-              <div className="text-2xl font-bold text-blue-500">{defense}</div>
+              <div className="text-2xl font-bold text-blue-500">
+                {totalDefenseBonus}
+              </div>
               <div className="text-xs uppercase text-text-muted font-bold tracking-wider">
                 Defense power
               </div>
@@ -106,6 +110,15 @@ const Military: React.FC = () => {
             const isUnlocked = unlockedTechs.includes(tech.id);
             const isLocked = !hasRequirements(tech) && !isUnlocked;
             const affordable = canAfford(tech.cost);
+            const isResearching = activeResearch?.techId === tech.id;
+            const isQueued = false; // Placeholder if we add queue later
+
+            // Should be disabled if: already unlocked, locked by reqs, cant afford, or something else researching
+            const isDisabled =
+              isUnlocked ||
+              isLocked ||
+              !affordable ||
+              (activeResearch !== null && !isResearching);
 
             return (
               <div
@@ -113,6 +126,8 @@ const Military: React.FC = () => {
                 className={`flex flex-col md:flex-row items-center p-4 rounded-lg border transition-all gap-4 ${
                   isUnlocked
                     ? "bg-bg-main border-success/30 shadow-[0_0_5px_rgba(34,197,94,0.05)]"
+                    : isResearching
+                    ? "bg-bg-main border-brand shadow-[0_0_5px_rgba(99,102,241,0.15)]"
                     : isLocked
                     ? "bg-bg-main/30 border-border-main opacity-60 grayscale"
                     : "bg-bg-main border-border-main hover:border-brand shadow-sm"
@@ -124,10 +139,16 @@ const Military: React.FC = () => {
                     className={`p-3 rounded-full border flex-none ${
                       isUnlocked
                         ? "bg-success/10 border-success/20"
+                        : isResearching
+                        ? "bg-brand/10 border-brand/20"
                         : "bg-bg-panel border-border-main"
                     }`}
                   >
-                    <TechIcon id={tech.id} />
+                    {isResearching ? (
+                      <Loader className="animate-spin text-brand" size={24} />
+                    ) : (
+                      <TechIcon id={tech.id} />
+                    )}
                   </div>
                   <div>
                     <h3 className="font-bold text-lg text-text-main">
@@ -138,17 +159,23 @@ const Military: React.FC = () => {
                     </p>
 
                     {/* Stats Inline */}
-                    <div className="flex gap-3 mt-1 text-xs font-mono">
-                      {tech.effects.power && (
+                    <div className="flex flex-wrap gap-3 mt-1 text-xs font-mono">
+                      {tech.effects.attackBonus && (
                         <span className="text-danger flex items-center gap-1">
-                          <Swords size={12} /> +{tech.effects.power} Power
+                          <Swords size={12} /> +{tech.effects.attackBonus}{" "}
+                          Attack/Warrior
                         </span>
                       )}
-                      {tech.effects.defense && (
+                      {tech.effects.defenseBonus && (
                         <span className="text-blue-400 flex items-center gap-1">
-                          <Shield size={12} /> +{tech.effects.defense} Defense
+                          <Shield size={12} /> +{tech.effects.defenseBonus}{" "}
+                          Defense
                         </span>
                       )}
+                    </div>
+                    <div className="text-xs font-mono text-text-muted mt-1 flex items-center gap-1">
+                      Time: {tech.researchTimeDays}{" "}
+                      {tech.researchTimeDays === 1 ? "day" : "days"}
                     </div>
                   </div>
                 </div>
@@ -158,6 +185,11 @@ const Military: React.FC = () => {
                   {isUnlocked ? (
                     <div className="px-4 py-2 bg-success/10 text-success text-sm font-bold rounded flex items-center gap-2 border border-success/20">
                       <CheckCircle size={16} /> Researched
+                    </div>
+                  ) : isResearching ? (
+                    <div className="px-4 py-2 bg-brand/10 text-brand text-sm font-bold rounded flex items-center gap-2 border border-brand/20">
+                      <Loader size={16} className="animate-spin" />{" "}
+                      {activeResearch?.remainingDays}d left
                     </div>
                   ) : isLocked ? (
                     <div className="px-4 py-2 bg-danger/5 text-danger text-xs font-bold rounded flex items-center gap-2 border border-danger/10">
@@ -186,8 +218,8 @@ const Military: React.FC = () => {
                         ))}
                       </div>
                       <Button
-                        onClick={() => handleUnlock(tech)}
-                        disabled={!affordable}
+                        onClick={() => handleResearch(tech)}
+                        disabled={isDisabled}
                         variant="primary"
                         className="min-w-[100px]"
                       >

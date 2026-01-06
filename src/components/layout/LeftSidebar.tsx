@@ -42,9 +42,21 @@ const LeftSidebar: React.FC = () => {
   const { level, experience, maxExperience } = useSelector(
     (state: RootState) => state.game
   );
-  const { militaryPower, defense } = useSelector(
+  // Get military bonuses
+  const { totalAttackBonus, totalDefenseBonus } = useSelector(
     (state: RootState) => state.military
   );
+  // Get population
+  const { population } = useSelector((state: RootState) => state.resources);
+
+  // Calculate actual stats
+  // Attack: Based on population + bonus per pop.
+  // Requirement: "take all population which is attack +1 per population, and then also per population add the attack bonus."
+  // So: Attack = Pop * 1 + Pop * Bonus = Pop * (1 + Bonus)
+  const attackValue = Math.floor(population * (1 + (totalAttackBonus || 0)));
+
+  // Defense: "high per item... +30 +50" -> Flat sum of bonuses.
+  const defenseValue = totalDefenseBonus || 0;
 
   const menuItems = [
     { to: "/overview", icon: Home, label: "Overview" },
@@ -92,7 +104,7 @@ const LeftSidebar: React.FC = () => {
                 Attack
               </span>
               <span className="text-xs font-bold leading-none">
-                {militaryPower}
+                {attackValue}
               </span>
             </div>
           </div>
@@ -102,7 +114,9 @@ const LeftSidebar: React.FC = () => {
               <span className="text-[10px] text-text-muted uppercase leading-none">
                 Defense
               </span>
-              <span className="text-xs font-bold leading-none">{defense}</span>
+              <span className="text-xs font-bold leading-none">
+                {defenseValue}
+              </span>
             </div>
           </div>
         </div>

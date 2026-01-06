@@ -15,6 +15,7 @@ import DailyReportModal from "../ui/DailyReportModal";
 import { DailyReport, markReportAsRead } from "../../store/reportsSlice";
 import { useDispatch } from "react-redux";
 import clsx from "clsx";
+import { MILITARY_TECHS, TechId } from "../../store/militarySlice";
 
 const ResourceIcon = ({ resource }: { resource: string }) => {
   switch (resource) {
@@ -43,6 +44,10 @@ const RightSidebar: React.FC = () => {
     (state: RootState) => state.buildings
   );
   const { reports } = useSelector((state: RootState) => state.reports);
+  // Select unlocked techs and active research from military slice
+  const { unlockedTechs, activeResearch } = useSelector(
+    (state: RootState) => state.military
+  );
 
   const [selectedReport, setSelectedReport] =
     React.useState<DailyReport | null>(null);
@@ -61,7 +66,49 @@ const RightSidebar: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full bg-bg-panel border-l border-border-main">
-      {/* Running Activities */}
+      {/* 1. Reports (Moved to Top) */}
+      <div className="flex-none p-4 pb-2 border-b border-border-main max-h-[30%] overflow-y-auto">
+        <h2 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2 sticky top-0 bg-bg-panel z-10">
+          Reports
+        </h2>
+        <div className="space-y-2">
+          {reports.slice(0, 2).map((report, index) => (
+            <div
+              key={report.id}
+              onClick={() => handleOpenReport(report)}
+              className={clsx(
+                "p-3 bg-bg-main rounded border-l-2 transition-colors cursor-pointer group",
+                report.read
+                  ? "border-transparent opacity-60 hover:opacity-100"
+                  : "border-brand"
+              )}
+            >
+              <div className="flex items-center justify-between mb-1">
+                <h4 className="text-sm font-medium text-text-main flex items-center gap-2">
+                  <FileText
+                    size={14}
+                    className={clsx(
+                      "group-hover:text-brand-hover",
+                      report.read ? "text-text-muted" : "text-brand"
+                    )}
+                  />
+                  {index === 0 ? "Today" : "Yesterday"}
+                </h4>
+              </div>
+              <p className="text-xs text-text-secondary line-clamp-1">
+                {report.nightEvent
+                  ? `Event: ${report.nightEvent.title}`
+                  : "A quiet night."}
+              </p>
+            </div>
+          ))}
+          {reports.length === 0 && (
+            <div className="text-sm text-text-dim italic">No reports yet.</div>
+          )}
+        </div>
+      </div>
+
+      {/* 2. Running Activities */}
       <div className="p-4 border-b border-border-main">
         <h2 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-3 flex items-center gap-2">
           Running Activities{" "}
@@ -151,7 +198,7 @@ const RightSidebar: React.FC = () => {
         </div>
       </div>
 
-      {/* Construction Queue */}
+      {/* 3. Construction Queue */}
       <div className="p-4 border-b border-border-main">
         <h2 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-3">
           Construction Queue
@@ -200,49 +247,45 @@ const RightSidebar: React.FC = () => {
         )}
       </div>
 
-      {/* Notifications / Reports */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="sticky top-0 bg-bg-panel p-4 pb-2 z-10">
-          <h2 className="text-xs font-semibold text-text-muted uppercase tracking-wider">
-            Reports
-          </h2>
-        </div>
-        <div className="px-4 pb-4 space-y-2">
-          {reports.slice(0, 2).map((report, index) => (
-            <div
-              key={report.id}
-              onClick={() => handleOpenReport(report)}
-              className={clsx(
-                "p-3 bg-bg-main rounded border-l-2 transition-colors cursor-pointer group",
-                report.read
-                  ? "border-transparent opacity-60 hover:opacity-100"
-                  : "border-brand"
-              )}
-            >
-              <div className="flex items-center justify-between mb-1">
-                <h4 className="text-sm font-medium text-text-main flex items-center gap-2">
-                  <FileText
-                    size={14}
-                    className={clsx(
-                      "group-hover:text-brand-hover",
-                      report.read ? "text-text-muted" : "text-brand"
-                    )}
-                  />
-                  {index === 0 ? "Today" : "Yesterday"}
-                </h4>
-                {/* User requested to remove day number or ensure it says Today/Yesterday. Index logic covers it. */}
-              </div>
-              <p className="text-xs text-text-secondary line-clamp-1">
-                {report.nightEvent
-                  ? `Event: ${report.nightEvent.title}`
-                  : "A quiet night."}
-              </p>
+      {/* 4. Military Research (New Section) */}
+      {/* 4. Military Research */}
+      <div className="p-4 flex-1 overflow-y-auto">
+        <h2 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-3 flex items-center gap-2">
+          <ShieldCheck size={14} />
+          Military Research
+        </h2>
+        {activeResearch ? (
+          <div className="bg-bg-main p-3 rounded border border-brand/30">
+            <div className="flex items-center gap-2 mb-1 justify-between">
+              <span className="text-sm font-bold text-brand">
+                {MILITARY_TECHS[activeResearch.techId]?.name}
+              </span>
+              <span className="text-xs text-text-secondary font-mono">
+                {activeResearch.remainingDays}d left
+              </span>
             </div>
-          ))}
-          {reports.length === 0 && (
-            <div className="text-sm text-text-dim italic">No reports yet.</div>
-          )}
-        </div>
+            <p className="text-xs text-text-secondary mb-2">
+              {MILITARY_TECHS[activeResearch.techId]?.description}
+            </p>
+            {/* Progress Bar */}
+            <div className="h-1.5 w-full bg-bg-panel rounded-full overflow-hidden mt-1">
+              <div
+                className="h-full bg-brand transition-all duration-500"
+                style={{
+                  width: `${
+                    ((activeResearch.totalDays - activeResearch.remainingDays) /
+                      activeResearch.totalDays) *
+                    100
+                  }%`,
+                }}
+              />
+            </div>
+          </div>
+        ) : (
+          <div className="text-sm text-text-dim italic py-2">
+            No military research
+          </div>
+        )}
       </div>
 
       {selectedReport && (

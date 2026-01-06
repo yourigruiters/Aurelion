@@ -3,7 +3,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 export type TechId =
   | "basic_weaponry"
   | "leather_armor"
-  | "archery"
+  | "warrior_training" // Renamed from archery
   | "iron_forging"
   | "fortifications";
 
@@ -19,13 +19,13 @@ export interface TechDefinition {
     gold?: number;
   };
   effects: {
-    power?: number;
-    defense?: number;
+    attackBonus?: number; // Per population
+    defenseBonus?: number; // Flat
   };
-  requires?: TechId[];
-  researchTimeDays?: number; // In game days
+  requires?: TechId[]; // Strict sequence
+  researchTimeDays: number; // In game days
   requiredLevel?: number; // Player level
-  experience?: number; // XP gained
+  experience: number; // XP gained
 }
 
 export const MILITARY_TECHS: Record<TechId, TechDefinition> = {
@@ -34,7 +34,7 @@ export const MILITARY_TECHS: Record<TechId, TechDefinition> = {
     name: "Basic Weaponry",
     description: "Equip your militia with simple swords and spears.",
     cost: { wood: 100, stone: 50 },
-    effects: { power: 5 },
+    effects: { attackBonus: 1 },
     researchTimeDays: 1,
     requiredLevel: 1,
     experience: 20,
@@ -44,17 +44,19 @@ export const MILITARY_TECHS: Record<TechId, TechDefinition> = {
     name: "Leather Armor",
     description: "Basic protection for your troops.",
     cost: { food: 150, wood: 50 },
-    effects: { defense: 5 },
+    effects: { defenseBonus: 30 },
+    requires: ["basic_weaponry"],
     researchTimeDays: 1,
     requiredLevel: 1,
     experience: 20,
   },
-  archery: {
-    id: "archery",
-    name: "Archery",
-    description: "Train archers to strike from a distance.",
-    cost: { wood: 200 },
-    effects: { power: 10 },
+  warrior_training: {
+    id: "warrior_training",
+    name: "Warrior Training",
+    description: "Advanced combat drills to improve effectiveness.",
+    cost: { wood: 200, food: 100 },
+    effects: { attackBonus: 2 },
+    requires: ["leather_armor"],
     researchTimeDays: 2,
     requiredLevel: 2,
     experience: 30,
@@ -64,8 +66,8 @@ export const MILITARY_TECHS: Record<TechId, TechDefinition> = {
     name: "Iron Forging",
     description: "Smith capable iron weapons and tools.",
     cost: { wood: 300, iron: 100 },
-    effects: { power: 20 },
-    requires: ["basic_weaponry"],
+    effects: { attackBonus: 3 },
+    requires: ["warrior_training"],
     researchTimeDays: 3,
     requiredLevel: 3,
     experience: 50,
@@ -75,7 +77,7 @@ export const MILITARY_TECHS: Record<TechId, TechDefinition> = {
     name: "Fortifications",
     description: "Build walls and defensive structures.",
     cost: { stone: 500, iron: 200 },
-    effects: { defense: 50 },
+    effects: { defenseBonus: 50 },
     requires: ["iron_forging"],
     researchTimeDays: 4,
     requiredLevel: 4,
@@ -83,46 +85,93 @@ export const MILITARY_TECHS: Record<TechId, TechDefinition> = {
   },
 };
 
+export interface ActiveResearch {
+  techId: TechId;
+  remainingDays: number;
+  totalDays: number;
+}
+
 interface MilitaryState {
   unlockedTechs: TechId[];
-  militaryPower: number;
-  defense: number;
+  activeResearch: ActiveResearch | null;
+  // Stats are calculated derived, but we can store them if cached.
+  // For now, let's keep them here as processed values for easy access,
+  // BUT the attack depends on population which varies dynamically.
+  // So 'attackBonus' and 'defenseBonus' total is better stored here,
+  // or just compute it in selectors/activites.
+  // User asked for "Left sidebar" calculation.
+  // Let's store the TOTAL multipliers here for easy access.
+  totalAttackBonus: number; // Sum of all flat bonuses per pop
+  totalDefenseBonus: number; // Sum of all flat defense
 }
 
 const initialState: MilitaryState = {
   unlockedTechs: [],
-  militaryPower: 0,
-  defense: 0,
+  activeResearch: null,
+  totalAttackBonus: 0,
+  totalDefenseBonus: 0,
 };
 
-// Helper to calculate totals based on unlocked techs
 const calculateStats = (unlockedTechs: TechId[]) => {
-  let power = 0;
-  let defense = 0;
+  let attackBonus = 0;
+  let defenseBonus = 0;
   unlockedTechs.forEach((id) => {
     const tech = MILITARY_TECHS[id];
-    if (tech.effects.power) power += tech.effects.power;
-    if (tech.effects.defense) defense += tech.effects.defense;
+    if (tech.effects.attackBonus) attackBonus += tech.effects.attackBonus;
+    if (tech.effects.defenseBonus) defenseBonus += tech.effects.defenseBonus;
   });
-  return { power, defense };
+  return { attackBonus, defenseBonus };
 };
 
 const militarySlice = createSlice({
   name: "military",
   initialState,
   reducers: {
-    unlockTech: (state, action: PayloadAction<TechId>) => {
+    startResearch: (state, action: PayloadAction<TechId>) => {
       const techId = action.payload;
-      if (!state.unlockedTechs.includes(techId)) {
-        state.unlockedTechs.push(techId);
-        // Recalculate stats
+      const tech = MILITARY_TECHS[techId];
+      // Validation should be done in Thunk, but double check here
+      if (!state.activeResearch && !state.unlockedTechs.includes(techId)) {
+        state.activeResearch = {
+          techId,
+          remainingDays: tech.researchTimeDays,
+          totalDays: tech.researchTimeDays,
+        };
+      }
+    },
+    progressResearch: (state) => {
+      if (state.activeResearch) {
+        state.activeResearch.remainingDays -= 1;
+      }
+    },
+    completeResearch: (state) => {
+      if (state.activeResearch) {
+        state.unlockedTechs.push(state.activeResearch.techId);
+
+        // Recalculate
         const stats = calculateStats(state.unlockedTechs);
-        state.militaryPower = stats.power;
-        state.defense = stats.defense;
+        state.totalAttackBonus = stats.attackBonus;
+        state.totalDefenseBonus = stats.defenseBonus;
+
+        state.activeResearch = null;
+      }
+    },
+    // Debug/Cheat
+    instantUnlock: (state, action: PayloadAction<TechId>) => {
+      if (!state.unlockedTechs.includes(action.payload)) {
+        state.unlockedTechs.push(action.payload);
+        const stats = calculateStats(state.unlockedTechs);
+        state.totalAttackBonus = stats.attackBonus;
+        state.totalDefenseBonus = stats.defenseBonus;
       }
     },
   },
 });
 
-export const { unlockTech } = militarySlice.actions;
+export const {
+  startResearch,
+  progressResearch,
+  completeResearch,
+  instantUnlock,
+} = militarySlice.actions;
 export default militarySlice.reducer;
