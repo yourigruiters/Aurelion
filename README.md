@@ -2,6 +2,9 @@
 
 A simplified city-builder and management game built with React, Redux, and TypeScript. Manage resources, construct buildings, and grow your settlement in a dangerous world.
 
+> [!NOTE]
+> Improving gameplay and building endgame content is now easily accessible! The game architecture has been refined to allow for seamless extension in whichever way possible.
+
 ## Getting Started
 
 Follow these instructions to get the game up and running on your local machine.
