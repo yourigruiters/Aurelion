@@ -318,10 +318,15 @@ const Buildings: React.FC = () => {
                           <div className="space-y-3">
                             {/* Cottage Option */}
                             <div className="bg-bg-panel/50 p-2 rounded border border-border-main/50">
-                              <div className="flex justify-between items-center mb-2">
-                                <span className="text-xs font-bold text-text-main">
-                                  Small Cottage
-                                </span>
+                              <div className="flex justify-between items-start mb-2">
+                                <div className="flex flex-col">
+                                  <span className="text-xs font-bold text-text-main">
+                                    Small Cottage
+                                  </span>
+                                  <span className="flex items-center gap-1 text-[10px] text-text-muted mt-0.5">
+                                    <Clock size={12} /> 1 Day
+                                  </span>
+                                </div>
                                 <div className="flex items-center gap-2">
                                   <span
                                     className={`text-xs ${
@@ -349,10 +354,15 @@ const Buildings: React.FC = () => {
 
                             {/* Homestead Option */}
                             <div className="bg-bg-panel/50 p-2 rounded border border-border-main/50">
-                              <div className="flex justify-between items-center mb-2">
-                                <span className="text-xs font-bold text-text-main">
-                                  Homestead
-                                </span>
+                              <div className="flex justify-between items-start mb-2">
+                                <div className="flex flex-col">
+                                  <span className="text-xs font-bold text-text-main">
+                                    Homestead
+                                  </span>
+                                  <span className="flex items-center gap-1 text-[10px] text-text-muted mt-0.5">
+                                    <Clock size={12} /> 3 Days
+                                  </span>
+                                </div>
                                 <div className="flex items-center gap-3">
                                   <div className="flex items-center gap-1">
                                     <span
@@ -395,10 +405,15 @@ const Buildings: React.FC = () => {
                         )}
                         {isCottage && (
                           <div className="bg-bg-panel/50 p-2 rounded border border-border-main/50">
-                            <div className="flex justify-between items-center mb-2">
-                              <span className="text-xs font-bold text-text-main">
-                                Upgrade to Homestead
-                              </span>
+                            <div className="flex justify-between items-start mb-2">
+                              <div className="flex flex-col">
+                                <span className="text-xs font-bold text-text-main">
+                                  Homestead
+                                </span>
+                                <span className="flex items-center gap-1 text-[10px] text-text-muted mt-0.5">
+                                  <Clock size={12} /> 2 Days
+                                </span>
+                              </div>
                               <div className="flex items-center gap-3">
                                 <div className="flex items-center gap-1">
                                   <span
@@ -531,19 +546,27 @@ const Buildings: React.FC = () => {
                     )}
 
                     {/* Right: Level & Chevron */}
-                    <div className="flex items-center gap-6 flex-none justify-end w-32">
+                    <div className="flex items-center gap-6 flex-1 justify-end w-32">
                       <div className="flex flex-col items-end">
                         <span className="text-xs text-text-muted uppercase font-bold">
                           {!building.unlocked ? "Locked" : "Level"}
                         </span>
                         {!building.unlocked ? (
                           <span className="text-xs text-danger font-bold">
-                            Req Lvl {def.requiredLevel}
+                            Requires city level {def.requiredLevel}
                           </span>
                         ) : (
-                          <div className="text-xl font-bold text-text-main">
+                          <div
+                            className={`text-xl font-bold ${
+                              isMaxLevel ? "text-success" : "text-text-main"
+                            }`}
+                          >
                             {building.level}
-                            <span className="text-text-muted text-base font-normal ml-1">
+                            <span
+                              className={`text-base font-normal ml-1 ${
+                                isMaxLevel ? "text-success" : "text-text-muted"
+                              }`}
+                            >
                               / {def.maxLevel}
                             </span>
                           </div>

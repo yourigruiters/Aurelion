@@ -11,6 +11,7 @@ interface ResourceItemProps {
   className?: string;
   customValueDisplay?: React.ReactNode;
   max?: number; // Optional max value for other usages if needed, but customValueDisplay overrides
+  loss?: number;
 }
 
 const ResourceItem: React.FC<ResourceItemProps> = ({
@@ -18,20 +19,28 @@ const ResourceItem: React.FC<ResourceItemProps> = ({
   value,
   rate,
   modifier,
+  loss, // Destructure loss
   color,
   tooltipLabel,
   className = "",
   customValueDisplay,
 }) => {
-  // Determine arrow
+  // Calculate Net Rate
+  const baseRate = rate || 0;
+  const mod = modifier || 1;
+  const production = baseRate * mod;
+  const totalLoss = loss || 0;
+  const netRate = production - totalLoss;
+
+  // Determine arrow based on NET rate
   let ArrowIcon: LucideIcon | null = null;
   let arrowColor = "";
 
-  if (rate !== undefined) {
-    if (rate > 0) {
+  if (rate !== undefined || loss !== undefined) {
+    if (netRate > 0) {
       ArrowIcon = ChevronUp;
       arrowColor = "text-success";
-    } else if (rate < 0) {
+    } else if (netRate < 0) {
       ArrowIcon = ChevronDown;
       arrowColor = "text-danger";
     }
@@ -48,19 +57,25 @@ const ResourceItem: React.FC<ResourceItemProps> = ({
       {ArrowIcon && <ArrowIcon size={12} className={arrowColor} />}
 
       {/* Tooltip */}
-      {tooltipLabel && (
+      {(tooltipLabel || rate !== undefined || loss !== undefined) && (
         <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 w-48 bg-bg-main border border-border-main shadow-xl rounded p-2 text-xs z-50 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-          <div className="font-bold mb-1 text-text-secondary">
-            {tooltipLabel}
-          </div>
+          {tooltipLabel && (
+            <div className="font-bold mb-1 text-text-secondary">
+              {tooltipLabel}
+            </div>
+          )}
+
+          {/* Income (Base Production) */}
           {rate !== undefined && rate > 0 && (
             <div className="flex justify-between text-success">
               <span>Income:</span>
-              <span>+{rate > 0 ? rate : 0} / day</span>
+              <span>+{rate} / day</span>
             </div>
           )}
-          {modifier !== undefined && (
-            <div className="flex justify-between text-info mt-1">
+
+          {/* Modifier Display */}
+          {modifier !== undefined && modifier !== 1 && (
+            <div className="flex justify-between text-info mt-1 border-b border-border-light pb-1 mb-1">
               <span>Modifier:</span>
               <span>
                 {(() => {
@@ -70,15 +85,36 @@ const ResourceItem: React.FC<ResourceItemProps> = ({
               </span>
             </div>
           )}
+
+          {/* Gross Production (if modifier present) */}
           {modifier !== undefined &&
-            modifier > 1 &&
+            modifier !== 1 &&
             rate !== undefined &&
             rate > 0 && (
-              <div className="mt-2 pt-2 border-t border-border-light flex justify-between font-bold text-text-main">
-                <span>Total:</span>
-                <span>+{Math.round(rate * modifier)} / day</span>
+              <div className="flex justify-between text-success">
+                <span>Production:</span>
+                <span>+{Math.floor(production)}</span>
               </div>
             )}
+
+          {/* Loss */}
+          {loss !== undefined && loss > 0 && (
+            <div className="flex justify-between text-danger">
+              <span>Loss:</span>
+              <span>-{loss} / day</span>
+            </div>
+          )}
+
+          {/* Net Change Line (only if rate or loss exists) */}
+          {(rate !== undefined || loss !== undefined) && (
+            <div className="mt-2 pt-2 border-t border-border-light flex justify-between font-bold text-text-main">
+              <span>Net:</span>
+              <span className={netRate >= 0 ? "text-success" : "text-danger"}>
+                {netRate > 0 ? "+" : ""}
+                {Math.floor(netRate)} / day
+              </span>
+            </div>
+          )}
         </div>
       )}
     </div>

@@ -186,6 +186,7 @@ const TopBar: React.FC<TopBarProps> = ({
             value={resources.food}
             rate={rates.food}
             modifier={modifiers.food}
+            loss={population * 5} // 5 food per pop
             color="text-danger-light"
             tooltipLabel="Food"
           />

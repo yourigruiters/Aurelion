@@ -1,5 +1,6 @@
 import React from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { RootState } from "../../store/store";
 import {
   Loader,
@@ -13,7 +14,6 @@ import {
 } from "lucide-react";
 import DailyReportModal from "../ui/DailyReportModal";
 import { DailyReport, markReportAsRead } from "../../store/reportsSlice";
-import { useDispatch } from "react-redux";
 import clsx from "clsx";
 import { MILITARY_TECHS, TechId } from "../../store/militarySlice";
 
@@ -34,12 +34,13 @@ const ResourceIcon = ({ resource }: { resource: string }) => {
   }
 };
 
-// ... Notification component ...
-
 const RightSidebar: React.FC = () => {
+  const navigate = useNavigate(); // Added hook
   const { activeSafeActivity, activeRiskyActivity } = useSelector(
     (state: RootState) => state.activities
   );
+  // ... rest of selectors
+
   const { constructionQueue } = useSelector(
     (state: RootState) => state.buildings
   );
@@ -62,6 +63,14 @@ const RightSidebar: React.FC = () => {
 
   const handleCloseReport = () => {
     setSelectedReport(null);
+  };
+
+  // Navigation Handlers
+  const goto = (path: string) => {
+    navigate(path);
+    // Optional: close sidebar? User didn't ask, but sidebar usually overlays on mobile.
+    // Assuming persistent sidebar on desktop.
+    // Ensure we don't break mobile if it exists, but "right sidebar" seems to be the "queue" logic.
   };
 
   return (
@@ -124,7 +133,10 @@ const RightSidebar: React.FC = () => {
           )}
 
           {activeSafeActivity && (
-            <div className="bg-bg-main p-3 rounded border border-success/30">
+            <div
+              onClick={() => goto("/activities")}
+              className="bg-bg-main p-3 rounded border border-success/30 cursor-pointer hover:bg-bg-panel transition-colors"
+            >
               <div className="flex items-center gap-2 mb-1">
                 <ShieldCheck size={16} className="text-success" />
                 <span className="text-sm font-bold text-success">
@@ -158,7 +170,10 @@ const RightSidebar: React.FC = () => {
           )}
 
           {activeRiskyActivity && (
-            <div className="bg-bg-main p-3 rounded border border-danger/30">
+            <div
+              onClick={() => goto("/activities")}
+              className="bg-bg-main p-3 rounded border border-danger/30 cursor-pointer hover:bg-bg-panel transition-colors"
+            >
               <div className="flex items-center gap-2 mb-1 justify-between">
                 <div className="flex items-center gap-2">
                   <Skull size={16} className="text-danger" />
@@ -212,7 +227,8 @@ const RightSidebar: React.FC = () => {
             {constructionQueue.map((item) => (
               <div
                 key={item.id}
-                className="bg-bg-main p-3 rounded border border-brand/30"
+                onClick={() => goto("/buildings")}
+                className="bg-bg-main p-3 rounded border border-brand/30 cursor-pointer hover:bg-bg-panel transition-colors"
               >
                 <div className="flex items-center gap-2 mb-1 justify-between">
                   <div className="flex items-center gap-2">
@@ -229,18 +245,21 @@ const RightSidebar: React.FC = () => {
                   {item.name}
                 </p>
                 {/* Progress Bar */}
-                <div className="h-1.5 w-full bg-bg-panel rounded-full overflow-hidden mt-2">
-                  <div
-                    className="h-full bg-brand transition-all duration-500"
-                    style={{
-                      width: `${
-                        ((item.totalDays - item.remainingDays) /
-                          item.totalDays) *
-                        100
-                      }%`,
-                    }}
-                  />
-                </div>
+                {/* Progress Bar - Only if > 1 day */}
+                {item.totalDays > 1 && (
+                  <div className="h-1.5 w-full bg-bg-panel rounded-full overflow-hidden mt-2">
+                    <div
+                      className="h-full bg-brand transition-all duration-500"
+                      style={{
+                        width: `${
+                          ((item.totalDays - item.remainingDays) /
+                            item.totalDays) *
+                          100
+                        }%`,
+                      }}
+                    />
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -255,7 +274,10 @@ const RightSidebar: React.FC = () => {
           Military Research
         </h2>
         {activeResearch ? (
-          <div className="bg-bg-main p-3 rounded border border-brand/30">
+          <div
+            onClick={() => goto("/military")}
+            className="bg-bg-main p-3 rounded border border-brand/30 cursor-pointer hover:bg-bg-panel transition-colors"
+          >
             <div className="flex items-center gap-2 mb-1 justify-between">
               <span className="text-sm font-bold text-brand">
                 {MILITARY_TECHS[activeResearch.techId]?.name}
@@ -268,18 +290,22 @@ const RightSidebar: React.FC = () => {
               {MILITARY_TECHS[activeResearch.techId]?.description}
             </p>
             {/* Progress Bar */}
-            <div className="h-1.5 w-full bg-bg-panel rounded-full overflow-hidden mt-1">
-              <div
-                className="h-full bg-brand transition-all duration-500"
-                style={{
-                  width: `${
-                    ((activeResearch.totalDays - activeResearch.remainingDays) /
-                      activeResearch.totalDays) *
-                    100
-                  }%`,
-                }}
-              />
-            </div>
+            {/* Progress Bar - Only if > 1 day */}
+            {activeResearch.totalDays > 1 && (
+              <div className="h-1.5 w-full bg-bg-panel rounded-full overflow-hidden mt-1">
+                <div
+                  className="h-full bg-brand transition-all duration-500"
+                  style={{
+                    width: `${
+                      ((activeResearch.totalDays -
+                        activeResearch.remainingDays) /
+                        activeResearch.totalDays) *
+                      100
+                    }%`,
+                  }}
+                />
+              </div>
+            )}
           </div>
         ) : (
           <div className="text-sm text-text-dim italic py-2">

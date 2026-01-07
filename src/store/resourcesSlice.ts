@@ -78,6 +78,17 @@ export const resourcesSlice = createSlice({
           }
         }
       );
+
+      // Consumption: 5 food per population
+      // Ensure specific subtraction logic.
+      // Note: we just added production above. Now subtract consumption.
+      // Doing it simply:
+      const consumption = state.population * 5;
+      state.resources.food -= consumption;
+
+      // Optional: Clamp to 0? Or allow debt?
+      // User didn't specify. Standard games allow debt or punish.
+      // I'll leave it as is, allowing negative or 0 based on JS math.
     },
     setRate: (
       state,

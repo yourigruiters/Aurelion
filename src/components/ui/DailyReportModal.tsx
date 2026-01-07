@@ -62,7 +62,8 @@ const DailyReportModal: React.FC<DailyReportModalProps> = ({
         {/* Content - Scrollable */}
         <div className="flex-1 overflow-y-auto p-4 space-y-6">
           {/* Night Event */}
-          {report.nightEvent ? (
+          {/* Night Event */}
+          {report.nightEvent && (
             <div className="bg-bg-dark rounded-lg p-4 border border-border-light relative overflow-hidden">
               <div className="flex items-start gap-3 relative z-10">
                 <div className="p-2 rounded-full bg-indigo-500/10 text-indigo-400">
@@ -95,10 +96,6 @@ const DailyReportModal: React.FC<DailyReportModalProps> = ({
                   )}
                 </div>
               </div>
-            </div>
-          ) : (
-            <div className="text-center py-4 text-text-muted italic border border-dashed border-border-light rounded-lg">
-              The night was peaceful.
             </div>
           )}
 
