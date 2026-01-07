@@ -3,12 +3,12 @@ import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { RootState } from "../../store/store";
 import {
-  Loader,
   ShieldCheck,
   Skull,
   Hammer,
   FileText,
   Activity,
+  ArrowUpCircle,
 } from "lucide-react";
 import DailyReportModal from "../ui/DailyReportModal";
 import { DailyReport, markReportAsRead } from "../../store/reportsSlice";
@@ -98,9 +98,6 @@ const RightSidebar: React.FC = () => {
         <h2 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-3 flex items-center gap-2">
           <Activity size={14} />
           Running Activities{" "}
-          {(activeSafeActivity || activeRiskyActivity) && (
-            <Loader size={12} className="animate-spin" />
-          )}
         </h2>
         <div className="space-y-3">
           {!activeSafeActivity && !activeRiskyActivity && (
@@ -143,7 +140,7 @@ const RightSidebar: React.FC = () => {
                   ))}
                 {activeSafeActivity.xp && (
                   <div className="flex items-center gap-1 text-xs text-brand">
-                    <span className="font-bold text-[10px]">XP</span>
+                    <ArrowUpCircle size={12} />
                     <span>+{activeSafeActivity.xp}</span>
                   </div>
                 )}
@@ -190,7 +187,7 @@ const RightSidebar: React.FC = () => {
                   ))}
                 {activeRiskyActivity.xp && (
                   <div className="flex items-center gap-1 text-xs text-brand">
-                    <span className="font-bold text-[10px]">XP</span>
+                    <ArrowUpCircle size={12} />
                     <span>+{activeRiskyActivity.xp}</span>
                   </div>
                 )}

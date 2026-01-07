@@ -18,7 +18,7 @@ import {
   Castle,
   Lock,
   CheckCircle,
-  Loader,
+  ArrowUpCircle,
   Clock,
 } from "lucide-react";
 import ResourceDisplay from "../components/ui/ResourceDisplay";
@@ -128,7 +128,7 @@ const Military: React.FC = () => {
                   isUnlocked
                     ? "bg-bg-main border-success/30 shadow-[0_0_5px_rgba(34,197,94,0.05)]"
                     : isResearching
-                    ? "bg-bg-main border-brand shadow-[0_0_5px_rgba(99,102,241,0.15)]"
+                    ? "bg-bg-main border-border-main"
                     : isLocked
                     ? "bg-bg-main/30 border-border-main opacity-60 grayscale"
                     : "bg-bg-main border-border-main hover:border-brand shadow-sm"
@@ -140,16 +140,10 @@ const Military: React.FC = () => {
                     className={`p-3 rounded-full border flex-none ${
                       isUnlocked
                         ? "bg-success/10 border-success/20"
-                        : isResearching
-                        ? "bg-brand/10 border-brand/20"
                         : "bg-bg-panel border-border-main"
                     }`}
                   >
-                    {isResearching ? (
-                      <Loader className="animate-spin text-brand" size={24} />
-                    ) : (
-                      <TechIcon id={tech.id} />
-                    )}
+                    <TechIcon id={tech.id} />
                   </div>
                   <div>
                     <h3 className="font-bold text-lg text-text-main">
@@ -179,7 +173,8 @@ const Military: React.FC = () => {
                       {tech.researchTimeDays === 1 ? "day" : "days"}
                       <span className="mx-2">•</span>
                       <span className="text-brand flex items-center gap-1">
-                        +{tech.experience} XP
+                        <ArrowUpCircle size={14} className="text-brand" /> +
+                        {tech.experience} XP
                       </span>
                     </div>
                   </div>
@@ -192,9 +187,8 @@ const Military: React.FC = () => {
                       <CheckCircle size={16} /> Researched
                     </div>
                   ) : isResearching ? (
-                    <div className="px-4 py-2 bg-brand/10 text-brand text-sm font-bold rounded flex items-center gap-2 border border-brand/20">
-                      <Loader size={16} className="animate-spin" />{" "}
-                      {activeResearch?.remainingDays}d left
+                    <div className="px-4 py-2 bg-orange-500/10 text-orange-500 text-sm font-bold rounded flex items-center gap-2 border border-orange-500/20 opacity-60">
+                      Researching
                     </div>
                   ) : isLocked ? (
                     <div className="px-4 py-2 bg-danger/5 text-danger text-xs font-bold rounded flex items-center gap-2 border border-danger/10">
@@ -231,14 +225,16 @@ const Military: React.FC = () => {
                             </div>
                           ))}
                       </div>
-                      <Button
-                        onClick={() => handleResearch(tech)}
-                        disabled={isDisabled}
-                        variant="primary"
-                        className="min-w-[100px]"
-                      >
-                        Research
-                      </Button>
+                      {!activeResearch && (
+                        <Button
+                          onClick={() => handleResearch(tech)}
+                          disabled={isDisabled}
+                          variant="primary"
+                          className="min-w-[100px]"
+                        >
+                          Research
+                        </Button>
+                      )}
                     </>
                   )}
                 </div>

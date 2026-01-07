@@ -2,8 +2,13 @@ import React from "react";
 import { ActivityInstance } from "../../store/activitiesSlice";
 import { RESOURCE_ORDER } from "../../helpers/resource";
 import Button from "./Button";
-import { Sword, CheckCircle, ShieldAlert, Clock } from "lucide-react";
-import ResourceIcon from "../ui/ResourceIcon";
+import {
+  Sword,
+  CheckCircle,
+  ShieldAlert,
+  Clock,
+  ArrowUpCircle,
+} from "lucide-react";
 import ResourceDisplay from "../ui/ResourceDisplay";
 
 interface ActivityCardProps {
@@ -102,7 +107,7 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
             {/* XP Reward */}
             {activity.xp && (
               <div className="flex items-center gap-1 text-text-main ml-2">
-                <span className="text-brand font-bold">XP</span>
+                <ArrowUpCircle size={14} className="text-brand" />
                 <span className="font-bold">+{activity.xp}</span>
               </div>
             )}
