@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { HelpCircle, RefreshCw } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { resetGame } from "../../store/gameSlice";
@@ -33,14 +34,19 @@ const Footer: React.FC = () => {
         </button>
 
         <span className="hidden md:inline text-border-main">|</span>
-        <a href="#" className="hover:text-text-secondary transition-colors">
-          Support
-        </a>
+        <Link
+          to="/players-guide"
+          className="hover:text-text-secondary transition-colors"
+        >
+          Players guide
+        </Link>
         <span className="hidden md:inline text-border-main">|</span>
-        <HelpCircle
-          size={14}
-          className="cursor-pointer hover:text-text-secondary"
-        />
+        <Link to="/players-guide">
+          <HelpCircle
+            size={14}
+            className="cursor-pointer hover:text-text-secondary"
+          />
+        </Link>
       </div>
     </div>
   );

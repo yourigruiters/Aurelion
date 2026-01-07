@@ -7,6 +7,7 @@ import Military from "./pages/Military";
 import Activities from "./pages/Activities";
 import MainLayout from "./components/layout/MainLayout";
 import NotFound from "./pages/NotFound";
+import PlayersGuide from "./pages/PlayersGuide";
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
         <Route path="market" element={<Market />} />
         <Route path="military" element={<Military />} />
         <Route path="activities" element={<Activities />} />
+        <Route path="players-guide" element={<PlayersGuide />} />
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>
