@@ -3,6 +3,7 @@ import { useSelector } from "react-redux";
 import { BookOpen, Crown } from "lucide-react";
 import ResourceItem from "../ui/ResourceItem";
 import { RootState } from "../../store/store";
+import { calculateBuildingModifiers } from "../../helpers/resource";
 
 // Helper to format date from daysPassed (Start: 1650-01-01)
 // Helper to get ordinal suffix
@@ -48,10 +49,14 @@ const TopBar: React.FC<TopBarProps> = ({
     rates,
     modifiers,
   } = useSelector((state: RootState) => state.resources);
-  const { housing } = useSelector((state: RootState) => state.buildings);
+  const { housing, buildings } = useSelector(
+    (state: RootState) => state.buildings
+  );
   const { gameStarted, cityName, region } = useSelector(
     (state: RootState) => state.game
   );
+
+  const buildingModifiers = calculateBuildingModifiers(buildings);
 
   // Calculate assigned population
   const assignments = useSelector(
@@ -175,7 +180,9 @@ const TopBar: React.FC<TopBarProps> = ({
             resource="gold"
             value={resources.gold}
             rate={rates.gold}
-            modifier={modifiers.gold}
+            modifier={(modifiers.gold || 1) + (buildingModifiers.gold || 0)}
+            buildingModifier={buildingModifiers.gold}
+            bonusModifier={(modifiers.gold || 1) - 1}
             tooltipLabel="Gold"
           />
         </div>
@@ -188,7 +195,9 @@ const TopBar: React.FC<TopBarProps> = ({
             resource="food"
             value={resources.food}
             rate={rates.food}
-            modifier={modifiers.food}
+            modifier={(modifiers.food || 1) + (buildingModifiers.food || 0)}
+            buildingModifier={buildingModifiers.food}
+            bonusModifier={(modifiers.food || 1) - 1}
             loss={population * 5} // 5 food per pop
             tooltipLabel="Food"
           />
@@ -196,21 +205,27 @@ const TopBar: React.FC<TopBarProps> = ({
             resource="wood"
             value={resources.wood}
             rate={rates.wood}
-            modifier={modifiers.wood}
+            modifier={(modifiers.wood || 1) + (buildingModifiers.wood || 0)}
+            buildingModifier={buildingModifiers.wood}
+            bonusModifier={(modifiers.wood || 1) - 1}
             tooltipLabel="Wood"
           />
           <ResourceItem
             resource="stone"
             value={resources.stone}
             rate={rates.stone}
-            modifier={modifiers.stone}
+            modifier={(modifiers.stone || 1) + (buildingModifiers.stone || 0)}
+            buildingModifier={buildingModifiers.stone}
+            bonusModifier={(modifiers.stone || 1) - 1}
             tooltipLabel="Stone"
           />
           <ResourceItem
             resource="iron"
             value={resources.iron}
             rate={rates.iron}
-            modifier={modifiers.iron}
+            modifier={(modifiers.iron || 1) + (buildingModifiers.iron || 0)}
+            buildingModifier={buildingModifiers.iron}
+            bonusModifier={(modifiers.iron || 1) - 1}
             tooltipLabel="Iron"
           />
         </div>

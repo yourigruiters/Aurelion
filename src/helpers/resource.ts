@@ -60,3 +60,52 @@ export const getResourceDetails = (
 };
 
 export const RESOURCE_ORDER = ["gold", "food", "wood", "stone", "iron"];
+
+export const calculateBuildingModifiers = (
+  buildings: Record<string, { level: number; unlocked: boolean }>
+) => {
+  const modifiers: Record<string, number> = {
+    food: 0,
+    wood: 0,
+    stone: 0,
+    iron: 0,
+    gold: 0,
+  };
+
+  // Wheat Fields: +20% Food per level > 1
+  if (
+    buildings["wheat_fields"]?.unlocked &&
+    buildings["wheat_fields"].level > 1
+  ) {
+    modifiers.food += (buildings["wheat_fields"].level - 1) * 0.2;
+  }
+
+  // Fisherman's Hut: +20% Food per level > 1
+  if (
+    buildings["fishermans_hut"]?.unlocked &&
+    buildings["fishermans_hut"].level > 1
+  ) {
+    modifiers.food += (buildings["fishermans_hut"].level - 1) * 0.2;
+  }
+
+  // Lumberjack's Camp: +20% Wood per level > 1
+  if (
+    buildings["lumberjacks_camp"]?.unlocked &&
+    buildings["lumberjacks_camp"].level > 1
+  ) {
+    modifiers.wood += (buildings["lumberjacks_camp"].level - 1) * 0.2;
+  }
+
+  // Deep Mine: +20% Stone & Iron per level > 1
+  if (buildings["deep_mine"]?.unlocked && buildings["deep_mine"].level > 1) {
+    modifiers.stone += (buildings["deep_mine"].level - 1) * 0.2;
+    modifiers.iron += (buildings["deep_mine"].level - 1) * 0.2;
+  }
+
+  // Trade Post: +5% Gold per level > 1
+  if (buildings["trade_post"]?.unlocked && buildings["trade_post"].level > 1) {
+    modifiers.gold += (buildings["trade_post"].level - 1) * 0.05;
+  }
+
+  return modifiers;
+};

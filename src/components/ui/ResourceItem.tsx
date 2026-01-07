@@ -13,6 +13,8 @@ interface ResourceItemProps {
   customValueDisplay?: React.ReactNode;
   max?: number;
   loss?: number;
+  buildingModifier?: number;
+  bonusModifier?: number;
 }
 
 const ResourceItem: React.FC<ResourceItemProps> = ({
@@ -25,9 +27,32 @@ const ResourceItem: React.FC<ResourceItemProps> = ({
   tooltipLabel,
   className = "",
   customValueDisplay,
+  buildingModifier,
+  bonusModifier,
 }) => {
   // Calculate Net Rate
   const baseRate = rate || 0;
+  // Modifiers are used directly in JSX for display
+  // Combine: 1 + Building + Bonus (as requested: Building first, Bonus after)
+  // Logic: BaseRate * (1 + BuildMod + BonusMod)?
+  // Or: BaseRate * (1 + BuildMod) * (1 + BonusMod)?
+  // User said: "Building first, bonus after for maximal gains." which implies multiplicative order or just visual order?
+  // Usually games sum modifiers: 1 + A + B.
+  // If user says "Building first... for maximal gains", maybe they mean multiplicative:
+  // Base * (1+Build) * (1+Bonus).
+  // Let's implement multiplicative for "maximal gains".
+  // Effective Rate = Rate * (1 + Build) * (1 + Bonus) ??
+  // NO, usually standard is additive. Multiplicative is wildly powerful.
+  // Let's stick to Additive for now unless explicitly "compounding" is requested.
+  // Wait, "maximal gains" implies compounding order matters?
+  // (A * X) * Y == A * (X*Y). Order doesn't matter for multiplication.
+  // Unless it's (A + X) * Y.
+  // Let's assume Additive for simplicity first: Total = 1 + Build + Bonus.
+  // If user complains, we switch.
+  // Actually, let's use the explicit logic:
+  // modifier prop is "Total Modifier".
+  // So we just use `modifier` for calculation if provided.
+  // But we use build/bonus for Display.
   const mod = modifier || 1;
   const production = baseRate * mod;
   const totalLoss = loss || 0;
@@ -74,10 +99,24 @@ const ResourceItem: React.FC<ResourceItemProps> = ({
             </div>
           )}
 
-          {/* Modifier Display */}
-          {modifier !== undefined && modifier !== 1 && (
+          {/* Breakdown Display */}
+          {(buildingModifier || 0) > 0 && (
             <div className="flex justify-between text-info mt-1">
-              <span>Modifier:</span>
+              <span>Building Mod:</span>
+              <span>+{Math.round((buildingModifier || 0) * 100)}%</span>
+            </div>
+          )}
+          {(bonusModifier || 0) > 0 && (
+            <div className="flex justify-between text-purple-400 mt-1">
+              <span>Bonus Mod:</span>
+              <span>+{Math.round((bonusModifier || 0) * 100)}%</span>
+            </div>
+          )}
+
+          {/* Total Modifier Display */}
+          {modifier !== undefined && modifier !== 1 && (
+            <div className="flex justify-between text-text-main font-bold mt-1 pt-1 border-t border-border-light/20">
+              <span>Total Mod:</span>
               <span>
                 {(() => {
                   const pct = Math.round((modifier - 1) * 100);

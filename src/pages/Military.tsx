@@ -1,6 +1,7 @@
 import React from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../store/store";
+import { calculateMilitaryModifiers } from "../helpers/combat";
 import {
   MILITARY_TECHS,
   TechId,
@@ -43,15 +44,22 @@ const TechIcon = ({ id, size = 24 }: { id: TechId; size?: number }) => {
 
 const Military: React.FC = () => {
   const dispatch = useDispatch();
-  const { unlockedTechs, activeResearch, totalAttackBonus, totalDefenseBonus } =
-    useSelector((state: RootState) => state.military);
+  const { unlockedTechs, activeResearch } = useSelector(
+    (state: RootState) => state.military
+  );
   const { resources, assignments } = useSelector(
     (state: RootState) => state.resources
   );
+  const { buildings } = useSelector((state: RootState) => state.buildings);
 
-  // Derived stats
-  const warriorCount = Number(assignments["Warrior"] || 0);
-  const attackValue = Math.floor(warriorCount * (1 + (totalAttackBonus || 0)));
+  // Derived stats using helper
+  const stats = calculateMilitaryModifiers(
+    buildings,
+    unlockedTechs,
+    assignments
+  );
+  const attackValue = stats.totalAttack;
+  const defenseValue = stats.totalDefense;
 
   const canAfford = (cost: Record<string, number>) => {
     return Object.entries(cost).every(([res, amount]) => {
@@ -88,20 +96,67 @@ const Military: React.FC = () => {
             </p>
           </div>
           <div className="flex gap-6">
-            <div className="text-center p-4 bg-bg-main rounded-lg border border-border-main min-w-[100px]">
+            <div className="text-center p-4 bg-bg-main rounded-lg border border-border-main min-w-[100px] relative group cursor-default">
               <div className="text-2xl font-bold text-danger">
                 {attackValue}
               </div>
               <div className="text-xs uppercase text-text-muted font-bold tracking-wider">
                 Attack power
               </div>
+
+              {/* Tooltip */}
+              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 w-48 bg-bg-main border border-border-main shadow-xl rounded p-3 text-xs z-50 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none text-left">
+                <div className="font-bold mb-2 text-text-secondary border-b border-border-light pb-1">
+                  Attack Breakdown
+                </div>
+                <div className="flex justify-between mb-1">
+                  <span>Base (Warriors):</span>
+                  <span>{stats.rawAttack}</span>
+                </div>
+                {stats.buildingAttackMod > 0 && (
+                  <div className="flex justify-between text-info mb-1">
+                    <span>Building Mod:</span>
+                    <span>+{Math.round(stats.buildingAttackMod * 100)}%</span>
+                  </div>
+                )}
+                {/* Tech is included in Raw for now based on logic, or separate? 
+                     Helper returns Raw = Base + TechFlat. 
+                     We can refine if needed, but start with this.
+                 */}
+                <div className="flex justify-between font-bold border-t border-border-light pt-1 mt-1">
+                  <span>Total:</span>
+                  <span className="text-danger">{stats.totalAttack}</span>
+                </div>
+              </div>
             </div>
-            <div className="text-center p-4 bg-bg-main rounded-lg border border-border-main min-w-[100px]">
+
+            <div className="text-center p-4 bg-bg-main rounded-lg border border-border-main min-w-[100px] relative group cursor-default">
               <div className="text-2xl font-bold text-blue-500">
-                {totalDefenseBonus}
+                {defenseValue}
               </div>
               <div className="text-xs uppercase text-text-muted font-bold tracking-wider">
                 Defense power
+              </div>
+
+              {/* Tooltip */}
+              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 w-48 bg-bg-main border border-border-main shadow-xl rounded p-3 text-xs z-50 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none text-left">
+                <div className="font-bold mb-2 text-text-secondary border-b border-border-light pb-1">
+                  Defense Breakdown
+                </div>
+                <div className="flex justify-between mb-1">
+                  <span>Base (Techs):</span>
+                  <span>{stats.rawDefense}</span>
+                </div>
+                {stats.buildingDefenseMod > 0 && (
+                  <div className="flex justify-between text-info mb-1">
+                    <span>Building Mod:</span>
+                    <span>+{Math.round(stats.buildingDefenseMod * 100)}%</span>
+                  </div>
+                )}
+                <div className="flex justify-between font-bold border-t border-border-light pt-1 mt-1">
+                  <span>Total:</span>
+                  <span className="text-blue-500">{stats.totalDefense}</span>
+                </div>
               </div>
             </div>
           </div>
