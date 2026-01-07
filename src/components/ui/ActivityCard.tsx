@@ -1,14 +1,10 @@
+import React from "react";
 import { ActivityInstance } from "../../store/activitiesSlice";
+import { RESOURCE_ORDER } from "../../helpers/resource";
 import Button from "./Button";
-import {
-  Sword,
-  CheckCircle,
-  ShieldAlert,
-  Wheat,
-  Coins,
-  Mountain,
-  Hammer,
-} from "lucide-react";
+import { Sword, CheckCircle, ShieldAlert } from "lucide-react";
+import ResourceIcon from "../ui/ResourceIcon";
+import ResourceDisplay from "../ui/ResourceDisplay";
 
 interface ActivityCardProps {
   activity: ActivityInstance;
@@ -19,23 +15,6 @@ interface ActivityCardProps {
   isSelected?: boolean;
 }
 
-const ResourceIcon = ({ resource }: { resource: string }) => {
-  switch (resource) {
-    case "food":
-      return <Wheat size={14} className="text-danger-light" />;
-    case "wood":
-      return <Wheat size={14} className="text-brand rotate-90" />;
-    case "stone":
-      return <Mountain size={14} className="text-text-muted" />;
-    case "iron":
-      return <Hammer size={14} className="text-text-secondary" />;
-    case "gold":
-      return <Coins size={14} className="text-accent" />;
-    default:
-      return null;
-  }
-};
-
 const ActivityCard: React.FC<ActivityCardProps> = ({
   activity,
   onPerform,
@@ -44,14 +23,14 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
   isSelected = false,
 }) => {
   const isRisky = activity.type === "risky";
-  const enemyPower = activity.enemyPower || 0;
+  const displayPower = activity.estimatedEnemyPower || activity.enemyPower || 0;
 
-  // Calculate win chance for display
+  // Calculate win chance for display (based on estimate)
   let winChance = 100;
-  if (isRisky && enemyPower > 0) {
+  if (isRisky && displayPower > 0) {
     if (userPower === 0) winChance = 0;
-    else if (userPower >= enemyPower) winChance = 95;
-    else winChance = Math.floor((userPower / enemyPower) * 100);
+    else if (userPower >= displayPower) winChance = 95;
+    else winChance = Math.floor((userPower / displayPower) * 100);
   }
 
   return (
@@ -106,12 +85,20 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
         <div className="flex items-center gap-4 mt-2 text-xs">
           {/* Rewards Inline */}
           <div className="flex items-center gap-2">
-            {Object.entries(activity.baseReward).map(([res, amount]) => (
-              <div key={res} className="flex items-center gap-1 text-text-main">
-                <ResourceIcon resource={res} />
-                <span className="font-bold">+{amount}</span>
-              </div>
-            ))}
+            {Object.entries(activity.baseReward)
+              .sort(
+                (a, b) =>
+                  RESOURCE_ORDER.indexOf(a[0]) - RESOURCE_ORDER.indexOf(b[0])
+              )
+              .map(([res, amount]) => (
+                <ResourceDisplay
+                  key={res}
+                  resource={res}
+                  amount={amount}
+                  showPlus
+                  className="text-text-main"
+                />
+              ))}
             {/* XP Reward */}
             {activity.xp && (
               <div className="flex items-center gap-1 text-text-main ml-2">
@@ -126,28 +113,39 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
       {/* Right Action / Stats */}
       <div className="flex-none flex flex-col items-end gap-2 w-32 md:w-48">
         {isRisky && !activity.isCompleted && !disabled && (
-          <div className="flex items-center gap-1 text-xs">
-            <ShieldAlert
-              size={14}
-              className={
-                winChance > 75
-                  ? "text-success"
-                  : winChance > 40
-                  ? "text-accent"
-                  : "text-danger"
-              }
-            />
-            <span
-              className={`font-bold ${
-                winChance > 75
-                  ? "text-success"
-                  : winChance > 40
-                  ? "text-accent"
-                  : "text-danger"
-              }`}
-            >
-              {winChance}% Win Rate
-            </span>
+          <div className="flex flex-col items-end w-full">
+            <div className="flex-1 flex items-center justify-end gap-1 text-xs text-text-muted mb-1">
+              <Sword size={14} className="text-danger" />
+              <span>
+                Est. Attack Needed:{" "}
+                <span className="font-bold">
+                  ~{activity.estimatedEnemyPower || (activity.enemyPower ?? 0)}
+                </span>
+              </span>
+            </div>
+            <div className="flex items-center gap-1 text-xs">
+              <ShieldAlert
+                size={14}
+                className={
+                  winChance > 75
+                    ? "text-success"
+                    : winChance > 40
+                    ? "text-accent"
+                    : "text-danger"
+                }
+              />
+              <span
+                className={`font-bold ${
+                  winChance > 75
+                    ? "text-success"
+                    : winChance > 40
+                    ? "text-accent"
+                    : "text-danger"
+                }`}
+              >
+                ~{winChance}% Win Chance
+              </span>
+            </div>
           </div>
         )}
 
@@ -162,7 +160,6 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
             {activity.result === "success" ? "Completed" : "Failed"}
           </div>
         ) : isSelected ? (
-          /* Selected State - No Button, maybe a text indicator or nothing? User said "button to select can be removed" */
           <div className="text-xs font-bold text-text-main py-1.5 px-3"></div>
         ) : (
           <Button

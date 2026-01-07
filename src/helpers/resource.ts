@@ -58,3 +58,5 @@ export const getResourceDetails = (
 
   return resources;
 };
+
+export const RESOURCE_ORDER = ["gold", "food", "wood", "stone", "iron"];

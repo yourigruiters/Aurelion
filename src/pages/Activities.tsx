@@ -137,16 +137,17 @@ const Activities: React.FC = () => {
               </p>
             </div>
 
-            {userPower === 0 && (
-              <div className="mb-4 p-3 bg-danger/10 text-danger border border-danger/20 rounded text-sm">
-                WARNING: You have no active Warriors. Expeditions are highly
-                dangerous!
+            {warriorCount === 0 && (
+              <div className="mb-4 p-3 bg-danger/10 text-danger border border-danger/20 rounded text-sm font-bold flex items-center gap-2">
+                <Skull size={16} />
+                You must assign at least 1 Warrior to start an Expedition.
               </div>
             )}
 
             <div className="flex flex-col gap-4">
               {displayRiskyActivities.map((activity) => {
                 const isActive = activeRiskyActivity?.id === activity.id;
+                const canStart = warriorCount > 0;
 
                 return (
                   <div
@@ -155,9 +156,16 @@ const Activities: React.FC = () => {
                   >
                     <ActivityCard
                       activity={activity}
-                      onPerform={handlePerformActivity}
+                      onPerform={(id, type) => {
+                        if (type === "risky" && warriorCount === 0) return;
+                        handlePerformActivity(id, type);
+                      }}
                       userPower={userPower}
-                      disabled={expired || !!activeRiskyActivity}
+                      disabled={
+                        expired ||
+                        !!activeRiskyActivity ||
+                        (!isActive && !canStart)
+                      }
                       isSelected={isActive}
                     />
                   </div>

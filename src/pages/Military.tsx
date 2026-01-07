@@ -8,6 +8,7 @@ import {
   TechDefinition,
 } from "../store/militarySlice";
 import { deductResources } from "../store/resourcesSlice";
+import { RESOURCE_ORDER } from "../helpers/resource";
 import Button from "../components/ui/Button";
 import {
   Swords,
@@ -19,6 +20,7 @@ import {
   CheckCircle,
   Loader,
 } from "lucide-react";
+import ResourceDisplay from "../components/ui/ResourceDisplay";
 
 // Helper for icons
 const TechIcon = ({ id, size = 24 }: { id: TechId; size?: number }) => {
@@ -47,9 +49,7 @@ const Military: React.FC = () => {
   );
 
   // Derived stats
-  // Ensure we use the correct case "Warrior" and handle potential string/undefined values safely
   const warriorCount = Number(assignments["Warrior"] || 0);
-  // Attack Power = Warriors * (1 + bonus_per_warrior)
   const attackValue = Math.floor(warriorCount * (1 + (totalAttackBonus || 0)));
 
   const canAfford = (cost: Record<string, number>) => {
@@ -113,9 +113,7 @@ const Military: React.FC = () => {
             const isLocked = !hasRequirements(tech) && !isUnlocked;
             const affordable = canAfford(tech.cost);
             const isResearching = activeResearch?.techId === tech.id;
-            const isQueued = false; // Placeholder if we add queue later
 
-            // Should be disabled if: already unlocked, locked by reqs, cant afford, or something else researching
             const isDisabled =
               isUnlocked ||
               isLocked ||
@@ -204,20 +202,31 @@ const Military: React.FC = () => {
                     <>
                       {/* Costs */}
                       <div className="flex flex-wrap gap-2 justify-end max-w-[200px]">
-                        {Object.entries(tech.cost).map(([res, amt]) => (
-                          <div
-                            key={res}
-                            className={`flex items-center gap-1.5 px-2 py-1 rounded bg-bg-panel border border-border-main text-xs ${
-                              (resources[res as keyof typeof resources] || 0) <
-                              amt
-                                ? "text-danger border-danger/30"
-                                : "text-text-main"
-                            }`}
-                          >
-                            <span className="capitalize">{res}</span>
-                            <span className="font-bold">{amt}</span>
-                          </div>
-                        ))}
+                        {Object.entries(tech.cost)
+                          .sort(
+                            (a, b) =>
+                              RESOURCE_ORDER.indexOf(a[0]) -
+                              RESOURCE_ORDER.indexOf(b[0])
+                          )
+                          .map(([res, amt]) => (
+                            <div
+                              key={res}
+                              className={`flex items-center gap-1.5 px-2 py-1 rounded bg-bg-panel border border-border-main text-xs ${
+                                (resources[res as keyof typeof resources] ||
+                                  0) < amt
+                                  ? "text-danger border-danger/30"
+                                  : "text-text-main"
+                              }`}
+                            >
+                              <ResourceDisplay
+                                resource={res}
+                                amount={amt}
+                                size="sm"
+                                className="text-inherit"
+                                iconClassName="text-current"
+                              />
+                            </div>
+                          ))}
                       </div>
                       <Button
                         onClick={() => handleResearch(tech)}

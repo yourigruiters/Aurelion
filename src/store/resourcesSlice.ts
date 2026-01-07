@@ -52,6 +52,9 @@ export const resourcesSlice = createSlice({
         state.resources[resource] += amount;
       }
     },
+    updatePopulation: (state, action: PayloadAction<number>) => {
+      state.population += action.payload;
+    },
     initializeResources: (
       state,
       action: PayloadAction<{ region: Region; focus: Focus }>
@@ -207,6 +210,7 @@ export const resourcesSlice = createSlice({
 
 export const {
   updateResource,
+  updatePopulation,
   advanceDay,
   setRate,
   initializeResources,

@@ -1,5 +1,10 @@
 import { AppThunk } from "./store";
-import { advanceDay, deductResources, updateResource } from "./resourcesSlice";
+import {
+  advanceDay,
+  deductResources,
+  updateResource,
+  updatePopulation,
+} from "./resourcesSlice";
 import { resetDayTime, addExperience } from "./gameSlice";
 import {
   generateDailyActivities,
@@ -69,11 +74,8 @@ export const startBuildingProject =
 
 // ... imports
 import {
-  startResearch,
   progressResearch,
   completeResearch,
-  ActiveResearch,
-  TechId,
   MILITARY_TECHS,
 } from "./militarySlice";
 
@@ -146,7 +148,10 @@ export const handleDayRollover = (): AppThunk => (dispatch, getState) => {
         warriorCount * (1 + (totalAttackBonus || 0))
       );
 
-      const enemyPower = activeRiskyActivity.enemyPower || 0;
+      const enemyPower =
+        activeRiskyActivity.actualEnemyPower ||
+        activeRiskyActivity.enemyPower ||
+        0;
 
       let winChance = 0;
       if (userPower >= enemyPower) winChance = 0.95;
@@ -182,7 +187,15 @@ export const handleDayRollover = (): AppThunk => (dispatch, getState) => {
         dispatch(addToHistory(logEntry));
         completedActivities.push(logEntry);
       } else {
-        // Failure
+        // Failure - Lose 10% of Population
+        // "Lose 10% of population (floored) when failing"
+        const currentPop = state.resources.population;
+        const populationLost = Math.floor(currentPop * 0.1);
+
+        if (populationLost > 0) {
+          dispatch(updatePopulation(-populationLost));
+        }
+
         const logEntry: ActivityLogEntry = {
           id: activeRiskyActivity.id,
           name: activeRiskyActivity.name,
@@ -190,7 +203,8 @@ export const handleDayRollover = (): AppThunk => (dispatch, getState) => {
           type: "risky",
           result: "failure",
           rewards: {},
-          losses: {},
+          losses: {}, // Could put resources here if any
+          populationLost,
         };
         dispatch(addToHistory(logEntry));
         completedActivities.push(logEntry);
@@ -259,24 +273,85 @@ export const handleDayRollover = (): AppThunk => (dispatch, getState) => {
   dispatch(advanceDay());
   dispatch(resetDayTime());
 
-  // 6. Generate New Activities
+  // 6. Starvation Logic
+  // Check fresh state after advanceDay
+  const stateAfterAdvance = getState();
+  const currentFood = stateAfterAdvance.resources.resources.food;
+  const currentPop = stateAfterAdvance.resources.population;
+  let starvationEvent: DailyReport["starvation"] | undefined = undefined;
+
+  if (currentFood < 0) {
+    // Reset food to 0? Or leave it negative?
+    // User didn't specify, but usually we reset if we apply penalty.
+    // Let's reset food to 0 to prevent death spiral accumulation,
+    // as the penalty is the "cost".
+    dispatch(
+      updateResource({ resource: "food", amount: Math.abs(currentFood) })
+    );
+
+    if (currentPop > 0) {
+      // Scenario 1: Remove Population
+      dispatch(updatePopulation(-1));
+      starvationEvent = {
+        type: "population",
+        message: "A villager died of starvation.",
+      };
+    } else {
+      // Scenario 2: Remove Random Resources (if Pop is 0)
+      // "resources (even gold) randomly selected by a logical percentage"
+      const availableResources = Object.entries(
+        stateAfterAdvance.resources.resources
+      ).filter(([key, val]) => val > 0 && key !== "food"); // Exclude food as it's 0 (or negative we just fixed)
+
+      if (availableResources.length > 0) {
+        const randomRes =
+          availableResources[
+            Math.floor(Math.random() * availableResources.length)
+          ];
+        const resKey = randomRes[0] as keyof Resources;
+        const resVal = randomRes[1];
+        const lossAmount = Math.ceil(resVal * 0.2); // 20% loss
+
+        if (lossAmount > 0) {
+          dispatch(updateResource({ resource: resKey, amount: -lossAmount }));
+          starvationEvent = {
+            type: "resources",
+            message: `Starvation caused chaos! Lost ${lossAmount} ${resKey}.`,
+          };
+        }
+      } else {
+        starvationEvent = {
+          type: "resources",
+          message: "Starvation persists, but there is nothing left to lose.",
+        };
+      }
+    }
+  }
+
+  // 7. Generate New Activities
   dispatch(generateDailyActivities({ day: daysPassed + 1 }));
 
-  // 7. Generate Report
-  // Calculate Deltas
-  const newState = getState();
-  const newResources = newState.resources.resources;
+  // 8. Generate Report
+  // Calculate Deltas from snapshot vs FINAL state
+  // We need to compare stateAfterAdvance (plus penalties) vs prevResources
+  // But wait, `resourceGained` is usually calculated based on `advanceDay` production.
+  // If we subtract penalties, our `resourcesGained` might show negative or less positive.
+  // That is correct.
+
+  const finalState = getState();
+  const finalResources = finalState.resources.resources;
   const resourcesGained: Partial<Resources> = {};
 
-  (Object.keys(newResources) as Array<keyof Resources>).forEach((key) => {
-    const diff = newResources[key] - prevResources[key];
+  (Object.keys(finalResources) as Array<keyof Resources>).forEach((key) => {
+    // We compare against the very start of the tick `prevResources`
+    const diff = finalResources[key] - prevResources[key];
     if (diff !== 0) {
       resourcesGained[key] = diff;
     }
   });
 
-  const newLevel = newState.game.level;
-  const newExp = newState.game.experience;
+  const newLevel = finalState.game.level;
+  const newExp = finalState.game.experience;
 
   // We need to inject the completed research into the report if we want to show it.
   // The DailyReport types interface might need update, OR we piggyback on 'completedConstructions' or make a new field?
@@ -310,6 +385,7 @@ export const handleDayRollover = (): AppThunk => (dispatch, getState) => {
     read: false,
     completedResearch: completedResearchName,
     activeResearchSnapshot: getState().military.activeResearch,
+    starvation: starvationEvent,
   };
 
   dispatch(addReport(report));

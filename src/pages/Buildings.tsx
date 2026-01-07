@@ -8,6 +8,7 @@ import {
 } from "../store/buildingsSlice";
 import { startBuildingProject } from "../store/gameThunks";
 import Button from "../components/ui/Button";
+import { RESOURCE_ORDER } from "../helpers/resource";
 import {
   Home,
   Users,
@@ -17,44 +18,24 @@ import {
   ArrowUpCircle,
   Construction,
   Coins,
-  Wheat,
-  Mountain,
-  Pickaxe,
   Lock,
 } from "lucide-react";
+import ResourceIcon from "../components/ui/ResourceIcon";
+import ResourceDisplay from "../components/ui/ResourceDisplay";
 
-// Helper components for icons
-const ResourceIcon = ({
-  resource,
-  size = 16,
-}: {
-  resource: string;
-  size?: number;
-}) => {
-  switch (resource) {
-    case "food":
-      return <Wheat size={size} className="text-danger-light" />;
-    case "wood":
-      return <Wheat size={size} className="text-brand rotate-90" />; // Fallback icon if Axe not avail
-    case "stone":
-      return <Mountain size={size} className="text-text-muted" />;
-    case "iron":
-      return <Pickaxe size={size} className="text-text-secondary" />;
-    case "gold":
-      return <Coins size={size} className="text-accent" />;
-    default:
-      return null;
-  }
-};
+// Local helper removed
 
 const Buildings: React.FC = () => {
   const dispatch = useDispatch();
+  // @ts-ignore
   // @ts-ignore
   const { buildings, housing, constructionQueue } = useSelector(
     (state: RootState) => state.buildings
   );
   const { resources } = useSelector((state: RootState) => state.resources);
-  const { level: playerLevel } = useSelector((state: RootState) => state.game);
+  // const { level: playerLevel } = useSelector((state: RootState) => state.game);
+  // Use Town Keep Level
+  const townKeepLevel = buildings["town_keep"]?.level || 0;
 
   // Expanded state for building rows
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
@@ -85,6 +66,10 @@ const Buildings: React.FC = () => {
     Object.entries(base).forEach(([res, amount]) => {
       cost[res] = Math.floor(amount * multiplier);
     });
+    // Sort logic will be applied at display time or we return sorted?
+    // Returning object, order is keys dependent but usually insertion order.
+    // It's safer to sort at call sites or here?
+    // Let's rely on display sites sorting using RESOURCE_ORDER.
     return cost;
   };
 
@@ -96,7 +81,8 @@ const Buildings: React.FC = () => {
     const def = BUILDING_DEFINITIONS[id];
 
     // Check level req
-    if (playerLevel < def.requiredLevel) return;
+    // if (playerLevel < def.requiredLevel) return;
+    if (townKeepLevel < def.requiredLevel) return;
 
     const cost = getUpgradeCost(id, building.level);
 
@@ -128,7 +114,8 @@ const Buildings: React.FC = () => {
   const handleUnlockBuilding = (id: BuildingId) => {
     const def = BUILDING_DEFINITIONS[id];
     // Check level req
-    if (playerLevel < def.requiredLevel) return;
+    // if (playerLevel < def.requiredLevel) return;
+    if (townKeepLevel < def.requiredLevel) return;
 
     const cost = def.baseCost;
 
@@ -484,7 +471,8 @@ const Buildings: React.FC = () => {
               const nextLevel = building.level + 1;
               const cost = getUpgradeCost(id as BuildingId, building.level);
               const affordable = canAfford(cost);
-              const levelLocked = playerLevel < def.requiredLevel;
+              // const levelLocked = playerLevel < def.requiredLevel;
+              const levelLocked = townKeepLevel < def.requiredLevel;
               const Icon = def.icon;
 
               const underConstruction = constructionQueue.find(
@@ -553,7 +541,7 @@ const Buildings: React.FC = () => {
                         </span>
                         {!building.unlocked ? (
                           <span className="text-xs text-danger font-bold">
-                            Requires city level {def.requiredLevel}
+                            Requires Town Keep Lv {def.requiredLevel}
                           </span>
                         ) : (
                           <div
@@ -665,8 +653,15 @@ const Buildings: React.FC = () => {
                                             </span>
                                             {/* Cost Display for this level */}
                                             <div className="flex items-center gap-2 text-xs text-text-secondary">
-                                              {Object.entries(lvlCost).map(
-                                                ([res, amt]) => (
+                                              {Object.entries(lvlCost)
+                                                .sort(
+                                                  (a, b) =>
+                                                    RESOURCE_ORDER.indexOf(
+                                                      a[0]
+                                                    ) -
+                                                    RESOURCE_ORDER.indexOf(b[0])
+                                                )
+                                                .map(([res, amt]) => (
                                                   <span
                                                     key={res}
                                                     className="flex items-center gap-1"
@@ -677,8 +672,7 @@ const Buildings: React.FC = () => {
                                                       size={10}
                                                     />
                                                   </span>
-                                                )
-                                              )}
+                                                ))}
                                             </div>
                                           </div>
                                           <div className="text-xs text-text-secondary">
@@ -717,32 +711,40 @@ const Buildings: React.FC = () => {
                                 : "Unlock Cost"}
                             </div>
                             <div className="space-y-1">
-                              {Object.entries(
-                                building.unlocked ? cost : def.baseCost
-                              ).map(([res, amount]) => (
-                                <div
-                                  key={res}
-                                  className="flex items-center justify-between text-sm"
-                                >
-                                  <div className="flex items-center gap-2">
-                                    <ResourceIcon resource={res} />
-                                    <span className="capitalize text-text-secondary">
-                                      {res}
-                                    </span>
-                                  </div>
-                                  <span
-                                    className={`${
-                                      (resources[
-                                        res as keyof typeof resources
-                                      ] || 0) >= amount
-                                        ? "text-text-main"
-                                        : "text-danger"
-                                    }`}
-                                  >
-                                    {amount}
-                                  </span>
-                                </div>
-                              ))}
+                              <div className="space-y-1">
+                                {Object.entries(
+                                  building.unlocked ? cost : def.baseCost
+                                )
+                                  .sort(
+                                    (a, b) =>
+                                      RESOURCE_ORDER.indexOf(a[0]) -
+                                      RESOURCE_ORDER.indexOf(b[0])
+                                  )
+                                  .map(([res, amount]) => (
+                                    <div
+                                      key={res}
+                                      className="flex items-center justify-between text-sm"
+                                    >
+                                      <div className="flex items-center gap-2">
+                                        <ResourceIcon resource={res} />
+                                        <span className="capitalize text-text-secondary">
+                                          {res}
+                                        </span>
+                                      </div>
+                                      <span
+                                        className={`${
+                                          (resources[
+                                            res as keyof typeof resources
+                                          ] || 0) >= amount
+                                            ? "text-text-main"
+                                            : "text-danger"
+                                        }`}
+                                      >
+                                        {amount}
+                                      </span>
+                                    </div>
+                                  ))}
+                              </div>
                             </div>
                           </div>
 
@@ -754,7 +756,7 @@ const Buildings: React.FC = () => {
                                   Requirements
                                 </span>
                                 <ul className="list-disc list-inside text-xs text-danger/80 space-y-0.5">
-                                  <li>City Level {def.requiredLevel}</li>
+                                  <li>Town Keep Lv {def.requiredLevel}</li>
                                 </ul>
                               </div>
                             ) : underConstruction ? (

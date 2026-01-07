@@ -1,40 +1,23 @@
 import React from "react";
 import { DailyReport } from "../../store/reportsSlice";
 import { MILITARY_TECHS } from "../../store/militarySlice";
+import { RESOURCE_ORDER } from "../../helpers/resource";
 import {
   X,
   Moon,
   ArrowUpCircle,
-  Wheat,
-  Coins,
-  Mountain,
   Hammer,
   Skull,
   ShieldCheck,
-  Loader, // <--- Added
+  Loader,
 } from "lucide-react";
+import ResourceIcon from "../ui/ResourceIcon";
+import ResourceDisplay from "../ui/ResourceDisplay";
 
 interface DailyReportModalProps {
   report: DailyReport;
   onClose: () => void;
 }
-
-const ResourceIcon = ({ resource }: { resource: string }) => {
-  switch (resource) {
-    case "food":
-      return <Wheat size={14} className="text-danger-light" />;
-    case "wood":
-      return <Wheat size={14} className="text-brand rotate-90" />;
-    case "stone":
-      return <Mountain size={14} className="text-text-muted" />;
-    case "iron":
-      return <Hammer size={14} className="text-text-secondary" />;
-    case "gold":
-      return <Coins size={14} className="text-accent" />;
-    default:
-      return null;
-  }
-};
 
 const DailyReportModal: React.FC<DailyReportModalProps> = ({
   report,
@@ -61,7 +44,21 @@ const DailyReportModal: React.FC<DailyReportModalProps> = ({
 
         {/* Content - Scrollable */}
         <div className="flex-1 overflow-y-auto p-4 space-y-6">
-          {/* Night Event */}
+          {/* Starvation Report */}
+          {report.starvation && (
+            <div
+              className={`p-3 rounded mb-4 bg-danger/10 border border-danger/30`}
+            >
+              <div className="flex items-center gap-2 mb-1 text-danger font-bold">
+                <Skull size={18} />
+                <h3>Starvation!</h3>
+              </div>
+              <p className="text-sm text-text-secondary">
+                {report.starvation.message}
+              </p>
+            </div>
+          )}
+
           {/* Night Event */}
           {report.nightEvent && (
             <div className="bg-bg-dark rounded-lg p-4 border border-border-light relative overflow-hidden">
@@ -80,16 +77,16 @@ const DailyReportModal: React.FC<DailyReportModalProps> = ({
                     <div className="flex gap-3 mt-2">
                       {Object.entries(report.nightEvent.effect).map(
                         ([res, amount]) => (
-                          <div
+                          <ResourceDisplay
                             key={res}
-                            className={`text-xs font-bold flex items-center gap-1 ${
+                            resource={res}
+                            amount={amount}
+                            showPlus
+                            size="xs"
+                            className={
                               amount > 0 ? "text-success" : "text-danger"
-                            }`}
-                          >
-                            <ResourceIcon resource={res} />
-                            {amount > 0 ? "+" : ""}
-                            {amount}
-                          </div>
+                            }
+                          />
                         )
                       )}
                     </div>
@@ -124,25 +121,23 @@ const DailyReportModal: React.FC<DailyReportModalProps> = ({
             </h3>
             <div className="grid grid-cols-3 gap-2">
               {Object.entries(report.resourcesGained).length > 0 ? (
-                Object.entries(report.resourcesGained).map(([res, amount]) => (
-                  <div
-                    key={res}
-                    className="flex items-center gap-2 p-2 bg-bg-main rounded border border-border-light"
-                  >
-                    <ResourceIcon resource={res} />
-                    <span
-                      className={`text-sm font-bold ${
-                        amount >= 0 ? "text-success" : "text-danger"
-                      }`}
-                    >
-                      {amount > 0 ? "+" : ""}
-                      {amount}
-                    </span>
-                    <span className="text-xs text-text-muted capitalize">
-                      {res}
-                    </span>
-                  </div>
-                ))
+                Object.entries(report.resourcesGained)
+                  .sort(
+                    (a, b) =>
+                      RESOURCE_ORDER.indexOf(a[0]) -
+                      RESOURCE_ORDER.indexOf(b[0])
+                  )
+                  .map(([res, amount]) => (
+                    <ResourceDisplay
+                      key={res}
+                      resource={res}
+                      amount={amount}
+                      showPlus
+                      size="sm"
+                      className={amount >= 0 ? "text-success" : "text-danger"}
+                      iconClassName={amount >= 0 ? "" : "grayscale"}
+                    />
+                  ))
               ) : (
                 <div className="col-span-3 text-sm text-text-muted italic">
                   No resource changes recorded.
@@ -184,23 +179,35 @@ const DailyReportModal: React.FC<DailyReportModalProps> = ({
                           : "Failed"}
                       </div>
                     </div>
-                    {/* Rewards diff display? Or just result */}
-                    {activity.result === "success" && (
-                      <div className="text-right">
+                    {/* Result Details */}
+                    <div className="text-right">
+                      {activity.result === "success" ? (
                         <div className="flex flex-col items-end gap-1">
                           {Object.entries(activity.rewards).map(
                             ([res, amt]) => (
-                              <div
+                              <ResourceDisplay
                                 key={res}
-                                className="flex items-center gap-1 text-xs text-text-secondary"
-                              >
-                                <ResourceIcon resource={res} /> +{amt}
-                              </div>
+                                resource={res}
+                                amount={amt}
+                                showPlus
+                                size="xs"
+                                className="text-text-secondary"
+                              />
                             )
                           )}
                         </div>
-                      </div>
-                    )}
+                      ) : (
+                        <div className="flex flex-col items-end gap-1">
+                          {activity.populationLost &&
+                            activity.populationLost > 0 && (
+                              <div className="flex items-center gap-1 text-xs text-danger font-bold">
+                                <Skull size={12} /> -{activity.populationLost}{" "}
+                                Population
+                              </div>
+                            )}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 ))
               ) : (
@@ -211,7 +218,7 @@ const DailyReportModal: React.FC<DailyReportModalProps> = ({
             </div>
           </div>
 
-          {/* Construction Queue (Mocked for now) */}
+          {/* Construction Queue */}
           <div>
             <h3 className="text-sm font-bold text-text-main mb-3 uppercase tracking-wider">
               Construction Queue

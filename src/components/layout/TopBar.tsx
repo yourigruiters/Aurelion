@@ -1,15 +1,6 @@
 import React from "react";
 import { useSelector } from "react-redux";
-import {
-  BookOpen,
-  Crown,
-  Gem,
-  Hammer,
-  Wheat,
-  Apple,
-  Mountain,
-  Users,
-} from "lucide-react";
+import { BookOpen, Crown } from "lucide-react";
 import ResourceItem from "../ui/ResourceItem";
 import { RootState } from "../../store/store";
 
@@ -158,13 +149,12 @@ const TopBar: React.FC<TopBarProps> = ({
 
         <div className="h-6 w-px bg-border-main" />
 
-        {/* Population & Food Group */}
+        {/* Population & Gold Group */}
         <div className="flex items-center space-x-2 xl:space-x-3">
           <ResourceItem
-            icon={Users}
+            resource="population"
             value={population}
-            max={totalHousingCapacity} // Add max prop if supported or handle via value string
-            color="text-info"
+            max={totalHousingCapacity}
             tooltipLabel={populationTooltip}
             customValueDisplay={
               <span className="flex items-center">
@@ -182,51 +172,46 @@ const TopBar: React.FC<TopBarProps> = ({
             }
           />
           <ResourceItem
-            icon={Apple}
-            value={resources.food}
-            rate={rates.food}
-            modifier={modifiers.food}
-            loss={population * 5} // 5 food per pop
-            color="text-danger-light"
-            tooltipLabel="Food"
+            resource="gold"
+            value={resources.gold}
+            rate={rates.gold}
+            modifier={modifiers.gold}
+            tooltipLabel="Gold"
           />
         </div>
 
         <div className="h-6 w-px bg-border-main" />
 
-        {/* Other Resources */}
+        {/* Resources Group (Food, Wood, Stone, Iron) */}
         <div className="flex items-center space-x-1.5 xl:space-x-2">
           <ResourceItem
-            icon={Wheat}
+            resource="food"
+            value={resources.food}
+            rate={rates.food}
+            modifier={modifiers.food}
+            loss={population * 5} // 5 food per pop
+            tooltipLabel="Food"
+          />
+          <ResourceItem
+            resource="wood"
             value={resources.wood}
             rate={rates.wood}
             modifier={modifiers.wood}
-            color="text-brand"
             tooltipLabel="Wood"
           />
           <ResourceItem
-            icon={Mountain}
+            resource="stone"
             value={resources.stone}
             rate={rates.stone}
             modifier={modifiers.stone}
-            color="text-text-muted"
             tooltipLabel="Stone"
           />
           <ResourceItem
-            icon={Hammer}
+            resource="iron"
             value={resources.iron}
             rate={rates.iron}
             modifier={modifiers.iron}
-            color="text-text-secondary"
             tooltipLabel="Iron"
-          />
-          <ResourceItem
-            icon={Gem}
-            value={resources.gold}
-            rate={rates.gold}
-            modifier={modifiers.gold}
-            color="text-accent"
-            tooltipLabel="Gold"
           />
         </div>
       </div>

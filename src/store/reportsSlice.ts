@@ -26,6 +26,10 @@ export interface DailyReport {
   completedResearch?: string | null; // Name of completed research
   activeResearchSnapshot?: ActiveResearch | null; // Snapshot of active research
   read: boolean;
+  starvation?: {
+    type: "population" | "resources";
+    message: string;
+  };
 }
 
 export interface ReportsState {

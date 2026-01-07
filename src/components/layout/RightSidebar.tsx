@@ -2,53 +2,25 @@ import React from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { RootState } from "../../store/store";
-import {
-  Loader,
-  ShieldCheck,
-  Skull,
-  Wheat,
-  Coins,
-  Mountain,
-  Hammer,
-  FileText,
-} from "lucide-react";
+import { Loader, ShieldCheck, Skull, Hammer, FileText } from "lucide-react";
 import DailyReportModal from "../ui/DailyReportModal";
 import { DailyReport, markReportAsRead } from "../../store/reportsSlice";
 import clsx from "clsx";
-import { MILITARY_TECHS, TechId } from "../../store/militarySlice";
-
-const ResourceIcon = ({ resource }: { resource: string }) => {
-  switch (resource) {
-    case "food":
-      return <Wheat size={12} className="text-danger-light" />;
-    case "wood":
-      return <Wheat size={12} className="text-brand rotate-90" />;
-    case "stone":
-      return <Mountain size={12} className="text-text-muted" />;
-    case "iron":
-      return <Hammer size={12} className="text-text-secondary" />;
-    case "gold":
-      return <Coins size={12} className="text-accent" />;
-    default:
-      return null;
-  }
-};
+import { MILITARY_TECHS } from "../../store/militarySlice";
+import { RESOURCE_ORDER } from "../../helpers/resource";
+import ResourceDisplay from "../ui/ResourceDisplay";
 
 const RightSidebar: React.FC = () => {
-  const navigate = useNavigate(); // Added hook
+  const navigate = useNavigate();
   const { activeSafeActivity, activeRiskyActivity } = useSelector(
     (state: RootState) => state.activities
   );
-  // ... rest of selectors
 
   const { constructionQueue } = useSelector(
     (state: RootState) => state.buildings
   );
   const { reports } = useSelector((state: RootState) => state.reports);
-  // Select unlocked techs and active research from military slice
-  const { unlockedTechs, activeResearch } = useSelector(
-    (state: RootState) => state.military
-  );
+  const { activeResearch } = useSelector((state: RootState) => state.military);
 
   const [selectedReport, setSelectedReport] =
     React.useState<DailyReport | null>(null);
@@ -65,17 +37,13 @@ const RightSidebar: React.FC = () => {
     setSelectedReport(null);
   };
 
-  // Navigation Handlers
   const goto = (path: string) => {
     navigate(path);
-    // Optional: close sidebar? User didn't ask, but sidebar usually overlays on mobile.
-    // Assuming persistent sidebar on desktop.
-    // Ensure we don't break mobile if it exists, but "right sidebar" seems to be the "queue" logic.
   };
 
   return (
     <div className="flex flex-col h-full bg-bg-panel border-l border-border-main">
-      {/* 1. Reports (Moved to Top) */}
+      {/* 1. Reports */}
       <div className="flex-none p-4 pb-2 border-b border-border-main max-h-[30%] overflow-y-auto">
         <h2 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2 sticky top-0 bg-bg-panel z-10">
           Reports
@@ -148,17 +116,22 @@ const RightSidebar: React.FC = () => {
               </p>
               {/* Rewards */}
               <div className="flex flex-wrap gap-2 pt-2 border-t border-border-light">
-                {Object.entries(activeSafeActivity.baseReward).map(
-                  ([res, amount]) => (
-                    <div
-                      key={res}
-                      className="flex items-center gap-1 text-xs text-text-secondary"
-                    >
-                      <ResourceIcon resource={res} />
-                      <span>+{amount}</span>
-                    </div>
+                {Object.entries(activeSafeActivity.baseReward)
+                  .sort(
+                    (a, b) =>
+                      RESOURCE_ORDER.indexOf(a[0]) -
+                      RESOURCE_ORDER.indexOf(b[0])
                   )
-                )}
+                  .map(([res, amount]) => (
+                    <ResourceDisplay
+                      key={res}
+                      resource={res}
+                      amount={amount}
+                      showPlus
+                      size="sm"
+                      className="text-text-secondary"
+                    />
+                  ))}
                 {activeSafeActivity.xp && (
                   <div className="flex items-center gap-1 text-xs text-brand">
                     <span className="font-bold text-[10px]">XP</span>
@@ -190,17 +163,22 @@ const RightSidebar: React.FC = () => {
               </p>
               {/* Rewards */}
               <div className="flex flex-wrap gap-2 pt-2 border-t border-border-light">
-                {Object.entries(activeRiskyActivity.baseReward).map(
-                  ([res, amount]) => (
-                    <div
-                      key={res}
-                      className="flex items-center gap-1 text-xs text-text-secondary"
-                    >
-                      <ResourceIcon resource={res} />
-                      <span>+{amount}</span>
-                    </div>
+                {Object.entries(activeRiskyActivity.baseReward)
+                  .sort(
+                    (a, b) =>
+                      RESOURCE_ORDER.indexOf(a[0]) -
+                      RESOURCE_ORDER.indexOf(b[0])
                   )
-                )}
+                  .map(([res, amount]) => (
+                    <ResourceDisplay
+                      key={res}
+                      resource={res}
+                      amount={amount}
+                      showPlus
+                      size="sm"
+                      className="text-text-secondary"
+                    />
+                  ))}
                 {activeRiskyActivity.xp && (
                   <div className="flex items-center gap-1 text-xs text-brand">
                     <span className="font-bold text-[10px]">XP</span>
@@ -244,8 +222,6 @@ const RightSidebar: React.FC = () => {
                 <p className="text-sm text-text-main font-medium mb-1">
                   {item.name}
                 </p>
-                {/* Progress Bar */}
-                {/* Progress Bar - Only if > 1 day */}
                 {item.totalDays > 1 && (
                   <div className="h-1.5 w-full bg-bg-panel rounded-full overflow-hidden mt-2">
                     <div
@@ -266,7 +242,6 @@ const RightSidebar: React.FC = () => {
         )}
       </div>
 
-      {/* 4. Military Research (New Section) */}
       {/* 4. Military Research */}
       <div className="p-4 flex-1 overflow-y-auto">
         <h2 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-3 flex items-center gap-2">
@@ -289,8 +264,6 @@ const RightSidebar: React.FC = () => {
             <p className="text-xs text-text-secondary mb-2">
               {MILITARY_TECHS[activeResearch.techId]?.description}
             </p>
-            {/* Progress Bar */}
-            {/* Progress Bar - Only if > 1 day */}
             {activeResearch.totalDays > 1 && (
               <div className="h-1.5 w-full bg-bg-panel rounded-full overflow-hidden mt-1">
                 <div

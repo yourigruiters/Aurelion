@@ -1,21 +1,22 @@
 import React from "react";
 import { ChevronUp, ChevronDown, LucideIcon } from "lucide-react";
+import ResourceIcon from "./ResourceIcon";
 
 interface ResourceItemProps {
-  icon: LucideIcon;
+  resource: string;
   value: number;
   rate?: number;
   modifier?: number;
-  color?: string;
+  color?: string; // Optional override
   tooltipLabel?: React.ReactNode;
   className?: string;
   customValueDisplay?: React.ReactNode;
-  max?: number; // Optional max value for other usages if needed, but customValueDisplay overrides
+  max?: number;
   loss?: number;
 }
 
 const ResourceItem: React.FC<ResourceItemProps> = ({
-  icon: Icon,
+  resource,
   value,
   rate,
   modifier,
@@ -50,7 +51,7 @@ const ResourceItem: React.FC<ResourceItemProps> = ({
     <div
       className={`group relative flex items-center space-x-1.5 bg-bg-panel/50 px-2 py-1 rounded cursor-default border border-transparent hover:border-border-light transition-colors ${className}`}
     >
-      <Icon size={16} className={color} />
+      <ResourceIcon resource={resource} size={16} className={color} />
       <span className="text-sm font-medium">
         {customValueDisplay || Math.floor(value)}
       </span>

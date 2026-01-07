@@ -21,6 +21,8 @@ export interface ActivityInstance extends ActivityTemplate {
   rewardClaimed?: boolean;
   remainingDays?: number;
   dayCompleted?: number; // Day number when it finished
+  estimatedEnemyPower?: number; // Visual estimate
+  actualEnemyPower?: number; // Real difficulty
 }
 
 export interface ActivityLogEntry {
@@ -31,6 +33,7 @@ export interface ActivityLogEntry {
   result: "success" | "failure";
   rewards: Partial<Resources>;
   losses?: Partial<Resources>; // For risky failures
+  populationLost?: number;
 }
 
 export interface ActivitiesState {
@@ -161,11 +164,19 @@ export const activitiesSlice = createSlice({
           const idx = Math.floor(Math.random() * RISKY_TEMPLATES.length);
           if (!usedRisky.has(idx)) {
             usedRisky.add(idx);
+            const template = RISKY_TEMPLATES[idx];
+            const actualPower = template.enemyPower || 0;
+            // Est is +/- 20%
+            const variance = 0.8 + Math.random() * 0.4;
+            const estimatedPower = Math.floor(actualPower * variance);
+
             activities.push({
-              ...RISKY_TEMPLATES[idx],
+              ...template,
               id: `risky-${day}-${idx}`,
               type: "risky",
               isCompleted: false,
+              actualEnemyPower: actualPower,
+              estimatedEnemyPower: estimatedPower,
             });
           }
         }

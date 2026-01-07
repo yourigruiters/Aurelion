@@ -33,7 +33,7 @@ export interface BuildingDefinition {
   costScaling: number; // multiplier per level
   baseTime: number; // in seconds (for display mostly) - keeping for legacy or animation
   buildTimeDays: number; // New: In game days
-  requiredLevel: number; // New: Player level required
+  requiredLevel: number; // New: Town Keep Level required
   experience: number; // New: XP gained
   effectDescription: string;
   icon: any; // LucideIcon

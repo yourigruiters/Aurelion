@@ -3,24 +3,17 @@ import { useSelector, useDispatch } from "react-redux";
 import { tradeResource } from "../store/resourcesSlice";
 import { RootState } from "../store/store";
 import {
-  Wheat,
-  Mountain,
-  Hammer,
   Coins,
-  LucideIcon,
-  Apple,
-  Users,
   ShoppingBag,
   BadgeDollarSign,
   ArrowRightLeft,
 } from "lucide-react";
-import Button from "../components/ui/Button"; // Assuming this exists from People.tsx context
+import Button from "../components/ui/Button";
+import ResourceIcon from "../components/ui/ResourceIcon";
 
 interface TradeItem {
   id: string; // Resource key
   name: string;
-  icon: LucideIcon;
-  color: string;
   basePrice: number;
 }
 
@@ -28,36 +21,26 @@ const TRADE_ITEMS: TradeItem[] = [
   {
     id: "population",
     name: "Population",
-    icon: Users,
-    color: "text-text-main",
     basePrice: 50,
   },
   {
     id: "food",
     name: "Food",
-    icon: Apple,
-    color: "text-danger-light",
     basePrice: 2,
   },
   {
     id: "wood",
     name: "Wood",
-    icon: Wheat,
-    color: "text-brand",
     basePrice: 2,
   },
   {
     id: "stone",
     name: "Stone",
-    icon: Mountain,
-    color: "text-text-muted",
     basePrice: 4,
   },
   {
     id: "iron",
     name: "Iron",
-    icon: Hammer,
-    color: "text-text-secondary",
     basePrice: 8,
   },
 ];
@@ -176,10 +159,8 @@ const Market: React.FC = () => {
                   >
                     {/* Icon & Name */}
                     <div className="w-1/4 flex items-center gap-4">
-                      <div
-                        className={`p-2 rounded-full bg-bg-main ${item.color}`}
-                      >
-                        <item.icon size={20} />
+                      <div className={`p-2 rounded-full bg-bg-main`}>
+                        <ResourceIcon resource={item.id} size={20} />
                       </div>
                       <div>
                         <span className="block font-bold text-text-main">
@@ -249,10 +230,8 @@ const Market: React.FC = () => {
                   >
                     {/* Icon & Name */}
                     <div className="w-1/4 flex items-center gap-4">
-                      <div
-                        className={`p-2 rounded-full bg-bg-main ${item.color}`}
-                      >
-                        <item.icon size={20} />
+                      <div className={`p-2 rounded-full bg-bg-main`}>
+                        <ResourceIcon resource={item.id} size={20} />
                       </div>
                       <div>
                         <span className="block font-bold text-text-main">
