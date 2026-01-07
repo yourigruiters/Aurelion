@@ -47,6 +47,10 @@ export const reportsSlice = createSlice({
   initialState,
   reducers: {
     addReport: (state, action: PayloadAction<DailyReport>) => {
+      // Prevent duplicates
+      if (state.reports.some((r) => r.id === action.payload.id)) {
+        return;
+      }
       // Add to beginning of list
       state.reports.unshift(action.payload);
       // Keep only last 30 reports to save state size?
@@ -68,10 +72,11 @@ export const reportsSlice = createSlice({
         state.unreadCount = Math.max(0, state.unreadCount - 1);
       }
     },
+    resetReports: () => initialState,
   },
 });
 
-export const { addReport, markReportsRead, markReportAsRead } =
+export const { addReport, markReportsRead, markReportAsRead, resetReports } =
   reportsSlice.actions;
 
 export default reportsSlice.reducer;

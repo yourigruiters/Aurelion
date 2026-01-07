@@ -141,7 +141,8 @@ export const activitiesSlice = createSlice({
 
       // Scaling Formula: Multiplier = 1 + (Player Level * 0.1)
       // e.g. Lv 1 = 1.1x, Lv 4 = 1.4x
-      const multiplier = 1 + playerLevel * 0.1;
+      const safeLevel = playerLevel || 1;
+      const multiplier = 1 + safeLevel * 0.1;
 
       // Generate 3 Safe, 2 Risky
       const activities: ActivityInstance[] = [];

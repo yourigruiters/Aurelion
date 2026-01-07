@@ -18,6 +18,7 @@ import {
   Mountain,
   Gem,
   LucideIcon,
+  CheckCircle,
 } from "lucide-react";
 import Button from "../components/ui/Button";
 
@@ -195,8 +196,12 @@ const People: React.FC = () => {
 
   const projectedRates = calculateProjectedRates();
 
+  const [saved, setSaved] = useState(false);
+
   const onSave = () => {
     dispatch(setAssignments(localAssignments));
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
   };
 
   return (
@@ -276,11 +281,11 @@ const People: React.FC = () => {
             <Button
               onClick={onSave}
               // @ts-ignore
-              variant="primary"
-              icon={Save}
-              disabled={idlePop < 0 || expired}
+              variant={saved ? "success" : "primary"}
+              icon={saved ? CheckCircle : Save}
+              disabled={idlePop < 0 || expired || saved}
             >
-              Save Changes
+              {saved ? "Saved!" : "Save Changes"}
             </Button>
           </div>
         </div>

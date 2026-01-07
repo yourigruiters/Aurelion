@@ -82,9 +82,16 @@ export const startBuildingProject =
 
 // ... existing code ...
 
+import { DAY_DURATION_MS } from "../helpers/game";
+
+// ... existing code ...
+
 export const handleDayRollover = (): AppThunk => (dispatch, getState) => {
   // 0. Snapshot State & Setup
   const state = getState();
+  // Guard: If day hasn't actually ended (or was already reset), do nothing.
+  if (state.game.dayTime < DAY_DURATION_MS) return;
+
   const prevResources = { ...state.resources.resources };
   const prevLevel = state.game.level;
   const prevExp = state.game.experience;

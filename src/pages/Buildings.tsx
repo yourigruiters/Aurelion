@@ -17,11 +17,9 @@ import {
   Clock,
   ArrowUpCircle,
   Construction,
-  Coins,
   Lock,
 } from "lucide-react";
 import ResourceIcon from "../components/ui/ResourceIcon";
-import ResourceDisplay from "../components/ui/ResourceDisplay";
 
 // Local helper removed
 
@@ -549,9 +547,15 @@ const Buildings: React.FC = () => {
                           {!building.unlocked ? "Locked" : "Level"}
                         </span>
                         {!building.unlocked ? (
-                          <span className="text-xs text-danger font-bold">
-                            Requires Town Keep Lv {def.requiredLevel}
-                          </span>
+                          levelLocked ? (
+                            <span className="text-xs text-danger font-bold">
+                              Requires Town Keep level {def.requiredLevel}
+                            </span>
+                          ) : (
+                            <span className="text-xs text-yellow-500 font-bold">
+                              Unlock Available
+                            </span>
+                          )
                         ) : (
                           <div
                             className={`text-xl font-bold ${
@@ -781,8 +785,8 @@ const Buildings: React.FC = () => {
                                 </span>
                                 <ul className="list-disc list-inside text-xs text-danger/80 space-y-0.5">
                                   <li>
-                                    Town Keep Lv {def.requiredLevel} (Current:{" "}
-                                    {townKeepLevel})
+                                    Town Keep level {def.requiredLevel}{" "}
+                                    (Current: {townKeepLevel})
                                   </li>
                                 </ul>
                               </div>

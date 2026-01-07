@@ -4,6 +4,7 @@ import { startGame } from "../store/gameSlice";
 import { initializeResources } from "../store/resourcesSlice";
 import { generateDailyActivities } from "../store/activitiesSlice";
 import { constructHouse } from "../store/buildingsSlice";
+import { resetReports } from "../store/reportsSlice";
 import regionsImage from "../assets/region/regions.png";
 import region1 from "../assets/region/region1.png";
 import region2 from "../assets/region/region2.png";
@@ -78,7 +79,8 @@ const GameStartModal: React.FC = () => {
       dispatch(constructHouse({ plotId: 1, type: "homestead" }));
     }
 
-    dispatch(generateDailyActivities({ day: 1 }));
+    dispatch(resetReports());
+    dispatch(generateDailyActivities({ day: 1, playerLevel: 1 }));
 
     // Navigate to overview
     navigate("/overview");

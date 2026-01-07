@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Focus, GameState, Region } from "../types";
+import { DAY_DURATION_MS } from "../helpers/game";
 
 const initialState: GameState = {
   gameStarted: false,
@@ -9,7 +10,7 @@ const initialState: GameState = {
   dayTime: 0,
   level: 1,
   experience: 0,
-  maxExperience: 100,
+  maxExperience: 50,
   isRightSidebarOpen: true, // Auto-open or default open
 };
 
@@ -26,7 +27,7 @@ export const gameSlice = createSlice({
       state.dayTime = 0;
       state.level = 1;
       state.experience = 0;
-      state.maxExperience = 100;
+      state.maxExperience = 50;
     },
     tickTime: (state, action: PayloadAction<number>) => {
       state.dayTime += action.payload;
@@ -45,6 +46,9 @@ export const gameSlice = createSlice({
     resetGame: () => {
       return initialState;
     },
+    completeDay: (state) => {
+      state.dayTime = DAY_DURATION_MS;
+    },
     toggleRightSidebar: (state) => {
       state.isRightSidebarOpen = !state.isRightSidebarOpen;
     },
@@ -60,6 +64,7 @@ export const {
   resetDayTime,
   addExperience,
   resetGame,
+  completeDay,
   toggleRightSidebar,
   setRightSidebarOpen,
 } = gameSlice.actions;

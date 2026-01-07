@@ -74,7 +74,7 @@ export const BUILDING_DEFINITIONS: Record<BuildingId, BuildingDefinition> = {
     description:
       "The heart of your settlement. Upgrading allows for more advanced structures.",
     maxLevel: 10,
-    baseCost: { wood: 200, stone: 80, gold: 40 },
+    baseCost: { wood: 4, stone: 4, gold: 4 }, // 100, 40, 20
     costScaling: 1.5,
     baseTime: 60,
     buildTimeDays: 2,
@@ -116,12 +116,12 @@ export const BUILDING_DEFINITIONS: Record<BuildingId, BuildingDefinition> = {
     name: "Lumberjack's Camp",
     description: "Dedicated to felling trees and processing timber.",
     maxLevel: 5,
-    baseCost: { wood: 50 },
+    baseCost: { wood: 70 },
     costScaling: 1.4,
     baseTime: 45,
     buildTimeDays: 1,
     requiredLevel: 1,
-    experience: 20,
+    experience: 30,
     effectDescription: "+20% Wood production per level.",
     icon: Axe,
   },

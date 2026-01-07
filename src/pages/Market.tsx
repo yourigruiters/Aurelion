@@ -201,6 +201,14 @@ const Market: React.FC = () => {
                       >
                         Sell 10
                       </Button>
+                      <Button
+                        onClick={() => handleTrade("sell", item, 50)}
+                        disabled={!HasResource(item.id, 50)}
+                        variant="outline"
+                        className="px-4 py-1 text-sm bg-bg-main border border-border-main hover:bg-bg-dark"
+                      >
+                        Sell 50
+                      </Button>
                     </div>
                   </div>
                 );
@@ -273,6 +281,14 @@ const Market: React.FC = () => {
                         className="px-4 py-1 text-sm bg-bg-main border border-border-main hover:bg-bg-dark"
                       >
                         Buy 10
+                      </Button>
+                      <Button
+                        onClick={() => handleTrade("buy", item, 50)}
+                        disabled={!CanAfford(item.id, 50)}
+                        variant="outline"
+                        className="px-4 py-1 text-sm bg-bg-main border border-border-main hover:bg-bg-dark"
+                      >
+                        Buy 50
                       </Button>
                     </div>
                   </div>

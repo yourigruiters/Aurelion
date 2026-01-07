@@ -67,6 +67,7 @@ export const resourcesSlice = createSlice({
       state.resources = resourceDetails.resources;
       state.modifiers = resourceDetails.modifiers;
       state.rates = resourceDetails.rates;
+      state.daysPassed = 0;
       state.gameStartTime = Date.now();
     },
     advanceDay: (

@@ -1,8 +1,9 @@
 import React from "react";
-import { useSelector } from "react-redux";
-import { BookOpen, Crown } from "lucide-react";
+import { useSelector, useDispatch } from "react-redux";
+import { BookOpen, Crown, SkipForward } from "lucide-react";
 import ResourceItem from "../ui/ResourceItem";
 import { RootState } from "../../store/store";
+import { completeDay } from "../../store/gameSlice";
 import { calculateBuildingModifiers } from "../../helpers/resource";
 
 // Helper to format date from daysPassed (Start: 1650-01-01)
@@ -42,6 +43,7 @@ const TopBar: React.FC<TopBarProps> = ({
   isRightSidebarOpen,
   onToggleRightSidebar,
 }) => {
+  const dispatch = useDispatch();
   const {
     population,
     resources,
@@ -150,6 +152,13 @@ const TopBar: React.FC<TopBarProps> = ({
               {formatDate(daysPassed)}
             </span>
           </div>
+          <button
+            onClick={() => dispatch(completeDay())}
+            className="p-1 rounded-full text-text-muted hover:text-white hover:bg-white/10 transition-colors"
+            title="Skip to end of day"
+          >
+            <SkipForward size={14} />
+          </button>
         </div>
 
         <div className="h-6 w-px bg-border-main" />
