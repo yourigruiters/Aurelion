@@ -46,14 +46,16 @@ const LeftSidebar: React.FC = () => {
   const { totalAttackBonus, totalDefenseBonus } = useSelector(
     (state: RootState) => state.military
   );
-  // Get population
-  const { population } = useSelector((state: RootState) => state.resources);
+  // Get population and assignments
+  const { population, assignments } = useSelector(
+    (state: RootState) => state.resources
+  );
 
   // Calculate actual stats
-  // Attack: Based on population + bonus per pop.
-  // Requirement: "take all population which is attack +1 per population, and then also per population add the attack bonus."
-  // So: Attack = Pop * 1 + Pop * Bonus = Pop * (1 + Bonus)
-  const attackValue = Math.floor(population * (1 + (totalAttackBonus || 0)));
+  // Attack: Based on WARRIORS (not population) + bonus per warrior.
+  // Formula: Warriors * (1 + Bonus)
+  const warriorCount = Number(assignments["Warrior"] || 0);
+  const attackValue = Math.floor(warriorCount * (1 + (totalAttackBonus || 0)));
 
   // Defense: "high per item... +30 +50" -> Flat sum of bonuses.
   const defenseValue = totalDefenseBonus || 0;

@@ -47,7 +47,9 @@ const Military: React.FC = () => {
   );
 
   // Derived stats
-  const warriorCount = assignments["Warrior"] || 0;
+  // Ensure we use the correct case "Warrior" and handle potential string/undefined values safely
+  const warriorCount = Number(assignments["Warrior"] || 0);
+  // Attack Power = Warriors * (1 + bonus_per_warrior)
   const attackValue = Math.floor(warriorCount * (1 + (totalAttackBonus || 0)));
 
   const canAfford = (cost: Record<string, number>) => {

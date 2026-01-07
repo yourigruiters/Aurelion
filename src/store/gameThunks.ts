@@ -135,9 +135,17 @@ export const handleDayRollover = (): AppThunk => (dispatch, getState) => {
     } else {
       // Expedition Finished - Calculate Outcome
 
-      // Calculate User Power (Warrior * 10) - duplicating logic from Activities.tsx roughly
+      // Calculate User Power (Warriors + Military Tech Bonuses)
       const warriorCount = assignments["Warrior"] || 0;
-      const userPower = warriorCount * 10;
+      const { totalAttackBonus } = state.military;
+
+      // Base attack is 1 per warrior, plus bonuses per warrior
+      // Formula: Warriors * (1 + Bonuses)
+      // This matches the UI in Military.tsx
+      const userPower = Math.floor(
+        warriorCount * (1 + (totalAttackBonus || 0))
+      );
+
       const enemyPower = activeRiskyActivity.enemyPower || 0;
 
       let winChance = 0;

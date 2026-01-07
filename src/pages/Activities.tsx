@@ -14,14 +14,18 @@ const Activities: React.FC = () => {
     useSelector((state: RootState) => state.activities);
   const { assignments } = useSelector((state: RootState) => state.resources);
   const { dayTime } = useSelector((state: RootState) => state.game);
+  const { totalAttackBonus } = useSelector(
+    (state: RootState) => state.military
+  );
 
   // Activities expire after the yellow zone (2/3 of day)
   const expireThreshold = SEGMENT_DURATION_MS * 2;
   const expired = dayTime >= expireThreshold;
 
-  // Calculate User Power from Warriors
-  const warriorCount = assignments["warrior"] || 0;
-  const userPower = warriorCount * 10;
+  // Calculate User Power from Warriors + Military Tech
+  const warriorCount = assignments["Warrior"] || 0;
+  // Base attack is 1 per warrior, plus bonuses per warrior
+  const userPower = Math.floor(warriorCount * (1 + (totalAttackBonus || 0)));
 
   const handlePerformActivity = (id: string, type: "safe" | "risky") => {
     // Dispatch Start
