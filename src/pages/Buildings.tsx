@@ -99,9 +99,9 @@ const Buildings: React.FC = () => {
             buildingId: id,
             type: "building_upgrade",
             targetLevel: building.level + 1,
-            remainingDays: def.buildTimeDays,
+            remainingDays: 1, // Upgrades take 1 day
             name: `Upgrade ${def.name} to Level ${building.level + 1}`,
-            totalDays: def.buildTimeDays,
+            totalDays: 1,
           },
           cost
         )
@@ -189,9 +189,9 @@ const Buildings: React.FC = () => {
                 buildingId: plotId.toString(),
                 type: "house_upgrade",
                 targetHouseType: "homestead",
-                remainingDays: 2, // Upgrade takes 2 days
+                remainingDays: 1, // Upgrade takes 1 day
                 name: `Upgrade to Homestead (Plot ${plotId})`,
-                totalDays: 2,
+                totalDays: 1,
               },
               cost
             )
@@ -404,7 +404,7 @@ const Buildings: React.FC = () => {
                                   Homestead
                                 </span>
                                 <span className="flex items-center gap-1 text-[10px] text-text-muted mt-0.5">
-                                  <Clock size={12} /> 2 Days
+                                  <Clock size={12} /> 1 Day
                                 </span>
                                 <span className="flex items-center gap-1 text-[10px] text-brand mt-0.5">
                                   <ArrowUpCircle size={12} /> +10 XP
@@ -728,6 +728,11 @@ const Buildings: React.FC = () => {
                               {building.unlocked
                                 ? "Next Upgrade Cost"
                                 : "Unlock Cost"}
+                              {building.unlocked && (
+                                <div className="flex items-center gap-1 text-text-main normal-case float-right">
+                                  <Clock size={12} /> 1 Day
+                                </div>
+                              )}
                             </div>
                             <div className="space-y-1">
                               <div className="space-y-1">
