@@ -36,10 +36,6 @@ const persistConfig = {
   key: "root",
   version: 1,
   storage,
-  migrate: (_state: any) => {
-    // Simple migration: if version changed (or undefined), just return undefined to reset
-    return Promise.resolve(undefined);
-  },
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
