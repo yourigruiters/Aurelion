@@ -22,8 +22,8 @@ export interface DailyReport {
     expGained: number; // XP gained THIS day
   };
   constructionQueue: string[]; // Snapshot of queue
-  completedConstructions: string[]; // Names of completed buildings
-  completedResearch?: string | null; // Name of completed research
+  completedConstructions: { name: string; xp: number }[]; // Names of completed buildings
+  completedResearch?: { name: string; xp: number } | null; // Name of completed research
   activeResearchSnapshot?: ActiveResearch | null; // Snapshot of active research
   read: boolean;
   starvation?: {

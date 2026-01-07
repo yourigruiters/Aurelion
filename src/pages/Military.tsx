@@ -176,6 +176,10 @@ const Military: React.FC = () => {
                     <div className="text-xs font-mono text-text-muted mt-1 flex items-center gap-1">
                       Time: {tech.researchTimeDays}{" "}
                       {tech.researchTimeDays === 1 ? "day" : "days"}
+                      <span className="mx-2">•</span>
+                      <span className="text-brand flex items-center gap-1">
+                        +{tech.experience} XP
+                      </span>
                     </div>
                   </div>
                 </div>

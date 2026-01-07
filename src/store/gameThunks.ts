@@ -26,6 +26,7 @@ import {
   updateQueueItem,
   upgradeBuilding,
   upgradeHouse,
+  BUILDING_DEFINITIONS,
 } from "./buildingsSlice";
 import { setRightSidebarOpen } from "./gameSlice";
 
@@ -92,10 +93,10 @@ export const handleDayRollover = (): AppThunk => (dispatch, getState) => {
   const { activeResearch } = state.military; // Get active research
   const { daysPassed, assignments } = state.resources;
   const completedActivities: ActivityLogEntry[] = [];
-  const completedConstructions: string[] = [];
+  const completedConstructions: { name: string; xp: number }[] = [];
 
   // Track research completion for report
-  let completedResearchName: string | null = null;
+  let completedResearchInfo: { name: string; xp: number } | null = null;
 
   // 1. Process Active Safe Activity
   if (activeSafeActivity) {
@@ -221,11 +222,18 @@ export const handleDayRollover = (): AppThunk => (dispatch, getState) => {
     const newRemaining = item.remainingDays - 1;
 
     if (newRemaining <= 0) {
+      let xpGained = 0;
       // Construction Complete!
       if (item.type === "building_upgrade") {
         dispatch(upgradeBuilding(item.buildingId as BuildingId));
+        // Add XP for upgrade
+        const def = BUILDING_DEFINITIONS[item.buildingId as BuildingId];
+        if (def) xpGained = def.experience;
       } else if (item.type === "building_unlock") {
         dispatch(unlockBuilding(item.buildingId as BuildingId));
+        // Add XP for unlock
+        const def = BUILDING_DEFINITIONS[item.buildingId as BuildingId];
+        if (def) xpGained = def.experience;
       } else if (item.type === "house_construct") {
         dispatch(
           constructHouse({
@@ -233,11 +241,19 @@ export const handleDayRollover = (): AppThunk => (dispatch, getState) => {
             type: item.targetHouseType!,
           })
         );
+        // Add XP for house construct (Small amount?)
+        xpGained = 5;
       } else if (item.type === "house_upgrade") {
         dispatch(upgradeHouse(parseInt(item.buildingId)));
+        // Add XP for house upgrade
+        xpGained = 10;
       }
 
-      completedConstructions.push(item.name);
+      if (xpGained > 0) {
+        dispatch(addExperience(xpGained));
+      }
+
+      completedConstructions.push({ name: item.name, xp: xpGained });
       dispatch(removeFromQueue(item.id));
     } else {
       dispatch(updateQueueItem({ id: item.id, remainingDays: newRemaining }));
@@ -251,10 +267,12 @@ export const handleDayRollover = (): AppThunk => (dispatch, getState) => {
       dispatch(completeResearch());
       // Log it or add to report
       const tech = MILITARY_TECHS[activeResearch.techId];
-      completedResearchName = tech.name;
 
-      if (tech.experience) {
-        dispatch(addExperience(tech.experience));
+      const xpGained = tech.experience || 0;
+      completedResearchInfo = { name: tech.name, xp: xpGained };
+
+      if (xpGained > 0) {
+        dispatch(addExperience(xpGained));
       }
     } else {
       dispatch(progressResearch());
@@ -353,22 +371,6 @@ export const handleDayRollover = (): AppThunk => (dispatch, getState) => {
   const newLevel = finalState.game.level;
   const newExp = finalState.game.experience;
 
-  // We need to inject the completed research into the report if we want to show it.
-  // The DailyReport types interface might need update, OR we piggyback on 'completedConstructions' or make a new field?
-  // User wanted "Military research reports will be added to the daily report modal."
-  // For now, let's append it to Night Event description or make a custom object if `reportsSlice` allows extra fields.
-  // Checking `reportsSlice.ts` would be good, but let's assume we can't change it right now easily without more edits.
-  // Actually, I can update the report object structure if I update `reportsSlice`.
-
-  // Wait, I can probably just put it in a separate field if I update the type in `reportsSlice`?
-  // Let's stick to existing and maybe hack it into "completedConstructions" or just wait.
-  // Actually, I can likely add a new property "completedResearch" to the report object.
-  // But strictly I cannot change the type without editing reportsSlice.ts.
-  // I will check reportsSlice in next step if I can't add it.
-  // For this step, I'll calculate it but maybe not add it to the valid `report` object yet to avoid TS errors,
-  // OR I will cast it if I am lazy, but better to do it right.
-  // Let's omit it from the report object for THIS step, and I'll update ReportSlice next.
-
   const report: DailyReport = {
     id: `day-${daysPassed + 1}`,
     day: daysPassed + 1,
@@ -383,7 +385,7 @@ export const handleDayRollover = (): AppThunk => (dispatch, getState) => {
     constructionQueue: constructionQueue.map((i) => i.name),
     completedConstructions,
     read: false,
-    completedResearch: completedResearchName,
+    completedResearch: completedResearchInfo,
     activeResearchSnapshot: getState().military.activeResearch,
     starvation: starvationEvent,
   };

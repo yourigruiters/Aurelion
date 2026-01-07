@@ -313,6 +313,9 @@ const Buildings: React.FC = () => {
                                   <span className="flex items-center gap-1 text-[10px] text-text-muted mt-0.5">
                                     <Clock size={12} /> 1 Day
                                   </span>
+                                  <span className="flex items-center gap-1 text-[10px] text-brand mt-0.5">
+                                    <ArrowUpCircle size={12} /> +5 XP
+                                  </span>
                                 </div>
                                 <div className="flex items-center gap-2">
                                   <span
@@ -348,6 +351,9 @@ const Buildings: React.FC = () => {
                                   </span>
                                   <span className="flex items-center gap-1 text-[10px] text-text-muted mt-0.5">
                                     <Clock size={12} /> 3 Days
+                                  </span>
+                                  <span className="flex items-center gap-1 text-[10px] text-brand mt-0.5">
+                                    <ArrowUpCircle size={12} /> +10 XP
                                   </span>
                                 </div>
                                 <div className="flex items-center gap-3">
@@ -399,6 +405,9 @@ const Buildings: React.FC = () => {
                                 </span>
                                 <span className="flex items-center gap-1 text-[10px] text-text-muted mt-0.5">
                                   <Clock size={12} /> 2 Days
+                                </span>
+                                <span className="flex items-center gap-1 text-[10px] text-brand mt-0.5">
+                                  <ArrowUpCircle size={12} /> +10 XP
                                 </span>
                               </div>
                               <div className="flex items-center gap-3">
@@ -601,6 +610,13 @@ const Buildings: React.FC = () => {
                                   {def.buildTimeDays} Days Construction
                                 </span>
                               </div>
+                              <div className="flex items-center gap-1">
+                                <ArrowUpCircle
+                                  size={16}
+                                  className="text-brand"
+                                />
+                                <span>+{def.experience} XP</span>
+                              </div>
                             </div>
                           </div>
                         ) : (
@@ -681,6 +697,9 @@ const Buildings: React.FC = () => {
                                               {def.effectDescription}
                                             </span>
                                             {/* If we had specific numbers we would put them here. E.g. "Production: 100 -> 120" */}
+                                            <div className="mt-1 text-brand">
+                                              + {def.experience} XP
+                                            </div>
                                           </div>
                                         </div>
                                       );
