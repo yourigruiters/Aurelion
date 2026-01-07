@@ -82,7 +82,7 @@ const DailyReportModal: React.FC<DailyReportModalProps> = ({
                             resource={res}
                             amount={amount}
                             showPlus
-                            size="xs"
+                            size="sm"
                             className={
                               amount > 0 ? "text-success" : "text-danger"
                             }
@@ -190,7 +190,7 @@ const DailyReportModal: React.FC<DailyReportModalProps> = ({
                                 resource={res}
                                 amount={amt}
                                 showPlus
-                                size="xs"
+                                size="sm"
                                 className="text-text-secondary"
                               />
                             )

@@ -6,11 +6,12 @@ import Market from "./pages/Market";
 import Military from "./pages/Military";
 import Activities from "./pages/Activities";
 import MainLayout from "./components/layout/MainLayout";
+import NotFound from "./pages/NotFound";
 
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<MainLayout />}>
+      <Route element={<MainLayout />}>
         <Route index element={<Navigate to="/overview" replace />} />
         <Route path="overview" element={<Overview />} />
         <Route path="people" element={<People />} />
@@ -19,6 +20,7 @@ function App() {
         <Route path="military" element={<Military />} />
         <Route path="activities" element={<Activities />} />
       </Route>
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }

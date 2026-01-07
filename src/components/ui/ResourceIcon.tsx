@@ -22,6 +22,7 @@ const ResourceIcon: React.FC<ResourceIconProps> = ({
   size = 14,
   className = "",
 }) => {
+  if (!resource) return null;
   const normResource = resource.toLowerCase();
 
   let Icon = Apple; // Default fallback
