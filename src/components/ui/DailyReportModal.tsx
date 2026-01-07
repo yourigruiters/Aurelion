@@ -199,8 +199,7 @@ const DailyReportModal: React.FC<DailyReportModalProps> = ({
                           {activity.populationLost &&
                             activity.populationLost > 0 && (
                               <div className="flex items-center gap-1 text-xs text-danger font-bold">
-                                <Skull size={12} /> -{activity.populationLost}{" "}
-                                Population
+                                -{activity.populationLost} Population
                               </div>
                             )}
                         </div>

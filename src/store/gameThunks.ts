@@ -4,6 +4,7 @@ import {
   deductResources,
   updateResource,
   updatePopulation,
+  setAssignments,
 } from "./resourcesSlice";
 import { resetDayTime, addExperience } from "./gameSlice";
 import {
@@ -29,6 +30,11 @@ import {
   BUILDING_DEFINITIONS,
 } from "./buildingsSlice";
 import { setRightSidebarOpen } from "./gameSlice";
+import {
+  progressResearch,
+  completeResearch,
+  MILITARY_TECHS,
+} from "./militarySlice";
 
 // Simple Night Event Generator
 const generateNightEvent = (): NightEvent | undefined => {
@@ -73,13 +79,6 @@ export const startBuildingProject =
     dispatch(setRightSidebarOpen(true));
   };
 
-// ... imports
-import {
-  progressResearch,
-  completeResearch,
-  MILITARY_TECHS,
-} from "./militarySlice";
-
 // ... existing code ...
 
 export const handleDayRollover = (): AppThunk => (dispatch, getState) => {
@@ -97,6 +96,62 @@ export const handleDayRollover = (): AppThunk => (dispatch, getState) => {
 
   // Track research completion for report
   let completedResearchInfo: { name: string; xp: number } | null = null;
+
+  // Helper: Process Population Loss with Priority (Idle -> Warrior -> Random)
+  const processPopulationLoss = (amount: number) => {
+    // We must fetch FRESH state because this might run after consumption/other updates
+    const currentState = getState();
+    const currentPop = currentState.resources.population;
+    const currentAssignments = { ...currentState.resources.assignments };
+
+    const actualLoss = Math.min(amount, currentPop);
+    if (actualLoss <= 0) return 0;
+
+    // First, calculate how much population is currently assigned
+    const totalAssigned = Object.values(currentAssignments).reduce(
+      (sum, val) => sum + val,
+      0
+    );
+    const idleCount = currentPop - totalAssigned;
+
+    // Remaining loss after taking from idle
+    // Logical Step: We update total population at the end.
+    // If we lose 5 people and have 10 idle, we just reduce total pop by 5. Assignments untouched.
+    // If we lose 5 people and have 2 idle, we reduce total pop by 5. We must reduce assignments by 3.
+    let assignmentsToRemove = Math.max(0, actualLoss - idleCount);
+
+    if (assignmentsToRemove > 0) {
+      // 1. Remove Warriors first
+      const warriorCount = currentAssignments["Warrior"] || 0;
+      const warriorsRemoved = Math.min(assignmentsToRemove, warriorCount);
+      if (warriorsRemoved > 0) {
+        currentAssignments["Warrior"] -= warriorsRemoved;
+        assignmentsToRemove -= warriorsRemoved;
+      }
+
+      // 2. Remove Random others if needed
+      while (assignmentsToRemove > 0) {
+        const availableRoles = Object.keys(currentAssignments).filter(
+          (r) => currentAssignments[r] > 0
+        );
+
+        if (availableRoles.length === 0) break; // Should not happen if logic matches
+
+        const randomRole =
+          availableRoles[Math.floor(Math.random() * availableRoles.length)];
+        currentAssignments[randomRole] -= 1;
+        assignmentsToRemove -= 1;
+      }
+
+      // Update assignments only if changed
+      dispatch(setAssignments(currentAssignments));
+    }
+
+    // Always update total population
+    dispatch(updatePopulation(-actualLoss));
+
+    return actualLoss;
+  };
 
   // 1. Process Active Safe Activity
   if (activeSafeActivity) {
@@ -190,12 +245,15 @@ export const handleDayRollover = (): AppThunk => (dispatch, getState) => {
       } else {
         // Failure - Lose 10% of Population
         // "Lose 10% of population (floored) when failing"
-        const currentPop = state.resources.population;
-        const populationLost = Math.floor(currentPop * 0.1);
+        const currentPop = getState().resources.population; // Get fresh pop in case of weirdness
 
-        if (populationLost > 0) {
-          dispatch(updatePopulation(-populationLost));
+        let rawLoss = Math.floor(currentPop * 0.1);
+        // Ensure at least 1 loss if pop > 0
+        if (rawLoss === 0 && currentPop > 0) {
+          rawLoss = 1;
         }
+
+        const populationLost = processPopulationLoss(rawLoss);
 
         const logEntry: ActivityLogEntry = {
           id: activeRiskyActivity.id,
@@ -204,7 +262,7 @@ export const handleDayRollover = (): AppThunk => (dispatch, getState) => {
           type: "risky",
           result: "failure",
           rewards: {},
-          losses: {}, // Could put resources here if any
+          losses: {},
           populationLost,
         };
         dispatch(addToHistory(logEntry));
@@ -309,7 +367,9 @@ export const handleDayRollover = (): AppThunk => (dispatch, getState) => {
 
     if (currentPop > 0) {
       // Scenario 1: Remove Population
-      dispatch(updatePopulation(-1));
+      // Use helper to prioritize warriors/assignments
+      processPopulationLoss(1);
+
       starvationEvent = {
         type: "population",
         message: "A villager died of starvation.",
