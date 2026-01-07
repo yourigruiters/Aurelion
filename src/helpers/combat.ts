@@ -37,27 +37,6 @@ export const calculateMilitaryModifiers = (
   });
 
   // 4. Totals
-  // Attack: (Base + TechFlat) * (1 + BuildingMod) ?
-  // Or: Base * (1 + TechMod + BuildingMod)?
-  // Current logic in Military.tsx was: warriorCount * (1 + totalAttackBonus)
-  // Let's unify:
-  // Total Attack = WarriorCount * (1 + BuildingMod) + TechFlat?
-  // User asked for "Modifiers".
-  // Let's stick to the user's request: "The building first, the bonus after".
-  // Let's assume Techs provide FLAT bonuses (as currently defined: +1 Attack/Warrior),
-  // and Buildings provide PERCENTAGE modifiers.
-
-  // Wait, `totalAttackBonus` in slice was sum of flat bonuses per pop.
-  // Let's reinterpret for "Modifiers":
-  // Base Attack = Warrior Count
-  // Tech Bonus = (Sum of Tech Attack Bonus) * Warrior Count
-  // Building Bonus = (Base Attack + Tech Bonus) * BuildingMod?
-  // OR: Total = Base * (1 + BuildingMod + TechMod)?
-  // The user said "initial bonus modifier".
-  // Let's define:
-  // Techs provide flat stats per warrior.
-  // Buildings provide % multiplier.
-
   const totalRawAttack = baseAttack + techAttackFlat;
   const totalAttack = Math.floor(totalRawAttack * (1 + buildingAttackMod));
 

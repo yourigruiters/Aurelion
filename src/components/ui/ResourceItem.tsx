@@ -32,27 +32,6 @@ const ResourceItem: React.FC<ResourceItemProps> = ({
 }) => {
   // Calculate Net Rate
   const baseRate = rate || 0;
-  // Modifiers are used directly in JSX for display
-  // Combine: 1 + Building + Bonus (as requested: Building first, Bonus after)
-  // Logic: BaseRate * (1 + BuildMod + BonusMod)?
-  // Or: BaseRate * (1 + BuildMod) * (1 + BonusMod)?
-  // User said: "Building first, bonus after for maximal gains." which implies multiplicative order or just visual order?
-  // Usually games sum modifiers: 1 + A + B.
-  // If user says "Building first... for maximal gains", maybe they mean multiplicative:
-  // Base * (1+Build) * (1+Bonus).
-  // Let's implement multiplicative for "maximal gains".
-  // Effective Rate = Rate * (1 + Build) * (1 + Bonus) ??
-  // NO, usually standard is additive. Multiplicative is wildly powerful.
-  // Let's stick to Additive for now unless explicitly "compounding" is requested.
-  // Wait, "maximal gains" implies compounding order matters?
-  // (A * X) * Y == A * (X*Y). Order doesn't matter for multiplication.
-  // Unless it's (A + X) * Y.
-  // Let's assume Additive for simplicity first: Total = 1 + Build + Bonus.
-  // If user complains, we switch.
-  // Actually, let's use the explicit logic:
-  // modifier prop is "Total Modifier".
-  // So we just use `modifier` for calculation if provided.
-  // But we use build/bonus for Display.
   const mod = modifier || 1;
   const production = baseRate * mod;
   const totalLoss = loss || 0;

@@ -5,22 +5,18 @@ import LeftSidebar from "./LeftSidebar";
 import RightSidebar from "./RightSidebar";
 import Footer from "./Footer";
 import DayProgressBar from "./DayProgressBar";
-
 import { useSelector, useDispatch } from "react-redux";
 import GameStartModal from "../GameStartModal";
 import { RootState, AppDispatch } from "../../store/store";
-// import { advanceDay } from "../../store/resourcesSlice";
 import { handleDayRollover } from "../../store/gameThunks";
 import { toggleRightSidebar, tickTime } from "../../store/gameSlice";
 import { DAY_DURATION_MS } from "../../helpers/game";
-// ...
 
 const MainLayout: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { gameStarted, dayTime, isRightSidebarOpen } = useSelector(
     (state: RootState) => state.game
   );
-  // Removed local state
 
   // Game Loop
   React.useEffect(() => {
@@ -29,13 +25,6 @@ const MainLayout: React.FC = () => {
     if (gameStarted) {
       interval = setInterval(() => {
         dispatch(tickTime(100)); // Tick every 100ms
-
-        // Check for day rollover
-        // Note: dayTime is updated in Redux, but we need to check the state.
-        // However, since we are inside useEffect with only gameStarted dependency (initially),
-        // we might have stale state if we don't depend on dayTime.
-        // BETTER APPROACH: Check this in the reducer or pass current time to tickTime?
-        // OR: Just rely on the component re-rendering with new dayTime.
       }, 100);
     }
 

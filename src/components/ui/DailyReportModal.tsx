@@ -11,7 +11,6 @@ import {
   ShieldCheck,
   Loader,
 } from "lucide-react";
-import ResourceIcon from "../ui/ResourceIcon";
 import ResourceDisplay from "../ui/ResourceDisplay";
 
 interface DailyReportModalProps {

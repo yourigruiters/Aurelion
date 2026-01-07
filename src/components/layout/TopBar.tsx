@@ -7,7 +7,6 @@ import { completeDay } from "../../store/gameSlice";
 import { calculateBuildingModifiers } from "../../helpers/resource";
 
 // Helper to format date from daysPassed (Start: 1650-01-01)
-// Helper to get ordinal suffix
 const getOrdinalSuffix = (day: number) => {
   if (day > 3 && day < 21) return "th";
   switch (day % 10) {
@@ -252,7 +251,6 @@ const TopBar: React.FC<TopBarProps> = ({
           title="Toggle Logbook"
         >
           <BookOpen size={20} />
-          {/* Notification Badge - Removed */}
         </button>
       </div>
     </header>

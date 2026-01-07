@@ -27,7 +27,7 @@ const Activities: React.FC = () => {
   // Base attack is 1 per warrior, plus bonuses per warrior
   const userPower = Math.floor(warriorCount * (1 + (totalAttackBonus || 0)));
 
-  const handlePerformActivity = (id: string, type: "safe" | "risky") => {
+  const handlePerformActivity = (id: string) => {
     // Dispatch Start
     dispatch(startActivity({ id }));
     dispatch(setRightSidebarOpen(true)); // Open sidebar
@@ -157,7 +157,7 @@ const Activities: React.FC = () => {
                       activity={activity}
                       onPerform={(id, type) => {
                         if (type === "risky" && warriorCount === 0) return;
-                        handlePerformActivity(id, type);
+                        handlePerformActivity(id);
                       }}
                       userPower={userPower}
                       disabled={

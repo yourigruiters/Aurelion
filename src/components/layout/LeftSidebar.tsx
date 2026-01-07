@@ -38,15 +38,12 @@ const SidebarItem: React.FC<SidebarItemProps> = ({ to, icon: Icon, label }) => (
 );
 
 const LeftSidebar: React.FC = () => {
-  /* Restore game state selectors */
   const { level, experience, maxExperience } = useSelector(
     (state: RootState) => state.game
   );
-  // Get military bonuses
   const { totalAttackBonus, totalDefenseBonus, unlockedTechs } = useSelector(
     (state: RootState) => state.military
   );
-  // Get assignments
   const { assignments } = useSelector((state: RootState) => state.resources);
 
   // Calculate actual stats

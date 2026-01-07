@@ -17,9 +17,7 @@ import { DAY_DURATION_MS, SEGMENT_DURATION_MS } from "../helpers/game";
 
 const Overview: React.FC = () => {
   const navigate = useNavigate();
-  const { dayTime, gameStarted } = useSelector(
-    (state: RootState) => state.game
-  );
+  const { dayTime } = useSelector((state: RootState) => state.game);
   const { population, assignments } = useSelector(
     (state: RootState) => state.resources
   );

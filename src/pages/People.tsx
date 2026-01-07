@@ -21,9 +21,8 @@ import {
   CheckCircle,
 } from "lucide-react";
 import Button from "../components/ui/Button";
-
 import { SEGMENT_DURATION_MS } from "../helpers/game";
-import { BUILDING_DEFINITIONS, BuildingId } from "../store/buildingsSlice"; // Import BuildingId
+import { BUILDING_DEFINITIONS, BuildingId } from "../store/buildingsSlice";
 
 interface Impact {
   resource: string; // keyof Resources but flexible for now

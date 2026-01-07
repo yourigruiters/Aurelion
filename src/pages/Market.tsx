@@ -12,7 +12,7 @@ import Button from "../components/ui/Button";
 import ResourceIcon from "../components/ui/ResourceIcon";
 
 interface TradeItem {
-  id: string; // Resource key
+  id: string;
   name: string;
   basePrice: number;
 }

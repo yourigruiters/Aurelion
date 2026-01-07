@@ -13,7 +13,6 @@ interface ZoneProps {
 
 const Zone: React.FC<ZoneProps> = ({
   startMs,
-  // endMs,
   currentProgressMs,
   colorClass,
   tooltipText,
@@ -51,7 +50,7 @@ const DayProgressBar: React.FC = () => {
 
   return (
     <div className="w-full h-[10px] bg-zinc-800 flex relative overflow-visible border-b border-zinc-700">
-      {/* Zone 1: 0-5m (Green) */}
+      {/* Green zone */}
       <Zone
         startMs={0}
         endMs={SEGMENT_DURATION_MS}
@@ -60,7 +59,7 @@ const DayProgressBar: React.FC = () => {
         tooltipText="You can setup your population and run activities for today"
       />
 
-      {/* Zone 2: 5-10m (Yellow) */}
+      {/* Yellow zone */}
       <Zone
         startMs={SEGMENT_DURATION_MS}
         endMs={SEGMENT_DURATION_MS * 2}
@@ -69,7 +68,7 @@ const DayProgressBar: React.FC = () => {
         tooltipText="You can run activities for today"
       />
 
-      {/* Zone 3: 10-15m (Red) */}
+      {/* Red zone */}
       <Zone
         startMs={SEGMENT_DURATION_MS * 2}
         endMs={DAY_DURATION_MS}
@@ -78,7 +77,6 @@ const DayProgressBar: React.FC = () => {
         tooltipText="Activities are now stopped until the next day"
       />
 
-      {/* Markers */}
       <div className="absolute top-0 bottom-0 w-[1px] bg-white/20 z-20 left-1/3" />
       <div className="absolute top-0 bottom-0 w-[1px] bg-white/20 z-20 left-2/3" />
 

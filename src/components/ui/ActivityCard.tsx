@@ -14,9 +14,9 @@ import ResourceDisplay from "../ui/ResourceDisplay";
 interface ActivityCardProps {
   activity: ActivityInstance;
   onPerform: (id: string, type: "safe" | "risky") => void;
-  userPower?: number; // Needed for risky analysis
+  userPower?: number;
   disabled?: boolean;
-  canAfford?: boolean; // If we add costs later
+  canAfford?: boolean;
   isSelected?: boolean;
 }
 

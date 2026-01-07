@@ -21,11 +21,8 @@ import {
 } from "lucide-react";
 import ResourceIcon from "../components/ui/ResourceIcon";
 
-// Local helper removed
-
 const Buildings: React.FC = () => {
   const dispatch = useDispatch();
-  // @ts-ignore
   // @ts-ignore
   const { buildings, housing, constructionQueue } = useSelector(
     (state: RootState) => state.buildings
@@ -85,10 +82,6 @@ const Buildings: React.FC = () => {
     const cost = getUpgradeCost(id, building.level);
 
     if (canAfford(cost)) {
-      // dispatch(deductResources(cost));
-      // dispatch(upgradeBuilding(id));
-      // dispatch(addExperience(def.experience));
-
       // NEW: Start Project
       dispatch(
         // @ts-ignore
@@ -118,10 +111,6 @@ const Buildings: React.FC = () => {
     const cost = def.baseCost;
 
     if (canAfford(cost)) {
-      // dispatch(deductResources(cost));
-      // dispatch(unlockBuilding(id));
-      // dispatch(addExperience(def.experience));
-
       dispatch(
         // @ts-ignore
         startBuildingProject(
@@ -159,10 +148,7 @@ const Buildings: React.FC = () => {
     }
 
     if (canAfford(cost)) {
-      // dispatch(deductResources(cost));
-
       if (type === "cottage") {
-        // dispatch(constructHouse({ plotId, type }));
         dispatch(
           // @ts-ignore
           startBuildingProject(
@@ -179,7 +165,6 @@ const Buildings: React.FC = () => {
         );
       } else if (type === "homestead") {
         if (housing[plotId].type === "cottage") {
-          // dispatch(upgradeHouse(plotId));
           dispatch(
             // @ts-ignore
             startBuildingProject(
@@ -196,7 +181,6 @@ const Buildings: React.FC = () => {
           );
         } else {
           // Direct build
-          // dispatch(constructHouse({ plotId, type }));
           dispatch(
             // @ts-ignore
             startBuildingProject(
