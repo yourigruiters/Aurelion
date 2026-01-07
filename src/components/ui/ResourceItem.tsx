@@ -94,8 +94,8 @@ const ResourceItem: React.FC<ResourceItemProps> = ({
           {/* Income (Base Production) */}
           {rate !== undefined && rate > 0 && (
             <div className="flex justify-between text-success">
-              <span>Income:</span>
-              <span>+{rate} / day</span>
+              <span>Base:</span>
+              <span>+{rate}</span>
             </div>
           )}
 
@@ -132,7 +132,7 @@ const ResourceItem: React.FC<ResourceItemProps> = ({
             rate !== undefined &&
             rate > 0 && (
               <div className="flex justify-between text-success mt-1 pt-1 border-t border-border-light">
-                <span>Production:</span>
+                <span>Gross:</span>
                 <span>+{Math.floor(production)}</span>
               </div>
             )}
@@ -140,8 +140,8 @@ const ResourceItem: React.FC<ResourceItemProps> = ({
           {/* Loss */}
           {loss !== undefined && loss > 0 && (
             <div className="flex justify-between text-danger">
-              <span>Loss:</span>
-              <span>-{loss} / day</span>
+              <span>Consumption:</span>
+              <span>-{loss}</span>
             </div>
           )}
 

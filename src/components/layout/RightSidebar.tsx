@@ -54,7 +54,7 @@ const RightSidebar: React.FC = () => {
       <div className="flex-none p-4 pb-2 border-b border-border-main max-h-[30%] overflow-y-auto">
         <h2 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2 sticky top-0 bg-bg-panel z-10 flex items-center gap-2">
           <FileText size={14} />
-          Reports
+          Daily Reports
         </h2>
         <div className="space-y-2">
           {reports.slice(0, 2).map((report, index) => (

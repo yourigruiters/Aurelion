@@ -780,7 +780,10 @@ const Buildings: React.FC = () => {
                                   Requirements
                                 </span>
                                 <ul className="list-disc list-inside text-xs text-danger/80 space-y-0.5">
-                                  <li>Town Keep Lv {def.requiredLevel}</li>
+                                  <li>
+                                    Town Keep Lv {def.requiredLevel} (Current:{" "}
+                                    {townKeepLevel})
+                                  </li>
                                 </ul>
                               </div>
                             ) : underConstruction ? (

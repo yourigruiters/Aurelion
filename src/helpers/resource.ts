@@ -77,15 +77,15 @@ export const calculateBuildingModifiers = (
     buildings["wheat_fields"]?.unlocked &&
     buildings["wheat_fields"].level > 1
   ) {
-    modifiers.food += (buildings["wheat_fields"].level - 1) * 0.2;
+    modifiers.food += (buildings["wheat_fields"].level - 1) * 0.1;
   }
 
-  // Fisherman's Hut: +20% Food per level > 1
+  // Fisherman's Hut: +10% Food per level > 1
   if (
     buildings["fishermans_hut"]?.unlocked &&
     buildings["fishermans_hut"].level > 1
   ) {
-    modifiers.food += (buildings["fishermans_hut"].level - 1) * 0.2;
+    modifiers.food += (buildings["fishermans_hut"].level - 1) * 0.1;
   }
 
   // Lumberjack's Camp: +20% Wood per level > 1

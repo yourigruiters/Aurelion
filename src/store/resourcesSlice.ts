@@ -69,15 +69,31 @@ export const resourcesSlice = createSlice({
       state.rates = resourceDetails.rates;
       state.gameStartTime = Date.now();
     },
-    advanceDay: (state) => {
+    advanceDay: (
+      state,
+      action: PayloadAction<Record<string, number> | undefined>
+    ) => {
       state.daysPassed += 1;
+      const buildingModifiers = action.payload || {};
 
       (Object.keys(state.resources) as Array<keyof Resources>).forEach(
         (key) => {
           if (state.rates[key]) {
+            // Base Modifier from Region + Building Modifier passed in
             // @ts-ignore
-            const modifier = state.modifiers[key] || 1;
-            state.resources[key] += state.rates[key] * modifier;
+            const baseMod = state.modifiers[key] || 1;
+            const buildMod = buildingModifiers[key] || 0;
+            // Additive: 1 + (RegionMod - 1) + BuildMod ??
+            // OR Simple Additive: RegionMod is e.g. 1.25. BuildMod is 0.2. Total = 1.45.
+            // Wait, state.modifiers are stored as e.g. 1.25.
+            // So total modifier = baseMod + buildMod?
+            // If baseMod is 1.0 and build is 0.1 => 1.1. Correct.
+            // If baseMod is 1.25 and build is 0.1 => 1.35. Correct.
+            const totalModifier = baseMod + buildMod;
+
+            state.resources[key] += Math.floor(
+              state.rates[key] * totalModifier
+            );
           }
         }
       );

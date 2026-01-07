@@ -6,6 +6,7 @@ import {
   updatePopulation,
   setAssignments,
 } from "./resourcesSlice";
+import { calculateBuildingModifiers } from "../helpers/resource";
 import { resetDayTime, addExperience } from "./gameSlice";
 import {
   generateDailyActivities,
@@ -346,7 +347,12 @@ export const handleDayRollover = (): AppThunk => (dispatch, getState) => {
   }
 
   // 5. Advance Day (Production)
-  dispatch(advanceDay());
+  // Calculate Building Modifiers dynamically
+  // const buildings = stateAfterAdvance.buildings.buildings; // Incorrect ref
+  const currentBuildings = getState().buildings.buildings;
+  const buildingModifiers = calculateBuildingModifiers(currentBuildings);
+
+  dispatch(advanceDay(buildingModifiers));
   dispatch(resetDayTime());
 
   // 6. Starvation Logic
@@ -407,7 +413,13 @@ export const handleDayRollover = (): AppThunk => (dispatch, getState) => {
   }
 
   // 7. Generate New Activities
-  dispatch(generateDailyActivities({ day: daysPassed + 1 }));
+  // Use newLevel from final state calculation roughly, or just get it now.
+  // We need to calculate it before report? No, report happens after.
+  // The logic below calculates `newLevel` for the report.
+  // Let's get the level from the active state *after* XP might have added.
+  const stateAfterEverything = getState();
+  const playerLevel = stateAfterEverything.game.level;
+  dispatch(generateDailyActivities({ day: daysPassed + 1, playerLevel }));
 
   // 8. Generate Report
   // Calculate Deltas from snapshot vs FINAL state

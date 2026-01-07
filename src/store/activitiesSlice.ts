@@ -135,9 +135,13 @@ export const activitiesSlice = createSlice({
   reducers: {
     generateDailyActivities: (
       state,
-      action: PayloadAction<{ day: number }>
+      action: PayloadAction<{ day: number; playerLevel: number }>
     ) => {
-      const { day } = action.payload;
+      const { day, playerLevel } = action.payload;
+
+      // Scaling Formula: Multiplier = 1 + (Player Level * 0.1)
+      // e.g. Lv 1 = 1.1x, Lv 4 = 1.4x
+      const multiplier = 1 + playerLevel * 0.1;
 
       // Generate 3 Safe, 2 Risky
       const activities: ActivityInstance[] = [];
@@ -149,8 +153,23 @@ export const activitiesSlice = createSlice({
         const idx = Math.floor(Math.random() * SAFE_TEMPLATES.length);
         if (!usedSafe.has(idx)) {
           usedSafe.add(idx);
+          const template = SAFE_TEMPLATES[idx];
+
+          // Scale Rewards
+          const scaledReward: Partial<Resources> = {};
+          Object.entries(template.baseReward).forEach(([k, v]) => {
+            scaledReward[k as keyof Resources] = Math.floor(v * multiplier);
+          });
+
+          // Scale XP
+          const scaledXp = template.xp
+            ? Math.floor(template.xp * multiplier)
+            : 0;
+
           activities.push({
-            ...SAFE_TEMPLATES[idx],
+            ...template,
+            baseReward: scaledReward, // Override with scaled
+            xp: scaledXp,
             id: `safe-${day}-${idx}`,
             type: "safe",
             isCompleted: false,
@@ -165,13 +184,29 @@ export const activitiesSlice = createSlice({
           if (!usedRisky.has(idx)) {
             usedRisky.add(idx);
             const template = RISKY_TEMPLATES[idx];
-            const actualPower = template.enemyPower || 0;
+
+            // Scale Rewards
+            const scaledReward: Partial<Resources> = {};
+            Object.entries(template.baseReward).forEach(([k, v]) => {
+              scaledReward[k as keyof Resources] = Math.floor(v * multiplier);
+            });
+
+            // Scale XP
+            const scaledXp = template.xp
+              ? Math.floor(template.xp * multiplier)
+              : 0;
+
+            const basePower = template.enemyPower || 0;
+            // Scale Enemy Power
+            const actualPower = Math.floor(basePower * multiplier);
             // Est is +/- 20%
             const variance = 0.8 + Math.random() * 0.4;
             const estimatedPower = Math.floor(actualPower * variance);
 
             activities.push({
               ...template,
+              baseReward: scaledReward,
+              xp: scaledXp,
               id: `risky-${day}-${idx}`,
               type: "risky",
               isCompleted: false,
