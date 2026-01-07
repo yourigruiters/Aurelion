@@ -318,6 +318,7 @@ const Buildings: React.FC = () => {
                                   </span>
                                 </div>
                                 <div className="flex items-center gap-2">
+                                  <ResourceIcon resource="wood" size={12} />
                                   <span
                                     className={`text-xs ${
                                       resources.wood >= 50
@@ -327,7 +328,6 @@ const Buildings: React.FC = () => {
                                   >
                                     50
                                   </span>
-                                  <ResourceIcon resource="wood" size={12} />
                                 </div>
                               </div>
                               <Button
@@ -358,6 +358,7 @@ const Buildings: React.FC = () => {
                                 </div>
                                 <div className="flex items-center gap-3">
                                   <div className="flex items-center gap-1">
+                                    <ResourceIcon resource="wood" size={12} />
                                     <span
                                       className={`text-xs ${
                                         resources.wood >= 150
@@ -367,9 +368,9 @@ const Buildings: React.FC = () => {
                                     >
                                       150
                                     </span>
-                                    <ResourceIcon resource="wood" size={12} />
                                   </div>
                                   <div className="flex items-center gap-1">
+                                    <ResourceIcon resource="stone" size={12} />
                                     <span
                                       className={`text-xs ${
                                         resources.stone >= 50
@@ -379,7 +380,6 @@ const Buildings: React.FC = () => {
                                     >
                                       50
                                     </span>
-                                    <ResourceIcon resource="stone" size={12} />
                                   </div>
                                 </div>
                               </div>
@@ -412,6 +412,7 @@ const Buildings: React.FC = () => {
                               </div>
                               <div className="flex items-center gap-3">
                                 <div className="flex items-center gap-1">
+                                  <ResourceIcon resource="wood" size={12} />
                                   <span
                                     className={`text-xs ${
                                       resources.wood >= 100
@@ -421,9 +422,9 @@ const Buildings: React.FC = () => {
                                   >
                                     100
                                   </span>
-                                  <ResourceIcon resource="wood" size={12} />
                                 </div>
                                 <div className="flex items-center gap-1">
+                                  <ResourceIcon resource="stone" size={12} />
                                   <span
                                     className={`text-xs ${
                                       resources.stone >= 50
@@ -433,7 +434,6 @@ const Buildings: React.FC = () => {
                                   >
                                     50
                                   </span>
-                                  <ResourceIcon resource="stone" size={12} />
                                 </div>
                               </div>
                             </div>

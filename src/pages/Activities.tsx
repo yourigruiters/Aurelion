@@ -139,7 +139,6 @@ const Activities: React.FC = () => {
 
             {warriorCount === 0 && (
               <div className="mb-4 p-3 bg-danger/10 text-danger border border-danger/20 rounded text-sm font-bold flex items-center gap-2">
-                <Skull size={16} />
                 You must assign at least 1 Warrior to start an Expedition.
               </div>
             )}

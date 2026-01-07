@@ -136,12 +136,14 @@ const Market: React.FC = () => {
           <section>
             <div className="flex items-center gap-3 mb-6">
               <BadgeDollarSign size={24} className="text-success" />
-              <h2 className="text-2xl font-bold text-text-main">
-                Sell Resources
-              </h2>
-              <span className="text-sm text-text-muted mt-1 ml-2">
-                Exchange goods for Gold
-              </span>
+              <div>
+                <h2 className="text-2xl font-bold text-text-main">
+                  Sell Resources
+                </h2>
+                <p className="text-sm text-text-muted mt-1">
+                  Exchange goods for Gold
+                </p>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 gap-4">
@@ -173,14 +175,12 @@ const Market: React.FC = () => {
                     </div>
 
                     {/* Price Info */}
-                    <div className="flex-1 text-center border-l border-r border-border-main/50 px-4">
+                    <div className="flex-1 border-l border-r border-border-main/50 px-4 flex items-center justify-center gap-1">
                       <span className="text-text-secondary text-sm">
-                        Sell for{" "}
+                        Sell for
                       </span>
-                      <span className="text-accent font-bold px-1">
-                        {sellPrice}
-                      </span>
-                      <span className="text-text-secondary text-sm">Gold</span>
+                      <Coins size={14} className="text-accent" />
+                      <span className="text-accent font-bold">{sellPrice}</span>
                     </div>
 
                     {/* Actions */}
@@ -212,12 +212,14 @@ const Market: React.FC = () => {
           <section>
             <div className="flex items-center gap-3 mb-6">
               <ArrowRightLeft size={24} className="text-brand" />
-              <h2 className="text-2xl font-bold text-text-main">
-                Buy Resources
-              </h2>
-              <span className="text-sm text-text-muted mt-1 ml-2">
-                Purchase goods with Gold
-              </span>
+              <div>
+                <h2 className="text-2xl font-bold text-text-main">
+                  Buy Resources
+                </h2>
+                <p className="text-sm text-text-muted mt-1">
+                  Purchase goods with Gold
+                </p>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 gap-4">
@@ -246,14 +248,12 @@ const Market: React.FC = () => {
                     </div>
 
                     {/* Price Info */}
-                    <div className="flex-1 text-center border-l border-r border-border-main/50 px-4">
+                    <div className="flex-1 border-l border-r border-border-main/50 px-4 flex items-center justify-center gap-1">
                       <span className="text-text-secondary text-sm">
-                        Buy for{" "}
+                        Buy for
                       </span>
-                      <span className="text-accent font-bold px-1">
-                        {buyPrice}
-                      </span>
-                      <span className="text-text-secondary text-sm">Gold</span>
+                      <Coins size={14} className="text-accent" />
+                      <span className="text-accent font-bold">{buyPrice}</span>
                     </div>
 
                     {/* Actions */}

@@ -6,7 +6,6 @@ import {
   Users,
   Hammer,
   ShoppingCart,
-  Map,
   Home,
   ShieldAlert,
   Activity,
@@ -14,6 +13,7 @@ import {
   Swords,
   Shield,
 } from "lucide-react";
+import { MILITARY_TECHS } from "../../store/militarySlice"; // Import defined
 
 interface SidebarItemProps {
   to: string;
@@ -43,13 +43,11 @@ const LeftSidebar: React.FC = () => {
     (state: RootState) => state.game
   );
   // Get military bonuses
-  const { totalAttackBonus, totalDefenseBonus } = useSelector(
+  const { totalAttackBonus, totalDefenseBonus, unlockedTechs } = useSelector(
     (state: RootState) => state.military
   );
-  // Get population and assignments
-  const { population, assignments } = useSelector(
-    (state: RootState) => state.resources
-  );
+  // Get assignments
+  const { assignments } = useSelector((state: RootState) => state.resources);
 
   // Calculate actual stats
   // Attack: Based on WARRIORS (not population) + bonus per warrior.
@@ -59,6 +57,15 @@ const LeftSidebar: React.FC = () => {
 
   // Defense: "high per item... +30 +50" -> Flat sum of bonuses.
   const defenseValue = totalDefenseBonus || 0;
+
+  // Derive active bonuses for display
+  const attackTechs = unlockedTechs
+    .map((id) => MILITARY_TECHS[id])
+    .filter((tech) => tech && tech.effects.attackBonus);
+
+  const defenseTechs = unlockedTechs
+    .map((id) => MILITARY_TECHS[id])
+    .filter((tech) => tech && tech.effects.defenseBonus);
 
   const menuItems = [
     { to: "/overview", icon: Home, label: "Overview" },
@@ -99,7 +106,8 @@ const LeftSidebar: React.FC = () => {
 
         {/* Military Stats */}
         <div className="grid grid-cols-2 gap-2">
-          <div className="flex items-center gap-2 px-2 py-1 bg-bg-main rounded border border-border-main">
+          {/* Attack Stat */}
+          <div className="group relative flex items-center gap-2 px-2 py-1 bg-bg-main rounded border border-border-main cursor-help">
             <Swords size={14} className="text-danger" />
             <div className="flex flex-col">
               <span className="text-[10px] text-text-muted uppercase leading-none">
@@ -109,8 +117,49 @@ const LeftSidebar: React.FC = () => {
                 {attackValue}
               </span>
             </div>
+            {/* Tooltip */}
+            <div className="absolute top-full left-0 mt-2 w-56 bg-bg-main border border-border-main shadow-xl rounded p-2 z-50 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+              <div className="font-bold text-xs text-text-main mb-1">
+                Attack Power
+              </div>
+              <div className="space-y-1 text-xs">
+                <div className="flex justify-between">
+                  <span className="text-text-secondary">Warriors:</span>
+                  <span className="font-mono">{warriorCount}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-text-secondary">Base Power:</span>
+                  <span className="font-mono">{warriorCount}</span>
+                </div>
+
+                {/* Active Bonuses List */}
+                {attackTechs.length > 0 && (
+                  <div className="mt-2 pt-1 border-t border-border-light/50">
+                    <div className="text-[10px] text-text-muted mb-1">
+                      Active Bonuses:
+                    </div>
+                    {attackTechs.map((tech) => (
+                      <div
+                        key={tech.id}
+                        className="flex justify-between text-success text-[10px]"
+                      >
+                        <span>{tech.name}:</span>
+                        <span>+{tech.effects.attackBonus}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <div className="border-t border-border-light mt-1 pt-1 flex justify-between font-bold">
+                  <span>Total:</span>
+                  <span className="text-danger">{attackValue}</span>
+                </div>
+              </div>
+            </div>
           </div>
-          <div className="flex items-center gap-2 px-2 py-1 bg-bg-main rounded border border-border-main">
+
+          {/* Defense Stat */}
+          <div className="group relative flex items-center gap-2 px-2 py-1 bg-bg-main rounded border border-border-main cursor-help">
             <Shield size={14} className="text-blue-500" />
             <div className="flex flex-col">
               <span className="text-[10px] text-text-muted uppercase leading-none">
@@ -119,6 +168,44 @@ const LeftSidebar: React.FC = () => {
               <span className="text-xs font-bold leading-none">
                 {defenseValue}
               </span>
+            </div>
+            {/* Tooltip */}
+            <div className="absolute top-full right-0 mt-2 w-56 bg-bg-main border border-border-main shadow-xl rounded p-2 z-50 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+              <div className="font-bold text-xs text-text-main mb-1">
+                Defense
+              </div>
+              <div className="space-y-1 text-xs">
+                <div className="text-text-secondary text-[10px] leading-tight mb-2">
+                  Reduces casualties during night raids.
+                </div>
+
+                {/* Active Bonuses List */}
+                {defenseTechs.length > 0 ? (
+                  <div className="mt-1 pt-1 border-t border-border-light/50">
+                    <div className="text-[10px] text-text-muted mb-1">
+                      Active Bonuses:
+                    </div>
+                    {defenseTechs.map((tech) => (
+                      <div
+                        key={tech.id}
+                        className="flex justify-between text-blue-400 text-[10px]"
+                      >
+                        <span>{tech.name}:</span>
+                        <span>+{tech.effects.defenseBonus}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-[10px] text-text-muted italic">
+                    No active defense bonuses.
+                  </div>
+                )}
+
+                <div className="border-t border-border-light mt-1 pt-1 flex justify-between font-bold">
+                  <span>Total Bonus:</span>
+                  <span className="text-blue-500">+{defenseValue}</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>

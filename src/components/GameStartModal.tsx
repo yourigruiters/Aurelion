@@ -8,15 +8,7 @@ import regionsImage from "../assets/region/regions.png";
 import region1 from "../assets/region/region1.png";
 import region2 from "../assets/region/region2.png";
 import region3 from "../assets/region/region3.png";
-import {
-  Crown,
-  Users,
-  Apple,
-  Wheat,
-  Mountain,
-  Hammer,
-  Gem,
-} from "lucide-react";
+import { Crown } from "lucide-react";
 import Button from "./ui/Button";
 import Input from "./ui/Input";
 import Select from "./ui/Select";
@@ -30,8 +22,11 @@ interface FormData {
   focus?: Focus;
 }
 
+import { useNavigate } from "react-router-dom";
+
 const GameStartModal: React.FC = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState<FormData>({
     cityName: "",
     region: undefined,
@@ -71,6 +66,7 @@ const GameStartModal: React.FC = () => {
         level: 1,
         experience: 0,
         maxExperience: 100,
+        isRightSidebarOpen: true,
       })
     );
 
@@ -83,6 +79,9 @@ const GameStartModal: React.FC = () => {
     }
 
     dispatch(generateDailyActivities({ day: 1 }));
+
+    // Navigate to overview
+    navigate("/overview");
   };
 
   const getImage = () => {
@@ -120,17 +119,15 @@ const GameStartModal: React.FC = () => {
                 <h4 className="text-xs text-text-dim mb-2 font-medium">Core</h4>
                 <div className="flex gap-3">
                   <ResourceItem
-                    icon={Users}
+                    resource="population"
                     value={resourceDetails.population}
-                    color="text-info"
                     tooltipLabel="Population"
                     className="bg-bg-panel flex-1"
                   />
                   <ResourceItem
-                    icon={Apple}
-                    value={resourceDetails.resources.food}
-                    color="text-danger-light"
-                    tooltipLabel="Food"
+                    resource="gold"
+                    value={resourceDetails.resources.gold}
+                    tooltipLabel="Gold"
                     className="bg-bg-panel flex-1"
                   />
                 </div>
@@ -143,31 +140,27 @@ const GameStartModal: React.FC = () => {
                 </h4>
                 <div className="flex gap-3">
                   <ResourceItem
-                    icon={Wheat}
+                    resource="food"
+                    value={resourceDetails.resources.food}
+                    tooltipLabel="Food"
+                    className="bg-bg-panel flex-1"
+                  />
+                  <ResourceItem
+                    resource="wood"
                     value={resourceDetails.resources.wood}
-                    color="text-brand"
                     tooltipLabel="Wood"
                     className="bg-bg-panel flex-1"
                   />
                   <ResourceItem
-                    icon={Mountain}
+                    resource="stone"
                     value={resourceDetails.resources.stone}
-                    color="text-text-muted"
                     tooltipLabel="Stone"
                     className="bg-bg-panel flex-1"
                   />
                   <ResourceItem
-                    icon={Hammer}
+                    resource="iron"
                     value={resourceDetails.resources.iron}
-                    color="text-text-secondary"
                     tooltipLabel="Iron"
-                    className="bg-bg-panel flex-1"
-                  />
-                  <ResourceItem
-                    icon={Gem}
-                    value={resourceDetails.resources.gold}
-                    color="text-accent"
-                    tooltipLabel="Gold"
                     className="bg-bg-panel flex-1"
                   />
                 </div>

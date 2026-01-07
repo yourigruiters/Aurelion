@@ -5,12 +5,16 @@ import { useDispatch } from "react-redux";
 import { resetGame } from "../../store/gameSlice";
 import { resetResources } from "../../store/resourcesSlice";
 
+import { useNavigate } from "react-router-dom";
+
 const Footer: React.FC = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const handleReset = () => {
     dispatch(resetGame());
     dispatch(resetResources());
+    navigate("/overview");
   };
 
   return (

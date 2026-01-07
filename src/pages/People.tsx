@@ -231,6 +231,13 @@ const People: React.FC = () => {
               className="flex items-center gap-8"
               title="Expected daily income for the next day"
             >
+              {/* Gold */}
+              <div className="flex items-center gap-2">
+                <Gem size={20} className="text-accent" />
+                <span className="font-bold text-lg text-text-main">
+                  {Math.floor(projectedRates.gold || 0)}
+                </span>
+              </div>
               {/* Food */}
               <div className="flex items-center gap-2">
                 <Apple size={20} className="text-danger-light" />
@@ -257,13 +264,6 @@ const People: React.FC = () => {
                 <Hammer size={20} className="text-text-secondary" />
                 <span className="font-bold text-lg text-text-main">
                   {Math.floor(projectedRates.iron || 0)}
-                </span>
-              </div>
-              {/* Gold */}
-              <div className="flex items-center gap-2">
-                <Gem size={20} className="text-accent" />
-                <span className="font-bold text-lg text-text-main">
-                  {Math.floor(projectedRates.gold || 0)}
                 </span>
               </div>
             </div>
@@ -377,14 +377,35 @@ const People: React.FC = () => {
                   {/* Section 2: Impact (Middle) */}
                   <div className="flex-1 h-full flex items-center justify-center gap-6 border-r border-border-main/50 bg-bg-main/20">
                     {role.impacts.length > 0 ? (
-                      role.impacts.map((imp, idx) => (
-                        <div key={idx} className="flex items-center gap-2">
-                          <imp.icon size={18} className="text-text-main" />
-                          <span className="font-mono font-semibold text-text-main">
-                            +{imp.val}
-                          </span>
-                        </div>
-                      ))
+                      role.impacts.map((imp, idx) => {
+                        let colorClass = "text-text-main";
+                        switch (imp.resource) {
+                          case "food":
+                            colorClass = "text-danger-light";
+                            break;
+                          case "wood":
+                            colorClass = "text-brand";
+                            break;
+                          case "stone":
+                            colorClass = "text-text-muted";
+                            break;
+                          case "iron":
+                            colorClass = "text-text-secondary";
+                            break;
+                          case "gold":
+                            colorClass = "text-accent";
+                            break;
+                        }
+
+                        return (
+                          <div key={idx} className="flex items-center gap-2">
+                            <imp.icon size={18} className={colorClass} />
+                            <span className="font-mono font-semibold text-text-main">
+                              +{imp.val}
+                            </span>
+                          </div>
+                        );
+                      })
                     ) : (
                       <span className="text-text-dim text-sm italic">
                         No resource output
@@ -397,7 +418,7 @@ const People: React.FC = () => {
                     <button
                       onClick={() => handleAdjust(role.id, -1)}
                       disabled={isLocked || count <= 0 || expired}
-                      className="p-2 rounded-full border border-border-main hover:bg-bg-main disabled:opacity-30 disabled:cursor-not-allowed text-text-secondary transition-colors"
+                      className="p-2 rounded-full border border-border-main hover:bg-bg-main disabled:hover:bg-transparent disabled:opacity-30 disabled:cursor-not-allowed text-text-secondary transition-colors"
                     >
                       <Minus size={20} />
                     </button>
@@ -407,7 +428,7 @@ const People: React.FC = () => {
                     <button
                       onClick={() => handleAdjust(role.id, 1)}
                       disabled={isLocked || idlePop <= 0 || expired}
-                      className="p-2 rounded-full border border-border-main hover:bg-bg-main disabled:opacity-30 disabled:cursor-not-allowed text-text-secondary transition-colors"
+                      className="p-2 rounded-full border border-border-main hover:bg-bg-main disabled:hover:bg-transparent disabled:opacity-30 disabled:cursor-not-allowed text-text-secondary transition-colors"
                     >
                       <Plus size={20} />
                     </button>

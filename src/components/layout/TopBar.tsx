@@ -228,8 +228,7 @@ const TopBar: React.FC<TopBarProps> = ({
           title="Toggle Logbook"
         >
           <BookOpen size={20} />
-          {/* Notification Badge */}
-          <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-danger rounded-full border border-bg-main"></span>
+          {/* Notification Badge - Removed */}
         </button>
       </div>
     </header>

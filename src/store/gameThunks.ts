@@ -303,9 +303,9 @@ export const handleDayRollover = (): AppThunk => (dispatch, getState) => {
     // User didn't specify, but usually we reset if we apply penalty.
     // Let's reset food to 0 to prevent death spiral accumulation,
     // as the penalty is the "cost".
-    dispatch(
-      updateResource({ resource: "food", amount: Math.abs(currentFood) })
-    );
+    // Reset food to 0? Or leave it negative?
+    // User requested food should go under 0.
+    // We do NOT reset it.
 
     if (currentPop > 0) {
       // Scenario 1: Remove Population

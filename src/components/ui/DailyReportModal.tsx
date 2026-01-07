@@ -83,9 +83,6 @@ const DailyReportModal: React.FC<DailyReportModalProps> = ({
                             amount={amount}
                             showPlus
                             size="sm"
-                            className={
-                              amount > 0 ? "text-success" : "text-danger"
-                            }
                           />
                         )
                       )}
@@ -119,7 +116,7 @@ const DailyReportModal: React.FC<DailyReportModalProps> = ({
             <h3 className="text-sm font-bold text-text-main mb-3 uppercase tracking-wider">
               Resource Changes
             </h3>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="flex flex-wrap gap-2">
               {Object.entries(report.resourcesGained).length > 0 ? (
                 Object.entries(report.resourcesGained)
                   .sort(
@@ -128,15 +125,17 @@ const DailyReportModal: React.FC<DailyReportModalProps> = ({
                       RESOURCE_ORDER.indexOf(b[0])
                   )
                   .map(([res, amount]) => (
-                    <ResourceDisplay
+                    <div
                       key={res}
-                      resource={res}
-                      amount={amount}
-                      showPlus
-                      size="sm"
-                      className={amount >= 0 ? "text-success" : "text-danger"}
-                      iconClassName={amount >= 0 ? "" : "grayscale"}
-                    />
+                      className="flex items-center justify-center p-2 bg-bg-main rounded border border-border-light"
+                    >
+                      <ResourceDisplay
+                        resource={res}
+                        amount={amount}
+                        showPlus
+                        size="sm"
+                      />
+                    </div>
                   ))
               ) : (
                 <div className="col-span-3 text-sm text-text-muted italic">
@@ -191,7 +190,6 @@ const DailyReportModal: React.FC<DailyReportModalProps> = ({
                                 amount={amt}
                                 showPlus
                                 size="sm"
-                                className="text-text-secondary"
                               />
                             )
                           )}

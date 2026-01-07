@@ -19,6 +19,7 @@ import {
   Lock,
   CheckCircle,
   Loader,
+  Clock,
 } from "lucide-react";
 import ResourceDisplay from "../components/ui/ResourceDisplay";
 
@@ -174,7 +175,7 @@ const Military: React.FC = () => {
                       )}
                     </div>
                     <div className="text-xs font-mono text-text-muted mt-1 flex items-center gap-1">
-                      Time: {tech.researchTimeDays}{" "}
+                      <Clock size={16} /> {tech.researchTimeDays}{" "}
                       {tech.researchTimeDays === 1 ? "day" : "days"}
                       <span className="mx-2">•</span>
                       <span className="text-brand flex items-center gap-1">
@@ -226,8 +227,6 @@ const Military: React.FC = () => {
                                 resource={res}
                                 amount={amt}
                                 size="sm"
-                                className="text-inherit"
-                                iconClassName="text-current"
                               />
                             </div>
                           ))}

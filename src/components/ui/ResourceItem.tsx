@@ -76,7 +76,7 @@ const ResourceItem: React.FC<ResourceItemProps> = ({
 
           {/* Modifier Display */}
           {modifier !== undefined && modifier !== 1 && (
-            <div className="flex justify-between text-info mt-1 border-b border-border-light pb-1 mb-1">
+            <div className="flex justify-between text-info mt-1">
               <span>Modifier:</span>
               <span>
                 {(() => {
@@ -92,7 +92,7 @@ const ResourceItem: React.FC<ResourceItemProps> = ({
             modifier !== 1 &&
             rate !== undefined &&
             rate > 0 && (
-              <div className="flex justify-between text-success">
+              <div className="flex justify-between text-success mt-1 pt-1 border-t border-border-light">
                 <span>Production:</span>
                 <span>+{Math.floor(production)}</span>
               </div>

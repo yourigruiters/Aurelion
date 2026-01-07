@@ -2,7 +2,7 @@ import React from "react";
 import { ActivityInstance } from "../../store/activitiesSlice";
 import { RESOURCE_ORDER } from "../../helpers/resource";
 import Button from "./Button";
-import { Sword, CheckCircle, ShieldAlert } from "lucide-react";
+import { Sword, CheckCircle, ShieldAlert, Clock } from "lucide-react";
 import ResourceIcon from "../ui/ResourceIcon";
 import ResourceDisplay from "../ui/ResourceDisplay";
 
@@ -72,8 +72,8 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
 
         {/* Duration for Risky Activities */}
         {isRisky && activity.durationDays && (
-          <p className="text-xs font-mono text-text-muted mt-1">
-            Duration:{" "}
+          <p className="text-xs font-mono text-text-muted mt-1 flex items-center gap-1">
+            <Clock size={12} />
             <span className="text-text-main font-bold">
               {activity.durationDays}{" "}
               {activity.durationDays === 1 ? "day" : "days"}

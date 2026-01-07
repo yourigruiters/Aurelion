@@ -2,7 +2,14 @@ import React from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { RootState } from "../../store/store";
-import { Loader, ShieldCheck, Skull, Hammer, FileText } from "lucide-react";
+import {
+  Loader,
+  ShieldCheck,
+  Skull,
+  Hammer,
+  FileText,
+  Activity,
+} from "lucide-react";
 import DailyReportModal from "../ui/DailyReportModal";
 import { DailyReport, markReportAsRead } from "../../store/reportsSlice";
 import clsx from "clsx";
@@ -45,7 +52,8 @@ const RightSidebar: React.FC = () => {
     <div className="flex flex-col h-full bg-bg-panel border-l border-border-main">
       {/* 1. Reports */}
       <div className="flex-none p-4 pb-2 border-b border-border-main max-h-[30%] overflow-y-auto">
-        <h2 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2 sticky top-0 bg-bg-panel z-10">
+        <h2 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2 sticky top-0 bg-bg-panel z-10 flex items-center gap-2">
+          <FileText size={14} />
           Reports
         </h2>
         <div className="space-y-2">
@@ -88,6 +96,7 @@ const RightSidebar: React.FC = () => {
       {/* 2. Running Activities */}
       <div className="p-4 border-b border-border-main">
         <h2 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-3 flex items-center gap-2">
+          <Activity size={14} />
           Running Activities{" "}
           {(activeSafeActivity || activeRiskyActivity) && (
             <Loader size={12} className="animate-spin" />
@@ -193,7 +202,8 @@ const RightSidebar: React.FC = () => {
 
       {/* 3. Construction Queue */}
       <div className="p-4 border-b border-border-main">
-        <h2 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-3">
+        <h2 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-3 flex items-center gap-2">
+          <Hammer size={14} />
           Construction Queue
         </h2>
         {constructionQueue.length === 0 ? (
